@@ -1,0 +1,268 @@
+{
+  "$defs": {
+    "AssetOrigin": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "locale": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "selection": {
+          "$ref": "#/$defs/Selection"
+        },
+        "settings": {
+          "$ref": "#/$defs/Settings",
+          "default": {
+            "duration_seconds": null,
+            "format": null,
+            "image_quality": null,
+            "instrumental": null,
+            "seed": null,
+            "size": null,
+            "voice": null
+          }
+        },
+        "sha256": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "selection",
+        "sha256"
+      ],
+      "type": "object"
+    },
+    "Provider": {
+      "enum": [
+        "openai",
+        "google",
+        "fish",
+        "openrouter",
+        "elevenlabs"
+      ],
+      "type": "string"
+    },
+    "Selection": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "$ref": "#/$defs/Provider"
+        }
+      },
+      "required": [
+        "provider",
+        "model"
+      ],
+      "type": "object"
+    },
+    "Settings": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_seconds": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "format": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "image_quality": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "input_fidelity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "instrumental": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "seed": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "size": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "voice": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "Visual": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "origins": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AssetOrigin"
+          },
+          "type": "object"
+        },
+        "references": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "selection": {
+          "$ref": "#/$defs/Selection"
+        },
+        "settings": {
+          "$ref": "#/$defs/Settings",
+          "default": {
+            "duration_seconds": null,
+            "format": null,
+            "image_quality": null,
+            "instrumental": null,
+            "seed": null,
+            "size": null,
+            "voice": null
+          }
+        }
+      },
+      "required": [
+        "description",
+        "selection"
+      ],
+      "type": "object"
+    },
+    "Voice": {
+      "additionalProperties": false,
+      "properties": {
+        "binding": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "references": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "samples": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/VoiceSample"
+          },
+          "type": "array"
+        },
+        "selection": {
+          "$ref": "#/$defs/Selection"
+        }
+      },
+      "required": [
+        "description",
+        "selection"
+      ],
+      "type": "object"
+    },
+    "VoiceSample": {
+      "additionalProperties": false,
+      "properties": {
+        "audio": {
+          "type": "string"
+        },
+        "consent": {
+          "type": "string"
+        },
+        "transcript": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "audio",
+        "transcript",
+        "consent"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "persona": {
+      "type": "string"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "maximum": 1,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "visual": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Visual"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "voice": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Voice"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "persona"
+  ],
+  "title": "Character",
+  "type": "object"
+}

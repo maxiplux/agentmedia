@@ -1,0 +1,13 @@
+schema_version: 1
+id: forest-play
+media: image
+selection:
+  provider: openai
+  model: gpt-image-1
+brief: brief.md
+references:
+  - ../../runs/54372645-39f4-4bc9-b0d6-536fc0101eda/outputs/demo-mira.png
+  - ../../runs/54372645-39f4-4bc9-b0d6-536fc0101eda/outputs/demo-kito.png
+settings:
+  size: 1536x1024
+  image_quality: medium

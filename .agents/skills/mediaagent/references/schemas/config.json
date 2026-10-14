@@ -1,0 +1,278 @@
+{
+  "$defs": {
+    "Consistency": {
+      "additionalProperties": false,
+      "properties": {
+        "inherit_source_settings": {
+          "type": "boolean"
+        },
+        "require_known_identity_model": {
+          "description": "Known original identity assets always pin provider/model; this flag also rejects unknown sources.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "require_known_identity_model",
+        "inherit_source_settings"
+      ],
+      "type": "object"
+    },
+    "Limits": {
+      "additionalProperties": false,
+      "properties": {
+        "attempts": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "audio_seconds": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "concurrency": {
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "images": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "per_provider": {
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "requests": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "revisions": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "speech_chars": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "requests",
+        "images",
+        "audio_seconds",
+        "speech_chars",
+        "revisions",
+        "attempts",
+        "concurrency",
+        "per_provider"
+      ],
+      "type": "object"
+    },
+    "Provider": {
+      "enum": [
+        "openai",
+        "google",
+        "fish",
+        "openrouter",
+        "elevenlabs"
+      ],
+      "type": "string"
+    },
+    "Selection": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "$ref": "#/$defs/Provider"
+        }
+      },
+      "required": [
+        "provider",
+        "model"
+      ],
+      "type": "object"
+    },
+    "Settings": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_seconds": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "format": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "image_quality": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "input_fidelity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "instrumental": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "seed": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "size": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "voice": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "consistency": {
+      "$ref": "#/$defs/Consistency",
+      "default": {
+        "inherit_source_settings": true,
+        "require_known_identity_model": false
+      }
+    },
+    "default_locales": {
+      "additionalProperties": false,
+      "properties": {
+        "image": {
+          "type": "string"
+        },
+        "infographic": {
+          "type": "string"
+        },
+        "music": {
+          "type": "string"
+        },
+        "podcast": {
+          "type": "string"
+        },
+        "sfx": {
+          "type": "string"
+        },
+        "speech": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "default_settings": {
+      "additionalProperties": false,
+      "properties": {
+        "image": {
+          "$ref": "#/$defs/Settings"
+        },
+        "infographic": {
+          "$ref": "#/$defs/Settings"
+        },
+        "music": {
+          "$ref": "#/$defs/Settings"
+        },
+        "podcast": {
+          "$ref": "#/$defs/Settings"
+        },
+        "sfx": {
+          "$ref": "#/$defs/Settings"
+        },
+        "speech": {
+          "$ref": "#/$defs/Settings"
+        },
+        "text": {
+          "$ref": "#/$defs/Settings"
+        }
+      },
+      "type": "object"
+    },
+    "defaults": {
+      "additionalProperties": false,
+      "default": {},
+      "properties": {
+        "image": {
+          "$ref": "#/$defs/Selection"
+        },
+        "infographic": {
+          "$ref": "#/$defs/Selection"
+        },
+        "music": {
+          "$ref": "#/$defs/Selection"
+        },
+        "podcast": {
+          "$ref": "#/$defs/Selection"
+        },
+        "sfx": {
+          "$ref": "#/$defs/Selection"
+        },
+        "speech": {
+          "$ref": "#/$defs/Selection"
+        },
+        "text": {
+          "$ref": "#/$defs/Selection"
+        }
+      },
+      "type": "object"
+    },
+    "limits": {
+      "$ref": "#/$defs/Limits",
+      "default": {
+        "attempts": 3,
+        "audio_seconds": 1800,
+        "concurrency": 4,
+        "images": 8,
+        "per_provider": 2,
+        "requests": 20,
+        "revisions": 3,
+        "speech_chars": 60000
+      }
+    },
+    "schema_version": {
+      "format": "uint32",
+      "maximum": 1,
+      "minimum": 1,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version"
+  ],
+  "title": "Config",
+  "type": "object"
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "instructions": {
+      "type": "string"
+    },
+    "method": {
+      "type": "string"
+    },
+    "parent_artifact": {
+      "type": "string"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "maximum": 1,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "target_turn": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "parent_artifact",
+    "instructions",
+    "method"
+  ],
+  "title": "Revision",
+  "type": "object"
+}

@@ -1,0 +1,3 @@
+# Stable visual identity
+
+An original small friendly robot with a rounded ivory body, a teal face visor showing two simple warm amber eye lights, and a short antenna tipped with an orange sphere. Stable features: teal shoulder panels, small ivory arms with teal mitten-like hands, short sturdy teal feet, a circular orange chest badge without text. The head is a rounded rectangular shape with a wide visor. Compact proportions, about three head-heights tall. Original stylized 3D illustrated character, soft sculpted forms, restrained toy-like materials, subtle surface texture, believable gentle reflections. No resemblance to an existing branded robot.

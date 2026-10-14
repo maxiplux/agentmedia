@@ -1,0 +1,163 @@
+{
+  "$defs": {
+    "Authentication": {
+      "enum": [
+        "not_checked",
+        "accepted",
+        "rejected",
+        "inconclusive"
+      ],
+      "type": "string"
+    },
+    "Check": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "authentication": {
+          "$ref": "#/$defs/Authentication"
+        },
+        "configured": {
+          "type": "boolean"
+        },
+        "elapsed_ms": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "endpoint_reachable": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "http_status": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "message": {
+          "type": "string"
+        },
+        "network_checked": {
+          "type": "boolean"
+        },
+        "provider": {
+          "$ref": "#/$defs/Provider"
+        },
+        "retry_after_seconds": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "variable": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "variable",
+        "configured",
+        "endpoint",
+        "status",
+        "authentication",
+        "network_checked",
+        "message"
+      ],
+      "type": "object"
+    },
+    "Provider": {
+      "enum": [
+        "openai",
+        "google",
+        "fish",
+        "openrouter",
+        "elevenlabs"
+      ],
+      "type": "string"
+    },
+    "Status": {
+      "enum": [
+        "configured",
+        "missing_credentials",
+        "invalid_configuration",
+        "ok",
+        "authentication_rejected",
+        "access_denied",
+        "rate_limited",
+        "service_unavailable",
+        "endpoint_error",
+        "invalid_response",
+        "timeout",
+        "network_error"
+      ],
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "credentials": {
+      "items": {
+        "$ref": "#/$defs/Check"
+      },
+      "type": "array"
+    },
+    "generation_performed": {
+      "type": "boolean"
+    },
+    "initialized": {
+      "type": "boolean"
+    },
+    "live_requested": {
+      "type": "boolean"
+    },
+    "network_checked": {
+      "type": "boolean"
+    },
+    "project": {
+      "type": "string"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "maximum": 1,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "scope": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "project",
+    "initialized",
+    "live_requested",
+    "network_checked",
+    "generation_performed",
+    "credentials",
+    "scope"
+  ],
+  "title": "Report",
+  "type": "object"
+}

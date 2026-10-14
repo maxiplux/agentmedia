@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "artifact": "a16d399f-cdd2-4142-9d27-fdeff0bbf785",
+  "quality": "needs_revision",
+  "provenance": "agent",
+  "reviewer": null,
+  "findings": [
+    {
+      "check": "character_identity",
+      "severity": "error",
+      "expected": "Preserve Mira\u2019s original facial geometry, apparent age and head/body ratio from demo-mira.png.",
+      "observed": "Despite high input fidelity, Mira\u2019s face and proportions are reinterpreted; the result cannot be called an identity-preserving success. Kito is closer but not a guarantee of exact design.",
+      "evidence": "Agent comparison of the generated PNG with both original selected portraits. This is not user approval.",
+      "location": "Mira; compare both character designs",
+      "suggested_fix": "Evaluate a separate explicitly selected image-edit model using the same immutable original references; preserve this failed result and do not accept it canonically."
+    }
+  ]
+}

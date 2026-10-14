@@ -1,0 +1,21 @@
+# Rust build output
+/target
+/mediaagent/runs/
+/mediaagent/cache/
+/mediaagent/characters/*/character.lock
+**/*.rs.bk
+*.pdb
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

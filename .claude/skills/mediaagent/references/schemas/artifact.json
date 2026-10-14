@@ -1,0 +1,80 @@
+{
+  "$defs": {
+    "Quality": {
+      "enum": [
+        "unchecked",
+        "passed",
+        "needs_revision",
+        "inconclusive"
+      ],
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "bytes": {
+      "format": "uint64",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "duration_seconds": {
+      "format": "double",
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "format": {
+      "type": "string"
+    },
+    "height": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "job_id": {
+      "type": "string"
+    },
+    "parent": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "path": {
+      "type": "string"
+    },
+    "quality": {
+      "$ref": "#/$defs/Quality"
+    },
+    "sha256": {
+      "type": "string"
+    },
+    "width": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "job_id",
+    "path",
+    "sha256",
+    "bytes",
+    "format",
+    "quality"
+  ],
+  "title": "Artifact",
+  "type": "object"
+}

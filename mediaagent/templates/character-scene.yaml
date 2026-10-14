@@ -1,0 +1,16 @@
+schema_version: 1
+id: same-characters-new-scene
+media: image
+selection:
+  provider: openai
+  model: gpt-image-1
+brief: character-scene.md
+references:
+  - path: selected-character-1.png
+    role: identity
+  - path: selected-character-2.png
+    role: identity
+settings:
+  size: 1536x1024
+  image_quality: high
+  input_fidelity: high

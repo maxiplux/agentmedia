@@ -1,0 +1,14 @@
+schema_version: 1
+id: episode-intro
+media: podcast
+selection: null
+brief: voice.md
+turns:
+  - id: narrator
+    text_file: script.md
+    character: null
+    selection: null
+    settings:
+      voice: null
+locale: en-US
+depends_on: []

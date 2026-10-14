@@ -1,0 +1,139 @@
+{
+  "$defs": {
+    "OperationAttempt": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "error": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "request_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "state": {
+          "$ref": "#/$defs/State"
+        },
+        "usage": true
+      },
+      "required": [
+        "attempt",
+        "state"
+      ],
+      "type": "object"
+    },
+    "Provider": {
+      "enum": [
+        "openai",
+        "google",
+        "fish",
+        "openrouter",
+        "elevenlabs"
+      ],
+      "type": "string"
+    },
+    "Selection": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "$ref": "#/$defs/Provider"
+        }
+      },
+      "required": [
+        "provider",
+        "model"
+      ],
+      "type": "object"
+    },
+    "State": {
+      "enum": [
+        "queued",
+        "running",
+        "cancelling",
+        "succeeded",
+        "partial",
+        "failed",
+        "cancelled",
+        "blocked",
+        "unknown"
+      ],
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "attempts": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "error": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "history": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/OperationAttempt"
+      },
+      "type": "array"
+    },
+    "id": {
+      "type": "string"
+    },
+    "input": true,
+    "request_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "result": true,
+    "retry_not_before": {
+      "format": "uint64",
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "schema_version": {
+      "format": "uint32",
+      "maximum": 1,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "selection": {
+      "$ref": "#/$defs/Selection"
+    },
+    "state": {
+      "$ref": "#/$defs/State"
+    },
+    "usage": true
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "selection",
+    "input",
+    "state",
+    "attempts"
+  ],
+  "title": "Operation",
+  "type": "object"
+}

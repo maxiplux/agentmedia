@@ -1,0 +1,49 @@
+{
+  "$defs": {
+    "ConsentPurpose": {
+      "enum": [
+        "reference_synthesis",
+        "saved_voice_clone"
+      ],
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "authorized_by": {
+      "type": "string"
+    },
+    "evidence": {
+      "type": "string"
+    },
+    "granted": {
+      "type": "boolean"
+    },
+    "purposes": {
+      "items": {
+        "$ref": "#/$defs/ConsentPurpose"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "maximum": 1,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "subject": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "subject",
+    "authorized_by",
+    "granted",
+    "purposes",
+    "evidence"
+  ],
+  "title": "VoiceConsent",
+  "type": "object"
+}

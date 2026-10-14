@@ -1,0 +1,123 @@
+{
+  "$defs": {
+    "Finding": {
+      "additionalProperties": false,
+      "properties": {
+        "check": {
+          "type": "string"
+        },
+        "evidence": {
+          "type": "string"
+        },
+        "expected": {
+          "type": "string"
+        },
+        "location": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "observed": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string"
+        },
+        "suggested_fix": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "check",
+        "severity",
+        "expected",
+        "observed",
+        "evidence"
+      ],
+      "type": "object"
+    },
+    "Provider": {
+      "enum": [
+        "openai",
+        "google",
+        "fish",
+        "openrouter",
+        "elevenlabs"
+      ],
+      "type": "string"
+    },
+    "Quality": {
+      "enum": [
+        "unchecked",
+        "passed",
+        "needs_revision",
+        "inconclusive"
+      ],
+      "type": "string"
+    },
+    "Selection": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "$ref": "#/$defs/Provider"
+        }
+      },
+      "required": [
+        "provider",
+        "model"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifact": {
+      "type": "string"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/Finding"
+      },
+      "type": "array"
+    },
+    "provenance": {
+      "type": "string"
+    },
+    "quality": {
+      "$ref": "#/$defs/Quality"
+    },
+    "reviewer": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Selection"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "schema_version": {
+      "format": "uint32",
+      "maximum": 1,
+      "minimum": 1,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "artifact",
+    "quality",
+    "provenance",
+    "findings"
+  ],
+  "title": "Review",
+  "type": "object"
+}

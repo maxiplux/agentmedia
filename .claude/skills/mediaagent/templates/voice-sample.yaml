@@ -1,0 +1,5 @@
+# Attach under a character voice.samples list or a speech job voice_samples list.
+# Paths are relative to the containing character/job manifest.
+audio: references/audio/selected.wav
+transcript: references/audio/selected-transcript.md
+consent: references/audio/consent.yaml

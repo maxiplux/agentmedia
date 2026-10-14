@@ -1,0 +1,36 @@
+# Offline init: mediaagent init ./project --defaults-file project-config.yaml --json
+# These are explicit example choices, not a promise of account/model access.
+# Select from `mediaagent models --json`; adjust before initialization.
+schema_version: 1
+defaults:
+  image: {provider: openai, model: gpt-image-1.5}
+  infographic: {provider: openai, model: gpt-image-1.5}
+  speech: {provider: openai, model: gpt-4o-mini-tts}
+  podcast: {provider: openai, model: gpt-4o-mini-tts}
+  music: {provider: elevenlabs, model: music_v1}
+  sfx: {provider: elevenlabs, model: eleven_text_to_sound_v2}
+  text: {provider: openai, model: gpt-4.1-mini}
+default_settings:
+  image: {format: png, size: 1024x1024, image_quality: high, input_fidelity: high}
+  infographic: {format: png, size: 1024x1536, image_quality: high, input_fidelity: high}
+  speech: {format: wav, voice: coral}
+  podcast: {format: wav, voice: coral}
+  music: {format: mp3, duration_seconds: 10, instrumental: true}
+  sfx: {format: mp3, duration_seconds: 3}
+default_locales:
+  speech: en-US
+  podcast: en-US
+consistency:
+  # Known identity originals always pin provider + model, regardless of this flag.
+  # Also require metadata for imported identity images with unknown generation history.
+  require_known_identity_model: true
+  inherit_source_settings: true
+limits:
+  requests: 20
+  images: 8
+  audio_seconds: 1800
+  speech_chars: 60000
+  revisions: 3
+  attempts: 3
+  concurrency: 4
+  per_provider: 2

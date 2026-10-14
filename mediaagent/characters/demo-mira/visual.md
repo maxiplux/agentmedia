@@ -1,0 +1,3 @@
+# Stable visual identity
+
+A fictional woman in her early thirties, warm medium-brown skin, an oval face, dark brown eyes, and short dark curly hair in a rounded silhouette. Distinctive features: a small crescent-shaped silver earring in her left ear, expressive eyebrows, a friendly open smile. Stable wardrobe: an olive-green field jacket with an orange neck scarf, cream shirt, dark navy trousers, brown walking boots. Compact tan cross-body field bag. Adult proportions. Original stylized 3D illustrated character, soft sculpted forms, coherent anatomy, restrained textures, warm natural colors. No resemblance to a celebrity.

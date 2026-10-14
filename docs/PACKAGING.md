@@ -1,0 +1,13 @@
+# Native local packages
+
+`python3 scripts/package-release.py --offline` builds an optimized native binary with locked, cached dependencies and creates an archive plus SHA-256 sidecar under `target/package-dist/`. Omit `--offline` when dependencies need downloading. Python 3.9+ and the Rust toolchain are development dependencies for this script; the packaged binary does not require either at runtime.
+
+The packager copies the executable into an isolated temporary directory outside the source checkout and verifies eight offline behaviors: preserving credentials on repeated initialization, embedding both agent skills, portable skill export, generation dry-run, strict schema output, initially disabled unconfigured profiles, complete initialization settings seeding configured profiles and generation defaults, and offline provider diagnostics with its embedded contract. Its subprocesses receive no live API keys. It never invokes media generation or creates provider account resources.
+
+Each package contains the native executable, a standalone usage README, a secret-free generated `.env.example`, and `verification.json` with the binary hash and executed checks. macOS/Linux archives preserve executable permissions using tar.gz; Windows uses zip. Archives and checksums are ignored by Git through the existing `target/` rule. They contain no development `.env`, generated media, or project characters.
+
+On October 14, 2026, the local Apple Silicon build for `aarch64-apple-darwin` passed all eight isolated checks and archive integrity/hash verification. Its local archive is `target/package-dist/mediaagent-0.1.0-aarch64-apple-darwin.tar.gz`. The `.sha256` sidecar identifies the exact archive; `verification.json` inside identifies the exact executable. This local package has not been published or notarized. A compiled, locally verified package is distinct from a public release.
+
+After extraction, put the executable on PATH or invoke its absolute path. Run `mediaagent init /path/to/project` to create the visible configuration folder and project-local skills. Fill credentials in that target project's root `.env` or process environment; the development repository's keys are never bundled or copied. User-level skill installation remains a separate explicit command.
+
+The manually dispatched `Native packages` workflow builds and verifies native archives on Linux, macOS, and Windows and uploads workflow artifacts. It does not create a GitHub release or publish packages. That workflow and the Linux/Windows packages have not been executed during local development; platform support remains subject to those native checks.

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "artifact": "ef3f1514-a152-442d-91eb-f209ffb565db",
+  "quality": "needs_revision",
+  "provenance": "user_feedback_with_agent_observation",
+  "reviewer": null,
+  "findings": [
+    {
+      "check": "character_identity",
+      "severity": "error",
+      "expected": "Mira and Kito must preserve the original selected portraits\u2019 facial geometry, head/body proportions, limb shapes, and distinguishing design features.",
+      "observed": "The user rejected the scene as different characters. Agent inspection also found changes to Mira\u2019s facial features and Kito\u2019s proportions.",
+      "evidence": "User feedback: \"They look totally different. The consistency is important\". Compare against demo-mira.png and demo-kito.png in run 54372645-39f4-4bc9-b0d6-536fc0101eda.",
+      "location": "Both characters",
+      "suggested_fix": "Use original portraits as explicit identity references, high input fidelity where supported, minimal expression/pose changes, and a strict identity review before acceptance."
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "audio_seconds": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "images": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "requests": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "revisions": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "speech_chars": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "requests",
+    "images",
+    "audio_seconds",
+    "speech_chars",
+    "revisions"
+  ],
+  "title": "Budget",
+  "type": "object"
+}

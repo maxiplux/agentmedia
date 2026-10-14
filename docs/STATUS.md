@@ -1,0 +1,62 @@
+# Implementation status
+
+Development snapshot, October 14, 2026. The first-version command families are implemented within the provider boundaries below. Visual character consistency has failed user acceptance and must not be described as complete. This is a local development package, not a published or platform-certified release.
+
+Implemented: Rust package/library/CLI, versioned contracts and schemas, offline preserving initialization, embedded skills/templates and explicit bundled-file refresh, portable character import/export and reference acceptance, direct/job/batch validation and explicit job overrides, infographic compilation, text planning with contained validated authoring bundles, concurrent durable runs, dependencies, finite limits, verified cache, submission idempotency, worker startup/loss handling, cancellation/resume, native audio assembly, review records, durable image AI review receipts/reuse/retry history, ElevenLabs descriptive voice previews and explicit saved-voice creation/binding/verification refresh, child revisions, targeted podcast revisions, consent-gated recorded-voice cloning, portable exact-transcript voice samples, Fish binary reference synthesis, Google audio AI review/retrieval, Google generation reconciliation, bounded paginated/filterable voice discovery, a terminal configuration wizard, and explicit user host concurrency controls. Reference media is decoded before acceptance or generation. Failed cached publication preserves independent jobs.
+
+| Provider | Adapter paths implemented | Selected live verification |
+| --- | --- | --- |
+| OpenAI | PNG generation/editing, saved/built-in voice speech, text planning, image review | Image generation/editing, built-in speech, job planning, image review passed |
+| Google | Interactions image/reference generation, speech, Lyria music, text planning, filterable paginated prebuilt/custom voice catalog, audio review, saved-interaction retrieval | Image generation and JPEG recovery, speech, instrumental clip, filtered catalog, short audio review passed; retrieval has mocked coverage |
+| Fish Audio | Speech with explicit saved voice binding/model header or authorized binary reference samples, filterable paginated owned/licensed public catalogs | Licensed public voice speech and two-page filtered public catalog passed; inline samples have mocked coverage |
+| OpenRouter | PNG image generation, text planning, image review | Image generation passed |
+| ElevenLabs | Saved voice speech, instrumental/vocal music, sound effects, filterable paginated account voice catalog, descriptive preview design, explicit saved-voice creation/binding and verification lookup, consent-gated recorded cloning | Premade voice speech, short instrumental music, sound effect, catalog, three preview candidates passed; creation/binding/cloning tested with mocks only; two-page filtered catalog passed |
+
+See [live evidence](LIVE_TESTS.md) for exact models, runs, decoded durations, one earlier rejected placeholder voice request, and untested paths. Live tests prove selected API/file handling, not human-perceived quality, exact script pronunciation, character consistency, or all model variants. No saved provider voice was created or cloned, and no candidates were accepted automatically. The descriptive preview test returned three candidates; provider-side creation/binding/verification refresh has offline coverage, with creation/binding untested live.
+
+Ordinary tests use mocked adapters/transports and small local fixtures. They verify contracts, concurrency, limits, identity resolution, authoring validation, audio assembly, cache, revisions, and recovery without paid calls even when credentials exist. All 100 offline tests, formatting, and lint checks passed locally on macOS. A local Apple Silicon release archive passed eight isolated offline checks, including initialization and embedded skill export without the checkout. See [packaging](PACKAGING.md). CI matrices are configured for Linux/macOS/Windows; Linux and Windows execution remain unverified here.
+
+Verification still requiring external inputs: selected authorized speaker recordings for live cloning/reference synthesis, human listening and repeated character scenes, and native Linux/Windows execution. These do not become passed merely because implementation or mock tests succeeded.
+
+Provider boundaries: voice preview design and saved-voice creation/cloning are implemented for ElevenLabs; other providers can reuse their accessible bindings. Fish supports stateless synthesis from authorized recordings with exact transcripts. Google supports audio review with a 20 MiB inline request ceiling; larger jobs can review individual clips. Google Interactions has retrieval by saved ID; the other adapter endpoints do not expose an implemented media-result retrieval path, so uncertain calls require account reconciliation before explicit retry. Provider professional/biometric verification must be completed by the speaker through the provider's supported account flow. No placeholder verification submission or video adapter is advertised. Public publishing, signing, and notarization are outside the requested local implementation.
+
+The opt-in smoke script makes at most one bounded request per invocation and reports unavailable credentials as skipped. Image identity, voice quality, vocal lyrics, and infographic typography/data accuracy still require review using repeated scenes/clips and the exact intended source content.
+
+Official implementation references: [OpenAI image API](https://developers.openai.com/api/docs/guides/image-generation), [OpenAI speech](https://developers.openai.com/api/reference/resources/audio/subresources/speech/methods/create), [Google images](https://ai.google.dev/gemini-api/docs/image-generation), [Google speech](https://ai.google.dev/gemini-api/docs/speech-generation), [Google music](https://ai.google.dev/gemini-api/docs/music-generation), [Fish TTS](https://docs.fish.audio/api-reference/endpoint/openapi-v1/text-to-speech), [OpenRouter images](https://openrouter.ai/docs/guides/overview/multimodal/image-generation), [ElevenLabs speech](https://elevenlabs.io/docs/api-reference/text-to-speech/convert), [music](https://elevenlabs.io/docs/api-reference/music/compose), [effects](https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert), [recorded cloning](https://elevenlabs.io/docs/api-reference/voices/ivc/create), [Google audio](https://ai.google.dev/gemini-api/docs/audio), [background retrieval](https://ai.google.dev/gemini-api/docs/background-execution), and [ElevenLabs speech limits](https://elevenlabs.io/docs/overview/models).
+
+
+The bundled skill includes every implemented command/flag generated from Clap,
+all current schemas, denied-permission consent scaffolds, clone/sample templates,
+configuration/concurrency guidance, and recovery/review procedures. Project skills
+are refreshed explicitly; existing credentials and unrelated assets are preserved.
+
+
+Character-consistency correction: the first paired forest scene was rejected by
+the user for changed identities and is recorded as `needs_revision`. The CLI now
+supports explicit identity-reference roles in image jobs and repeated
+`--identity-reference` flags. On supported OpenAI models it records and sends high
+input fidelity, rejects low-fidelity identity requests before submission, and keeps
+reference labels/order in the effective snapshot. Offline tests validate those
+controls and the actual multipart body. These controls are prerequisites, not proof
+that the generated face/body matches. Corrected visual output still needs user
+acceptance; model/provider changes remain explicit.
+
+
+Original-model continuity is now enforced before submission. Local original
+receipts and declared portable origins pin identity references to their source
+provider/model and carry compatible settings; conflicting model overrides fail.
+Initialization supports complete config files or offline terminal setup, including
+models, settings, voices, locales, consistency policy, and limits, before enabling
+the initial persona profiles. New template and skill guidance cover these fields.
+These changes have offline regression coverage; no additional paid generation was
+performed to verify them. The earlier explicit alternative-model comparison is a
+historical candidate, not evidence that changing the original model satisfies this
+contract. Visual likeness still needs user acceptance.
+
+
+Read-only API diagnostics are implemented through `doctor --live`, with provider
+selection, bounded parallel GET checks, timeouts, secret/account-data redaction,
+structured diagnostics schema, and actionable failure classes. Default doctor stays
+offline. A bounded live authentication check passed for all five provider endpoints
+with HTTP 200; media generation/model access and billing readiness were not tested
+by this check. See [connection checks](CONNECTIONS.md) and [live evidence](LIVE_TESTS.md).

@@ -1,0 +1,9 @@
+# Complete from the speaker/rightsholder's actual authorization. Never invent consent.
+schema_version: 1
+subject: ''
+authorized_by: ''
+granted: false
+purposes:
+  - reference_synthesis
+  # Add saved_voice_clone only when explicitly authorized.
+evidence: voice-permission.md

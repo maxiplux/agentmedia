@@ -1,0 +1,10 @@
+# Explicit provider account operation; supported for ElevenLabs speech profiles.
+schema_version: 1
+id: narrator-clone-1
+character: ../characters/narrator/character.yaml
+name: Narrator
+recordings:
+  - selected-recording.wav
+consent: voice-consent.yaml
+bind: false
+replace_binding: false

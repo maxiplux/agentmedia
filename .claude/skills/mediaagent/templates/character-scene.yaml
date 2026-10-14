@@ -1,0 +1,15 @@
+schema_version: 1
+id: same-characters-new-scene
+media: image
+# Provider/model is inherited from the selected original artifacts.
+# For external images, add origin metadata as described in references/consistency.md.
+brief: character-scene.md
+references:
+  - path: selected-character-1.png
+    role: identity
+  - path: selected-character-2.png
+    role: identity
+settings:
+  size: 1536x1024
+  image_quality: high
+# Supported identity-edit fidelity is resolved automatically for the original model.

@@ -1,0 +1,267 @@
+{
+  "$defs": {
+    "AssetOrigin": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "locale": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "selection": {
+          "$ref": "#/$defs/Selection"
+        },
+        "settings": {
+          "$ref": "#/$defs/Settings",
+          "default": {
+            "duration_seconds": null,
+            "format": null,
+            "image_quality": null,
+            "instrumental": null,
+            "seed": null,
+            "size": null,
+            "voice": null
+          }
+        },
+        "sha256": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "selection",
+        "sha256"
+      ],
+      "type": "object"
+    },
+    "InfoReference": {
+      "additionalProperties": false,
+      "properties": {
+        "origin": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssetOrigin"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/$defs/ReferenceRole"
+        }
+      },
+      "required": [
+        "path",
+        "role"
+      ],
+      "type": "object"
+    },
+    "InfoSection": {
+      "additionalProperties": false,
+      "properties": {
+        "copy": {
+          "type": "string"
+        },
+        "heading": {
+          "type": "string"
+        },
+        "values": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/InfoValue"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "heading",
+        "copy"
+      ],
+      "type": "object"
+    },
+    "InfoValue": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "source": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "unit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "value"
+      ],
+      "type": "object"
+    },
+    "Provider": {
+      "enum": [
+        "openai",
+        "google",
+        "fish",
+        "openrouter",
+        "elevenlabs"
+      ],
+      "type": "string"
+    },
+    "ReferenceRole": {
+      "enum": [
+        "identity",
+        "style",
+        "layout",
+        "content"
+      ],
+      "type": "string"
+    },
+    "Selection": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "$ref": "#/$defs/Provider"
+        }
+      },
+      "required": [
+        "provider",
+        "model"
+      ],
+      "type": "object"
+    },
+    "Settings": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_seconds": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "format": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "image_quality": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "input_fidelity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "instrumental": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "seed": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "size": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "voice": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "audience": {
+      "type": "string"
+    },
+    "canvas": {
+      "type": "string"
+    },
+    "key_message": {
+      "type": "string"
+    },
+    "layout": {
+      "type": "string"
+    },
+    "references": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/InfoReference"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "maximum": 1,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "sections": {
+      "items": {
+        "$ref": "#/$defs/InfoSection"
+      },
+      "type": "array"
+    },
+    "title": {
+      "type": "string"
+    },
+    "visual_brief": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "title",
+    "audience",
+    "key_message",
+    "canvas",
+    "layout",
+    "sections",
+    "visual_brief"
+  ],
+  "title": "Infographic",
+  "type": "object"
+}

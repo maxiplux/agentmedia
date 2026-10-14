@@ -1,0 +1,366 @@
+{
+  "$defs": {
+    "AssetOrigin": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "locale": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "selection": {
+          "$ref": "#/$defs/Selection"
+        },
+        "settings": {
+          "$ref": "#/$defs/Settings",
+          "default": {
+            "duration_seconds": null,
+            "format": null,
+            "image_quality": null,
+            "instrumental": null,
+            "seed": null,
+            "size": null,
+            "voice": null
+          }
+        },
+        "sha256": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "selection",
+        "sha256"
+      ],
+      "type": "object"
+    },
+    "InfoReference": {
+      "additionalProperties": false,
+      "properties": {
+        "origin": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssetOrigin"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/$defs/ReferenceRole"
+        }
+      },
+      "required": [
+        "path",
+        "role"
+      ],
+      "type": "object"
+    },
+    "JobReference": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/InfoReference"
+        }
+      ],
+      "description": "A legacy plain path, or an explicitly role-labelled image reference."
+    },
+    "Media": {
+      "enum": [
+        "image",
+        "infographic",
+        "speech",
+        "podcast",
+        "music",
+        "sfx",
+        "text"
+      ],
+      "type": "string"
+    },
+    "Provider": {
+      "enum": [
+        "openai",
+        "google",
+        "fish",
+        "openrouter",
+        "elevenlabs"
+      ],
+      "type": "string"
+    },
+    "ReferenceRole": {
+      "enum": [
+        "identity",
+        "style",
+        "layout",
+        "content"
+      ],
+      "type": "string"
+    },
+    "Selection": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "$ref": "#/$defs/Provider"
+        }
+      },
+      "required": [
+        "provider",
+        "model"
+      ],
+      "type": "object"
+    },
+    "Settings": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_seconds": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "format": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "image_quality": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "input_fidelity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "instrumental": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "seed": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "size": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "voice": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "Turn": {
+      "additionalProperties": false,
+      "properties": {
+        "character": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "selection": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Selection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "settings": {
+          "$ref": "#/$defs/Settings",
+          "default": {
+            "duration_seconds": null,
+            "format": null,
+            "image_quality": null,
+            "instrumental": null,
+            "seed": null,
+            "size": null,
+            "voice": null
+          }
+        },
+        "text_file": {
+          "type": "string"
+        },
+        "voice_samples": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/VoiceSample"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text_file"
+      ],
+      "type": "object"
+    },
+    "VoiceSample": {
+      "additionalProperties": false,
+      "properties": {
+        "audio": {
+          "type": "string"
+        },
+        "consent": {
+          "type": "string"
+        },
+        "transcript": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "audio",
+        "transcript",
+        "consent"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "brief": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "character": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "depends_on": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "id": {
+      "type": "string"
+    },
+    "locale": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "media": {
+      "$ref": "#/$defs/Media"
+    },
+    "output": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "references": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/JobReference"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "maximum": 1,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "selection": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Selection"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "settings": {
+      "$ref": "#/$defs/Settings",
+      "default": {
+        "duration_seconds": null,
+        "format": null,
+        "image_quality": null,
+        "instrumental": null,
+        "seed": null,
+        "size": null,
+        "voice": null
+      }
+    },
+    "spec": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "text_file": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "turns": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Turn"
+      },
+      "type": "array"
+    },
+    "voice_samples": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/VoiceSample"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "media"
+  ],
+  "title": "Job",
+  "type": "object"
+}

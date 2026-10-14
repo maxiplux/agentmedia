@@ -1,0 +1,30 @@
+name: Native packages
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --locked --all-targets --all-features -- -D warnings
+      - run: cargo test --locked
+      - name: Build and verify isolated native package
+        run: python scripts/package-release.py --offline
+      - uses: actions/upload-artifact@v7
+        with:
+          name: mediaagent-${{ matrix.os }}
+          path: target/package-dist/*
+          if-no-files-found: error

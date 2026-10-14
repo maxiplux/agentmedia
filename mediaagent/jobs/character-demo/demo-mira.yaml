@@ -1,0 +1,8 @@
+schema_version: 1
+id: demo-mira
+media: image
+character: ../../characters/demo-mira/character.yaml
+brief: demo-mira.md
+settings:
+  size: 1024x1024
+  image_quality: low

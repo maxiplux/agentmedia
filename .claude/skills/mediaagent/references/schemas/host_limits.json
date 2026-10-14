@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "concurrency": {
+      "format": "uint",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "per_provider": {
+      "format": "uint",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "maximum": 1,
+      "minimum": 1,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "concurrency",
+    "per_provider"
+  ],
+  "title": "HostLimits",
+  "type": "object"
+}

@@ -1,0 +1,244 @@
+{
+  "$defs": {
+    "Artifact": {
+      "additionalProperties": false,
+      "properties": {
+        "bytes": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "duration_seconds": {
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "format": {
+          "type": "string"
+        },
+        "height": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "job_id": {
+          "type": "string"
+        },
+        "parent": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "quality": {
+          "$ref": "#/$defs/Quality"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "width": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "job_id",
+        "path",
+        "sha256",
+        "bytes",
+        "format",
+        "quality"
+      ],
+      "type": "object"
+    },
+    "Limits": {
+      "additionalProperties": false,
+      "properties": {
+        "attempts": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "audio_seconds": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "concurrency": {
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "images": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "per_provider": {
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "requests": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "revisions": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "speech_chars": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "requests",
+        "images",
+        "audio_seconds",
+        "speech_chars",
+        "revisions",
+        "attempts",
+        "concurrency",
+        "per_provider"
+      ],
+      "type": "object"
+    },
+    "Provider": {
+      "enum": [
+        "openai",
+        "google",
+        "fish",
+        "openrouter",
+        "elevenlabs"
+      ],
+      "type": "string"
+    },
+    "Quality": {
+      "enum": [
+        "unchecked",
+        "passed",
+        "needs_revision",
+        "inconclusive"
+      ],
+      "type": "string"
+    },
+    "Selection": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "$ref": "#/$defs/Provider"
+        }
+      },
+      "required": [
+        "provider",
+        "model"
+      ],
+      "type": "object"
+    },
+    "VoiceCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "$ref": "#/$defs/Artifact"
+        },
+        "id": {
+          "type": "string"
+        },
+        "language": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "artifact"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "binding_before": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "candidates": {
+      "items": {
+        "$ref": "#/$defs/VoiceCandidate"
+      },
+      "type": "array"
+    },
+    "character_id": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "identity_hash": {
+      "type": "string"
+    },
+    "limits": {
+      "$ref": "#/$defs/Limits"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "maximum": 1,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "selection": {
+      "$ref": "#/$defs/Selection"
+    },
+    "speech_selection": {
+      "$ref": "#/$defs/Selection"
+    },
+    "text": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "character_id",
+    "identity_hash",
+    "selection",
+    "speech_selection",
+    "description",
+    "text",
+    "limits",
+    "candidates"
+  ],
+  "title": "VoiceDesign",
+  "type": "object"
+}

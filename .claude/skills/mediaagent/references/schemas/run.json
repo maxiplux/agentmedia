@@ -1,0 +1,542 @@
+{
+  "$defs": {
+    "Artifact": {
+      "additionalProperties": false,
+      "properties": {
+        "bytes": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "duration_seconds": {
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "format": {
+          "type": "string"
+        },
+        "height": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "job_id": {
+          "type": "string"
+        },
+        "parent": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "quality": {
+          "$ref": "#/$defs/Quality"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "width": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "job_id",
+        "path",
+        "sha256",
+        "bytes",
+        "format",
+        "quality"
+      ],
+      "type": "object"
+    },
+    "AssetOrigin": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "locale": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "selection": {
+          "$ref": "#/$defs/Selection"
+        },
+        "settings": {
+          "$ref": "#/$defs/Settings",
+          "default": {
+            "duration_seconds": null,
+            "format": null,
+            "image_quality": null,
+            "instrumental": null,
+            "seed": null,
+            "size": null,
+            "voice": null
+          }
+        },
+        "sha256": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "selection",
+        "sha256"
+      ],
+      "type": "object"
+    },
+    "Effective": {
+      "additionalProperties": false,
+      "properties": {
+        "character_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "depends_on": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "string"
+        },
+        "locale": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "media": {
+          "$ref": "#/$defs/Media"
+        },
+        "output": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "prompt": {
+          "type": "string"
+        },
+        "references": {
+          "items": {
+            "$ref": "#/$defs/Reference"
+          },
+          "type": "array"
+        },
+        "selection": {
+          "$ref": "#/$defs/Selection"
+        },
+        "settings": {
+          "$ref": "#/$defs/Settings"
+        },
+        "text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "turns": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Effective"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "media",
+        "selection",
+        "prompt",
+        "settings",
+        "references",
+        "depends_on"
+      ],
+      "type": "object"
+    },
+    "JobRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "artifacts": {
+          "items": {
+            "$ref": "#/$defs/Artifact"
+          },
+          "type": "array"
+        },
+        "attempts": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "cached": {
+          "type": "boolean"
+        },
+        "duration_accounted": {
+          "type": "boolean"
+        },
+        "error": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "fingerprint": {
+          "type": "string"
+        },
+        "input": {
+          "$ref": "#/$defs/Effective"
+        },
+        "request_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "retry_not_before": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "state": {
+          "$ref": "#/$defs/State"
+        },
+        "usage": true
+      },
+      "required": [
+        "input",
+        "fingerprint",
+        "state",
+        "attempts",
+        "artifacts",
+        "cached",
+        "duration_accounted"
+      ],
+      "type": "object"
+    },
+    "Limits": {
+      "additionalProperties": false,
+      "properties": {
+        "attempts": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "audio_seconds": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "concurrency": {
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "images": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "per_provider": {
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "requests": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "revisions": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "speech_chars": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "requests",
+        "images",
+        "audio_seconds",
+        "speech_chars",
+        "revisions",
+        "attempts",
+        "concurrency",
+        "per_provider"
+      ],
+      "type": "object"
+    },
+    "Media": {
+      "enum": [
+        "image",
+        "infographic",
+        "speech",
+        "podcast",
+        "music",
+        "sfx",
+        "text"
+      ],
+      "type": "string"
+    },
+    "Provider": {
+      "enum": [
+        "openai",
+        "google",
+        "fish",
+        "openrouter",
+        "elevenlabs"
+      ],
+      "type": "string"
+    },
+    "Quality": {
+      "enum": [
+        "unchecked",
+        "passed",
+        "needs_revision",
+        "inconclusive"
+      ],
+      "type": "string"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "base64": {
+          "type": "string"
+        },
+        "consent_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mime": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "origin": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssetOrigin"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "role": {
+          "$ref": "#/$defs/ReferenceRole"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "transcript": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "role",
+        "name",
+        "mime",
+        "sha256",
+        "base64"
+      ],
+      "type": "object"
+    },
+    "ReferenceRole": {
+      "enum": [
+        "identity",
+        "style",
+        "layout",
+        "content"
+      ],
+      "type": "string"
+    },
+    "Selection": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "$ref": "#/$defs/Provider"
+        }
+      },
+      "required": [
+        "provider",
+        "model"
+      ],
+      "type": "object"
+    },
+    "Settings": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_seconds": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "format": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "image_quality": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "input_fidelity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "instrumental": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "seed": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "size": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "voice": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "State": {
+      "enum": [
+        "queued",
+        "running",
+        "cancelling",
+        "succeeded",
+        "partial",
+        "failed",
+        "cancelled",
+        "blocked",
+        "unknown"
+      ],
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "budget_group": {
+      "type": "string"
+    },
+    "fresh": {
+      "type": "boolean"
+    },
+    "id": {
+      "type": "string"
+    },
+    "jobs": {
+      "items": {
+        "$ref": "#/$defs/JobRecord"
+      },
+      "type": "array"
+    },
+    "limits": {
+      "$ref": "#/$defs/Limits"
+    },
+    "overwrite": {
+      "type": "boolean"
+    },
+    "parent_artifact": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "request_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "schema_version": {
+      "format": "uint32",
+      "maximum": 1,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "state": {
+      "$ref": "#/$defs/State"
+    },
+    "submission_fingerprint": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "budget_group",
+    "state",
+    "jobs",
+    "limits",
+    "fresh",
+    "overwrite",
+    "submission_fingerprint"
+  ],
+  "title": "Run",
+  "type": "object"
+}

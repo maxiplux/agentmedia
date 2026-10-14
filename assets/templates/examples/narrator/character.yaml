@@ -1,0 +1,11 @@
+schema_version: 1
+id: mira-narrator
+persona: persona.md
+visual: null
+voice:
+  description: voice.md
+  selection:
+    provider: openai
+    model: gpt-4o-mini-tts
+  binding: alloy
+  references: []

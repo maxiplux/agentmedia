@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "bind": {
+      "default": false,
+      "type": "boolean"
+    },
+    "character": {
+      "type": "string"
+    },
+    "consent": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "recordings": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "replace_binding": {
+      "default": false,
+      "type": "boolean"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "maximum": 1,
+      "minimum": 1,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "character",
+    "name",
+    "recordings",
+    "consent"
+  ],
+  "title": "VoiceClone",
+  "type": "object"
+}

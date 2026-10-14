@@ -1,0 +1,18 @@
+schema_version: 1
+title: "Three habits for clearer writing"
+audience: "Adult learners"
+key_message: "Small edits improve clarity"
+canvas: "1024x1536"
+layout: "Title at top, three stacked cards, source note at bottom"
+sections:
+  - heading: "Use concrete words"
+    copy: "Choose words your reader can picture."
+    values: []
+  - heading: "Keep one idea per sentence"
+    copy: "Give each idea room to be understood."
+    values: []
+  - heading: "Read it aloud"
+    copy: "Revise where your voice hesitates."
+    values: []
+visual_brief: infographic.md
+references: []

@@ -1,0 +1,16 @@
+schema_version: 1
+id: mira
+persona: persona.md
+visual:
+  description: visual.md
+  selection:
+    provider: openai
+    model: gpt-image-1
+  references: []
+voice:
+  description: voice.md
+  selection:
+    provider: openai
+    model: gpt-4o-mini-tts
+  binding: alloy
+  references: []

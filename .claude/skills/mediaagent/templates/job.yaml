@@ -1,0 +1,15 @@
+schema_version: 1
+id: article-header
+media: image
+selection: null
+brief: image.md
+text_file: null
+character: null
+spec: null
+references: []
+turns: []
+settings:
+  format: png
+locale: en-US
+depends_on: []
+output: null

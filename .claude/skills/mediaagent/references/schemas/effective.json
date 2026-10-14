@@ -1,0 +1,272 @@
+{
+  "$defs": {
+    "AssetOrigin": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "locale": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "selection": {
+          "$ref": "#/$defs/Selection"
+        },
+        "settings": {
+          "$ref": "#/$defs/Settings",
+          "default": {
+            "duration_seconds": null,
+            "format": null,
+            "image_quality": null,
+            "instrumental": null,
+            "seed": null,
+            "size": null,
+            "voice": null
+          }
+        },
+        "sha256": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "selection",
+        "sha256"
+      ],
+      "type": "object"
+    },
+    "Media": {
+      "enum": [
+        "image",
+        "infographic",
+        "speech",
+        "podcast",
+        "music",
+        "sfx",
+        "text"
+      ],
+      "type": "string"
+    },
+    "Provider": {
+      "enum": [
+        "openai",
+        "google",
+        "fish",
+        "openrouter",
+        "elevenlabs"
+      ],
+      "type": "string"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "base64": {
+          "type": "string"
+        },
+        "consent_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mime": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "origin": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssetOrigin"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "role": {
+          "$ref": "#/$defs/ReferenceRole"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "transcript": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "role",
+        "name",
+        "mime",
+        "sha256",
+        "base64"
+      ],
+      "type": "object"
+    },
+    "ReferenceRole": {
+      "enum": [
+        "identity",
+        "style",
+        "layout",
+        "content"
+      ],
+      "type": "string"
+    },
+    "Selection": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "$ref": "#/$defs/Provider"
+        }
+      },
+      "required": [
+        "provider",
+        "model"
+      ],
+      "type": "object"
+    },
+    "Settings": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_seconds": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "format": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "image_quality": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "input_fidelity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "instrumental": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "seed": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "size": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "voice": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "character_hash": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "depends_on": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "id": {
+      "type": "string"
+    },
+    "locale": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "media": {
+      "$ref": "#/$defs/Media"
+    },
+    "output": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "prompt": {
+      "type": "string"
+    },
+    "references": {
+      "items": {
+        "$ref": "#/$defs/Reference"
+      },
+      "type": "array"
+    },
+    "selection": {
+      "$ref": "#/$defs/Selection"
+    },
+    "settings": {
+      "$ref": "#/$defs/Settings"
+    },
+    "text": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "turns": {
+      "default": [],
+      "items": {
+        "$ref": "#"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "media",
+    "selection",
+    "prompt",
+    "settings",
+    "references",
+    "depends_on"
+  ],
+  "title": "Effective",
+  "type": "object"
+}
