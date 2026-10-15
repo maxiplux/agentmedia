@@ -5,7 +5,7 @@ description: Generate images, infographics, speech, podcasts, music, and sound e
 
 # Mediaagent
 
-Use the `mediaagent` binary from any agent that can run a process. If it is missing, explain `cargo install --path /path/to/mediaagent` or use a release binary. Do not switch media tools or make provider API calls inside the skill.
+Use the `mediaagent` binary from any agent that can run a process. If it is missing, read [installation](references/installation.md) for public installers, user-local installation and explicit updates, or explain `cargo install --path /path/to/mediaagent` for a source checkout. Do not switch media tools or make provider API calls inside the skill.
 
 Read [commands](references/commands.md) for every command and flag in this binary version; [workflow](references/workflow.md) for outputs, limits, recovery, and review; [authoring](references/authoring.md) for character and infographic templates. Machine-readable schemas are in `references/schemas/`. Exported templates are in `templates/`.
 

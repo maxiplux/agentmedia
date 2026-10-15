@@ -53,9 +53,38 @@ version and human-accepted references; models are never silently substituted.
 See [setup and model policy](assets/skill/references/setup.md) for the complete
 human and agent workflow, optional live model discovery and credential handling.
 
-## Build and use
+## Install and update
 
-Download Windows, macOS and Linux binaries from the [Native packages workflow](https://github.com/maxiplux/agentmedia/actions/workflows/package.yml). Open a successful run and its Artifacts section; see [download and installation steps](docs/PACKAGING.md).
+macOS/Linux:
+
+```sh
+curl -fsSL https://maxiplux.github.io/agentmedia/install.sh | sh
+```
+
+Windows PowerShell:
+
+```powershell
+irm https://maxiplux.github.io/agentmedia/install.ps1 | iex
+```
+
+Already downloaded a 0.4.0+ binary? Run `./mediaagent install` (Windows:
+`./mediaagent.exe install`). Installation uses a user bin directory, verifies
+release bytes, and needs no administrator or Rust installation. Open a new terminal,
+then use `mediaagent init ./my-project` from your project folder.
+
+```sh
+mediaagent update --check
+mediaagent update
+mediaagent update --rollback
+```
+
+Updates preserve project keys, configuration, characters, generated media and
+installed skills. See [installation options](docs/INSTALLATION.md) for exact
+versions, custom directories, PATH controls and agent-readable results. Public
+binaries for macOS Apple Silicon/Intel, Linux x86-64 and Windows x86-64 are on
+[GitHub Releases](https://github.com/maxiplux/agentmedia/releases/latest).
+
+## Build and use
 
 ```sh
 cargo build --locked

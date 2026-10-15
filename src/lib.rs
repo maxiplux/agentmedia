@@ -5,6 +5,7 @@ pub mod catalog;
 pub mod cli;
 pub mod contracts;
 pub mod credentials;
+pub mod distribution;
 pub mod engine;
 pub mod error;
 pub mod maintenance;

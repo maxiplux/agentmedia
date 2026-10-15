@@ -1,4 +1,4 @@
-# mediaagent 0.3.1 command reference
+# mediaagent 0.4.0 command reference
 
 Generated from the executable's command definitions. Global flags are accepted before or after the command.
 
@@ -10,6 +10,8 @@ Generate images, infographics, exact speech, podcasts, music, and sound effects.
 Usage: mediaagent [OPTIONS] <COMMAND>
 
 Commands:
+  install    Install this downloaded binary in your user bin directory, offline and without administrator access
+  update     Update this executable from a verified public GitHub Release; project files stay untouched
   init       Initialize offline, preserving existing files and credentials
   config     Inspect or explicitly replace validated configuration
   verify     Preview a bounded live verification suite; execution requires the exact approved preview hash
@@ -62,6 +64,102 @@ Options:
 
   -V, --version
           Print version
+
+```
+
+## mediaagent install
+
+```text
+Install this downloaded binary in your user bin directory, offline and without administrator access
+
+Usage: mediaagent install [OPTIONS]
+
+Options:
+      --bin-dir <BIN_DIR>
+          Executable destination directory (default: ~/.local/bin; Windows: LOCALAPPDATA/mediaagent/bin)
+
+      --project <PROJECT>
+          Target project root; credentials are loaded only from this root's .env
+
+          [default: .]
+
+      --json
+          Emit a structured JSON result; diagnostics stay on stderr, with no animation
+
+      --no-modify-path
+          Do not add the directory to your user PATH or shell profile
+
+      --force
+          Explicitly replace an existing executable not managed by mediaagent
+
+      --non-interactive
+          Never prompt; supply YAML files or explicit flags for automation
+
+      --progress <PROGRESS>
+          Terminal progress mode; redirected auto progress uses plain stage updates
+
+          [default: auto]
+          [possible values: auto, plain, off]
+
+      --color <COLOR>
+          Terminal colors; auto honors NO_COLOR
+
+          [default: auto]
+          [possible values: auto, always, never]
+
+  -h, --help
+          Print help
+
+```
+
+## mediaagent update
+
+```text
+Update this executable from a verified public GitHub Release; project files stay untouched
+
+Usage: mediaagent update [OPTIONS]
+
+Options:
+      --check
+          Only check release metadata; do not download or replace the executable
+
+      --project <PROJECT>
+          Target project root; credentials are loaded only from this root's .env
+
+          [default: .]
+
+      --json
+          Emit a structured JSON result; diagnostics stay on stderr, with no animation
+
+      --version <VERSION>
+          Select an exact stable version, for example 0.4.0; defaults to the latest stable release
+
+      --force
+          Reinstall the selected version even when already current
+
+      --non-interactive
+          Never prompt; supply YAML files or explicit flags for automation
+
+      --allow-downgrade
+          Explicitly allow installing an older stable release
+
+      --progress <PROGRESS>
+          Terminal progress mode; redirected auto progress uses plain stage updates
+
+          [default: auto]
+          [possible values: auto, plain, off]
+
+      --color <COLOR>
+          Terminal colors; auto honors NO_COLOR
+
+          [default: auto]
+          [possible values: auto, always, never]
+
+      --rollback
+          Restore the verified backup saved by the preceding install or update; offline
+
+  -h, --help
+          Print help
 
 ```
 
@@ -3437,6 +3535,8 @@ Print this message or the help of the given subcommand(s)
 Usage: mediaagent help [COMMAND]
 
 Commands:
+  install    Install this downloaded binary in your user bin directory, offline and without administrator access
+  update     Update this executable from a verified public GitHub Release; project files stay untouched
   init       Initialize offline, preserving existing files and credentials
   config     Inspect or explicitly replace validated configuration
   verify     Preview a bounded live verification suite; execution requires the exact approved preview hash
@@ -3459,6 +3559,24 @@ Commands:
   plan       Explicit text-model planning; saves reviewable files without generating media
   skills     Export a portable skill or install it in agent discovery locations
   help       Print this message or the help of the given subcommand(s)
+
+```
+
+## mediaagent help install
+
+```text
+Install this downloaded binary in your user bin directory, offline and without administrator access
+
+Usage: mediaagent help install
+
+```
+
+## mediaagent help update
+
+```text
+Update this executable from a verified public GitHub Release; project files stay untouched
+
+Usage: mediaagent help update
 
 ```
 

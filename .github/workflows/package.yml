@@ -8,7 +8,9 @@ on:
       - 'src/**'
       - 'tests/**'
       - 'assets/**'
-      - 'scripts/package-release.py'
+      - 'scripts/**'
+      - 'docs/site/install.*'
+      - '.github/workflows/release.yml'
       - '.github/workflows/package.yml'
 permissions:
   contents: read
@@ -17,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, macos-15-intel, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
@@ -27,6 +29,13 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
+      - name: Check Windows bootstrap prerequisites
+        if: runner.os == 'Windows'
+        shell: python
+        run: |
+          import os, subprocess
+          clean = {k: v for k, v in os.environ.items() if k.upper() != 'PSMODULEPATH'}
+          subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', '$ErrorActionPreference="Stop"; Get-Command Get-FileHash, Invoke-WebRequest | Select-Object Name'], env=clean, check=True)
       - run: cargo fmt --all -- --check
       - run: cargo clippy --locked --all-targets --all-features -- -D warnings
       - run: cargo test --locked
