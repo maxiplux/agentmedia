@@ -91,7 +91,10 @@ impl Terminal {
     fn wait(&mut self, token: &str) {
         let deadline = Instant::now() + Duration::from_secs(15);
         loop {
-            if let Some(i) = self.output[self.cursor..].find(token) {
+            // ConPTY may insert cursor visibility/control sequences inside a prompt.
+            // Match the text a user sees; retain raw output for masking/color assertions.
+            let visible = console::strip_ansi_codes(&self.output);
+            if let Some(i) = visible[self.cursor..].find(token) {
                 self.cursor += i + token.len();
                 return;
             }
