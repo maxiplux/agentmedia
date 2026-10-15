@@ -69,6 +69,36 @@ pub struct Cli {
 }
 #[derive(Debug, Subcommand)]
 pub enum Command {
+    /// Install this downloaded binary in your user bin directory, offline and without administrator access
+    Install {
+        /// Executable destination directory (default: ~/.local/bin; Windows: LOCALAPPDATA/mediaagent/bin)
+        #[arg(long)]
+        bin_dir: Option<PathBuf>,
+        /// Do not add the directory to your user PATH or shell profile
+        #[arg(long)]
+        no_modify_path: bool,
+        /// Explicitly replace an existing executable not managed by mediaagent
+        #[arg(long)]
+        force: bool,
+    },
+    /// Update this executable from a verified public GitHub Release; project files stay untouched
+    Update {
+        /// Only check release metadata; do not download or replace the executable
+        #[arg(long, conflicts_with_all=["force", "rollback"])]
+        check: bool,
+        /// Select an exact stable version, for example 0.4.0; defaults to the latest stable release
+        #[arg(long, conflicts_with = "rollback")]
+        version: Option<String>,
+        /// Reinstall the selected version even when already current
+        #[arg(long, conflicts_with = "rollback")]
+        force: bool,
+        /// Explicitly allow installing an older stable release
+        #[arg(long, conflicts_with = "rollback")]
+        allow_downgrade: bool,
+        /// Restore the verified backup saved by the preceding install or update; offline
+        #[arg(long)]
+        rollback: bool,
+    },
     /// Initialize offline, preserving existing files and credentials
     Init {
         /// Project folder (defaults to --project or the current directory); must allow a mediaagent/ subfolder
@@ -726,6 +756,14 @@ pub fn command_reference() -> String {
         + "\n"
 }
 pub fn human_result(data: &Value) -> String {
+    if let Some(action) = data["distribution_action"].as_str() {
+        return format!(
+            "{}\nExecutable: {}\n{}",
+            action,
+            data["executable"].as_str().unwrap_or(""),
+            data["message"].as_str().unwrap_or("")
+        );
+    }
     if data["policy"] == "current_stable_only"
         && let Some(models) = data["models"].as_array()
     {
@@ -938,6 +976,30 @@ fn batch(root: &Path, path: &Path) -> Result<Vec<Effective>> {
 pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
     let root = absolute(&cli.project)?;
     match &cli.command {
+        Command::Install {
+            bin_dir,
+            no_modify_path,
+            force,
+        } => Ok((
+            crate::distribution::install(bin_dir.as_deref(), !no_modify_path, *force)?,
+            0,
+        )),
+        Command::Update {
+            check,
+            version,
+            force,
+            allow_downgrade,
+            rollback,
+        } => {
+            let result = if *rollback {
+                crate::distribution::rollback().await?
+            } else {
+                crate::distribution::ReleaseClient::new()?
+                    .update(version.as_deref(), *check, *force, *allow_downgrade)
+                    .await?
+            };
+            Ok((result, 0))
+        }
         Command::Init {
             path,
             agents,

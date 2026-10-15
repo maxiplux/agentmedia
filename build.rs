@@ -1,4 +1,8 @@
 fn main() {
+    println!(
+        "cargo::rustc-env=MEDIAAGENT_TARGET={}",
+        std::env::var("TARGET").unwrap()
+    );
     println!("cargo::rerun-if-changed=build.rs");
     // Use the target, not the build host, so cross-compilation behaves the same.
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows")

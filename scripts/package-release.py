@@ -7,6 +7,7 @@ import os
 import pathlib
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import zipfile
@@ -134,15 +135,27 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
     assert (exported / 'templates/cast-scene.yaml').exists()
     assert (exported / 'references/remediation.md').exists()
     checks.append('embedded_v2_cast_verification_and_recovery_guidance')
+    installed_bin = isolated / 'installed bin'
+    for _ in range(2):
+        installation = cli(['install', '--bin-dir', str(installed_bin), '--no-modify-path'])['data']
+        assert installation['project_files_changed'] is False and installation['network_requested'] is False
+    installed = installed_bin / executable
+    assert subprocess.run([str(installed), '--version'], capture_output=True, text=True, check=True).stdout.strip() == f'mediaagent {version}'
+    assert (project / '.env').read_text() == preserved
+    checks.append('offline_user_install_repeat_and_version_without_project_changes')
+    subprocess.run([sys.executable, str(root / 'scripts/test-installers.py'), '--binary', str(copied), '--target', host], env=smoke_environment, check=True)
+    checks.append('native_bootstrap_download_install_repeat_and_checksum_rejection_offline')
     reported = subprocess.run([str(copied), '--version'], cwd=isolated, env=smoke_environment, capture_output=True, text=True, check=True).stdout.strip()
     assert reported == f'mediaagent {version}'
 
 name = f'mediaagent-{version}-{host}'
 destination = root / 'target/package-dist'
 destination.mkdir(parents=True, exist_ok=True)
-metadata = {'schema_version': 1, 'package': 'mediaagent', 'version': version, 'target': host,
+source_commit = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=root, capture_output=True, text=True, check=True).stdout.strip()
+source_dirty = bool(subprocess.run(['git', 'status', '--porcelain'], cwd=root, capture_output=True, text=True, check=True).stdout.strip())
+metadata = {'source_commit': source_commit, 'source_dirty': source_dirty, 'schema_version': 1, 'package': 'mediaagent', 'version': version, 'target': host,
             'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
-            'native_offline_checks': checks, 'published': False,
+            'native_offline_checks': checks, 'publication_performed_by_packager': False,
             'live_provider_testing_performed_by_packager': False}
 with tempfile.TemporaryDirectory(prefix='mediaagent-archive-') as temporary:
     staged = pathlib.Path(temporary) / name
@@ -152,10 +165,13 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-archive-') as temporary:
     (staged / 'verification.json').write_text(json.dumps(metadata, indent=2) + '\n')
     (staged / 'README.md').write_text(f'''# mediaagent {version}
 
-Native binary for `{host}`. Copy `{executable}` to a directory on PATH or invoke its absolute path.
+Native binary for `{host}`. From the download folder, run `./{executable} install` to install in your user bin directory without administrator access. Open a new terminal afterwards. Installation does not initialize a project or copy provider keys.
 
 ```sh
 mediaagent --help
+mediaagent update --check
+mediaagent update
+mediaagent update --rollback
 mediaagent init /path/to/project
 mediaagent models --json
 mediaagent doctor --live --json  # Explicit read-only checks; no media generation
@@ -168,7 +184,7 @@ Copy `.env.example` to your target project's `.env` and fill only the selected p
 
 Images, infographics, speech, podcasts, music, sound effects, optional characters, concurrent jobs, budgets/cache/recovery, image reviews, and explicit ElevenLabs voice preview/create/bind workflows are available. Preview candidates need selection. Consent-gated ElevenLabs recorded-voice cloning, Fish audio-reference synthesis, Google audio review, and Google saved-interaction reconciliation are implemented with their documented boundaries; recording workflows have mocked coverage and require authorized samples for live verification. Offline initialization saves models/settings/voices/limits; original identity assets pin their recorded provider/model. Visual likeness remains subject to human acceptance. Video generation is excluded.
 
-`verification.json` records the binary hash and native offline checks. This local package has not been published, signed, or notarized; other platform packages need their own native build and verification. No provider generation is performed by the packager.
+`verification.json` records the binary hash and native offline checks. The packager does not publish; public availability is recorded on the GitHub Releases page. Binaries are not signed or notarized. Other platform packages require their own native build and verification. No provider generation is performed by the packager.
 ''')
     if os.name == 'nt':
         archive = destination / f'{name}.zip'
@@ -186,6 +202,10 @@ Images, infographics, speech, podcasts, music, sound effects, optional character
             assert len(bundle.getmembers()) == 5
             member = bundle.extractfile(f'{name}/{executable}')
             assert hashlib.sha256(member.read()).hexdigest() == metadata['binary_sha256']
+# Raw release assets avoid extraction tools in installers and the built-in updater.
+raw = destination / (f'mediaagent-{host}' + ('.exe' if os.name == 'nt' else ''))
+shutil.copy2(binary, raw)
+raw.with_name(raw.name + '.sha256').write_text(f'{metadata["binary_sha256"]}  {raw.name}\n')
 checksum = hashlib.sha256(archive.read_bytes()).hexdigest()
 checksum_file = archive.with_name(archive.name + '.sha256')
 checksum_file.write_text(f'{checksum}  {archive.name}\n')
