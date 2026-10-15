@@ -2,6 +2,67 @@ use assert_cmd::cargo::cargo_bin_cmd;
 use serde_json::Value;
 use std::fs;
 
+#[cfg(all(target_os = "windows", target_env = "msvc"))]
+#[test]
+fn windows_executable_reserves_stack_for_configured_initialization() {
+    // Inspect the actual linked executable, not an environment variable or
+    // build-script string. The configured-init tests below exercise that binary.
+    let exe = fs::read(env!("CARGO_BIN_EXE_mediaagent")).unwrap();
+    assert_eq!(&exe[..2], b"MZ");
+    let pe = u32::from_le_bytes(exe[0x3c..0x40].try_into().unwrap()) as usize;
+    assert_eq!(&exe[pe..pe + 4], b"PE\0\0");
+    let optional = pe + 24;
+    let magic = u16::from_le_bytes(exe[optional..optional + 2].try_into().unwrap());
+    let reserve = match magic {
+        // SizeOfStackReserve in the PE32 and PE32+ optional headers.
+        0x10b => u64::from(u32::from_le_bytes(
+            exe[optional + 72..optional + 76].try_into().unwrap(),
+        )),
+        0x20b => u64::from_le_bytes(exe[optional + 72..optional + 80].try_into().unwrap()),
+        _ => panic!("Unexpected PE optional header: {magic:#x}"),
+    };
+    assert!(reserve >= 8 * 1024 * 1024, "Main stack reserve: {reserve}");
+}
+
+#[test]
+fn init_complete_defaults_is_offline_and_repeatable() {
+    let temporary = tempfile::tempdir().unwrap();
+    let root = temporary.path().join("project with spaces");
+    let defaults = temporary.path().join("defaults.yaml");
+    fs::write(
+        &defaults,
+        include_str!("../assets/templates/project-config.yaml"),
+    )
+    .unwrap();
+    for _ in 0..2 {
+        let output = cargo_bin_cmd!("mediaagent")
+            .args(["--json", "--non-interactive", "init"])
+            .arg(&root)
+            .arg("--defaults-file")
+            .arg(&defaults)
+            .assert()
+            .success()
+            .get_output()
+            .stdout
+            .clone();
+        let response: Value = serde_json::from_slice(&output).unwrap();
+        assert_eq!(response["data"]["generation"], false);
+        assert_eq!(response["data"]["setup_required"], false);
+        assert_eq!(
+            response["data"]["configured_media"]
+                .as_array()
+                .unwrap()
+                .len(),
+            7
+        );
+    }
+    assert_eq!(
+        fs::read_dir(root.join("mediaagent/runs")).unwrap().count(),
+        0
+    );
+    assert_eq!(fs::read(root.join(".env")).unwrap(), b"");
+}
+
 #[test]
 fn agent_help_and_parse_errors_are_readable() {
     let output = cargo_bin_cmd!("mediaagent")
