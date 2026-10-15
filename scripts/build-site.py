@@ -186,10 +186,10 @@ def check(current, regenerated):
         return re.sub(r'(?<=>)(?=<)', '\n', strip(text)).splitlines()
     if strip(current) != strip(regenerated):
         diff = difflib.unified_diff(lines(current), lines(regenerated), 'committed', 'regenerated', lineterm='', n=1)
-        lines = [line if len(line) < 400 else line[:400] + '…' for line in diff]
-        report.extend(lines[:80])
-        if len(lines) > 80:
-            report.append(f'… {len(lines) - 80} more diff lines')
+        diff_lines = [line if len(line) < 400 else line[:400] + '…' for line in diff]
+        report.extend(diff_lines[:80])
+        if len(diff_lines) > 80:
+            report.append(f'… {len(diff_lines) - 80} more diff lines')
     return not report, '\n'.join(report) if report else 'guide is up to date'
 
 
