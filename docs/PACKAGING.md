@@ -18,6 +18,14 @@ mediaagent --help
 mediaagent init /path/to/project
 ```
 
+On macOS/Linux, do not initialize in the folder containing the downloaded file
+named `mediaagent`: setup needs to create a directory with that same name. From
+that folder, use `./mediaagent init ./my-project`, or put the binary on PATH and
+initialize in your project folder. Version 0.3.1 detects the conflict before the
+wizard and offers a different destination. In noninteractive mode it reports
+`init_path_conflict` without writing setup files. `--project PATH init` is also
+supported; an explicit `init PATH` takes precedence.
+
 Initialization opens a looping terminal checklist with OpenAI image/planning and Fish speech defaults. Add missing keys through masked input or the target project's root `.env`; process environment values take precedence. Review and finish, or save unfinished setup and run `init` again. No development credentials are bundled or copied. Project-local skills are included; user-level skill installation remains explicit. See the [web guide](https://maxiplux.github.io/agentmedia/) and [setup reference](../assets/skill/references/setup.md).
 
 ## Building and verifying a package

@@ -39,6 +39,12 @@ mediaagent models --provider fish --media speech
 mediaagent models --all
 ```
 
+If the downloaded executable is in the current folder, run `./mediaagent init ./my-project`.
+The executable and the required `mediaagent/` configuration directory cannot share
+the same path. Setup offers another folder before collecting choices when this
+conflict exists. `mediaagent --project ./my-project init` also selects that project;
+an explicit `init PATH` takes precedence.
+
 `--preset empty` creates an empty scaffold; `--defaults-file FILE` uses that exact
 configuration. Only reviewed current stable model families can submit new provider
 requests. Superseded/preview models remain readable in old projects, but cannot

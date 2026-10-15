@@ -23,12 +23,36 @@ pub fn config(root: &Path) -> Result<Config> {
 pub fn init(root: &Path, agents: &[String]) -> Result<serde_json::Value> {
     init_with_config(root, agents, None)
 }
+/// Detect the executable/configuration name collision before any setup files are written.
+pub fn check_init_destination(root: &Path) -> Result<()> {
+    let root = absolute(root)?;
+    for path in root
+        .ancestors()
+        .chain(std::iter::once(root.join("mediaagent").as_path()))
+    {
+        if fs::symlink_metadata(path).is_ok() && !path.is_dir() {
+            let mut error = Error::new(
+                "init_path_conflict",
+                format!(
+                    "Cannot initialize this project: {} is a file, but setup needs a directory. The mediaagent executable and the mediaagent/ configuration folder cannot share a path. Choose a project folder, for example: mediaagent init ./my-project. The existing file has not been changed.",
+                    path.display()
+                ),
+                2,
+            );
+            error.field = Some("path".into());
+            error.corrective_argv = vec!["mediaagent".into(), "init".into(), "./my-project".into()];
+            return Err(error);
+        }
+    }
+    Ok(())
+}
 pub fn init_with_config(
     root: &Path,
     agents: &[String],
     configured: Option<&Config>,
 ) -> Result<serde_json::Value> {
     check_agents(agents)?;
+    check_init_destination(root)?;
     if let Some(configured) = configured {
         validation::config(configured)?;
     }

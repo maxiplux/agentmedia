@@ -71,8 +71,8 @@ pub struct Cli {
 pub enum Command {
     /// Initialize offline, preserving existing files and credentials
     Init {
-        #[arg(default_value = ".")]
-        path: PathBuf,
+        /// Project folder (defaults to --project or the current directory); must allow a mediaagent/ subfolder
+        path: Option<PathBuf>,
         #[arg(long, value_delimiter = ',', default_value = "codex,claude")]
         agents: Vec<String>,
         /// Complete configuration YAML: provider/models, settings, locales, consistency, and limits
@@ -951,7 +951,7 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                     "init --interactive requires a terminal; automation uses init --preset recommended --json --non-interactive",
                 ));
             }
-            let exists = path.join("mediaagent/config.yaml").exists();
+            let path = path.as_deref().unwrap_or(&root);
             let terminal = *interactive
                 || (defaults_file.is_none()
                     && !cli.json
@@ -959,6 +959,9 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                     && std::io::stdin().is_terminal()
                     && std::io::stderr().is_terminal());
             if terminal {
+                let selected = crate::setup::init_destination(path, cli.color)?;
+                let path = selected.as_path();
+                let exists = path.join("mediaagent/config.yaml").exists();
                 let initial = if exists {
                     project::config(path)?
                 } else if matches!(preset, Some(Preset::Empty)) {
@@ -971,6 +974,8 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                     0,
                 ));
             }
+            project::check_init_destination(path)?;
+            let exists = path.join("mediaagent/config.yaml").exists();
             let configured = if let Some(file) = defaults_file {
                 Some(yaml::<Config>(file)?)
             } else if exists {

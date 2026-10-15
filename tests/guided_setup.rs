@@ -11,6 +11,105 @@ use std::{
 };
 
 #[test]
+fn init_reports_blocking_executable_before_writing_and_preserves_all_existing_files() {
+    let root = tempfile::tempdir().unwrap();
+    fs::write(root.path().join("mediaagent"), "fixture executable").unwrap();
+    fs::write(root.path().join(".env"), "OTHER=keep-existing\n").unwrap();
+    let output = cargo_bin_cmd!("mediaagent")
+        .current_dir(root.path())
+        .args(["init", "--json", "--non-interactive"])
+        .assert()
+        .code(2)
+        .get_output()
+        .stdout
+        .clone();
+    let result: Value = serde_json::from_slice(&output).unwrap();
+    assert_eq!(result["errors"][0]["code"], "init_path_conflict");
+    assert!(
+        result["errors"][0]["message"]
+            .as_str()
+            .unwrap()
+            .contains("mediaagent init ./my-project")
+    );
+    assert_eq!(
+        result["errors"][0]["corrective_argv"],
+        json!(["mediaagent", "init", "./my-project"])
+    );
+    assert_eq!(
+        fs::read_to_string(root.path().join("mediaagent")).unwrap(),
+        "fixture executable"
+    );
+    assert_eq!(
+        fs::read_to_string(root.path().join(".env")).unwrap(),
+        "OTHER=keep-existing\n"
+    );
+    assert_eq!(fs::read_dir(root.path()).unwrap().count(), 2);
+    assert!(
+        setup::Session::new(setup::recommended(), vec![])
+            .save(root.path())
+            .is_err()
+    );
+    assert_eq!(fs::read_dir(root.path()).unwrap().count(), 2);
+}
+
+#[test]
+fn init_honors_global_project_and_explicit_destination_with_executable_beside_it() {
+    let root = tempfile::tempdir().unwrap();
+    fs::write(root.path().join("mediaagent"), "fixture executable").unwrap();
+    cargo_bin_cmd!("mediaagent")
+        .current_dir(root.path())
+        .args([
+            "--project",
+            "selected project",
+            "init",
+            "--json",
+            "--non-interactive",
+        ])
+        .assert()
+        .success();
+    assert!(
+        root.path()
+            .join("selected project/mediaagent/config.yaml")
+            .is_file()
+    );
+    cargo_bin_cmd!("mediaagent")
+        .current_dir(root.path())
+        .args([
+            "--project",
+            "unused",
+            "init",
+            "explicit project",
+            "--json",
+            "--non-interactive",
+        ])
+        .assert()
+        .success();
+    assert!(
+        root.path()
+            .join("explicit project/mediaagent/config.yaml")
+            .is_file()
+    );
+    assert!(!root.path().join("unused").exists());
+    assert_eq!(
+        fs::read_to_string(root.path().join("mediaagent")).unwrap(),
+        "fixture executable"
+    );
+}
+
+#[test]
+fn init_rejects_project_paths_with_a_blocking_file_or_ancestor_without_mutations() {
+    let root = tempfile::tempdir().unwrap();
+    let file = root.path().join("blocking-file");
+    fs::write(&file, "keep").unwrap();
+    for target in [&file, &file.join("child")] {
+        let error = project::init(target, &[]).unwrap_err();
+        assert_eq!(error.code, "init_path_conflict");
+    }
+    assert_eq!(fs::read_to_string(file).unwrap(), "keep");
+    assert_eq!(fs::read_dir(root.path()).unwrap().count(), 1);
+}
+
+#[test]
 fn recommended_init_and_status_are_noninteractive_offline_and_resumable() {
     let t = tempfile::tempdir().unwrap();
     let root = t.path().join("project with spaces");
