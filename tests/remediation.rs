@@ -112,7 +112,10 @@ fn planner_selected_character_bundle_survives_original_removal() {
     let stage = tempfile::tempdir().unwrap();
     let v =
         planning::prepare_inputs(r.path(), stage.path(), std::slice::from_ref(&p), &[]).unwrap();
-    assert!(v.to_string().contains("_inputs/characters/mira"));
+    assert_eq!(
+        Path::new(v[0]["manifest"].as_str().unwrap()),
+        Path::new("_inputs/characters/mira/character.yaml")
+    );
     fs::remove_dir_all(p.parent().unwrap()).unwrap();
     let data=json!({"files":[{"path":"job.yaml","content":"schema_version: 2\nid: scene\nmedia: image\ncharacter: _inputs/characters/mira/character.yaml\nbrief: scene.md\n"},{"path":"scene.md","content":"Walk through a forest."}]}).to_string();
     let path = planning::stage(&data, "job", stage.path(), &Config::default()).unwrap();
