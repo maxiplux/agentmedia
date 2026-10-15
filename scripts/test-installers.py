@@ -11,6 +11,9 @@ version = subprocess.run([str(binary), '--version'], capture_output=True, text=T
 with tempfile.TemporaryDirectory(prefix='mediaagent-bootstrap-') as temporary:
     work = pathlib.Path(temporary)
     environment = {k: v for k, v in os.environ.items() if k not in ['OPENAI_API_KEY','GEMINI_API_KEY','FISH_API_KEY','ELEVENLABS_API_KEY','OPENROUTER_API_KEY']}
+    if os.name == 'nt':
+        # CI starts in PowerShell 7; Windows PowerShell 5.1 must load its own modules.
+        environment.pop('PSModulePath', None)
     environment.update(MEDIAAGENT_TEST_FIXTURE_BINARY=str(binary), MEDIAAGENT_TEST_FIXTURE_VERSION=version, MEDIAAGENT_TEST_FIXTURE_TARGET=args.target)
     if os.name == 'nt':
         script = root / 'docs/site/install.ps1'
