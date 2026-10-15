@@ -18,9 +18,8 @@ done
 command -v curl >/dev/null || { echo 'curl is required to download mediaagent' >&2; exit 1; }
 case "$(uname -s):$(uname -m)" in
   Darwin:arm64) target=aarch64-apple-darwin ;;
-  Darwin:x86_64) target=x86_64-apple-darwin ;;
   Linux:x86_64) target=x86_64-unknown-linux-gnu ;;
-  *) echo 'No published native binary for this platform. Build from source or use a supported macOS/Linux/Windows release.' >&2; exit 1 ;;
+  *) echo 'No published native binary for this platform. Build from source or use a supported Apple Silicon macOS, Linux x86-64 or Windows x86-64 release.' >&2; exit 1 ;;
 esac
 umask 077
 temporary=$(mktemp -d)

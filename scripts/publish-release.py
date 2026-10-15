@@ -14,7 +14,7 @@ commit = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=root, capture_output=T
 if not args.dry_run:
     tag_commit = subprocess.run(['git', 'rev-parse', args.tag + '^{commit}'], cwd=root, capture_output=True, text=True, check=True).stdout.strip()
     assert tag_commit == commit, 'Release checkout must match the exact tag commit'
-targets = ['aarch64-apple-darwin', 'x86_64-apple-darwin', 'x86_64-unknown-linux-gnu', 'x86_64-pc-windows-msvc']
+targets = ['aarch64-apple-darwin', 'x86_64-unknown-linux-gnu', 'x86_64-pc-windows-msvc']
 files = []
 for target in targets:
     binary_name = 'mediaagent-' + target + ('.exe' if 'windows' in target else '')
@@ -68,7 +68,7 @@ if existing.returncode == 0 and not json.loads(existing.stdout)['isDraft']:
     print('Published release already matches the validated assets'); raise SystemExit
 if existing.returncode != 0:
     notes = staged / 'notes.md'
-    notes.write_text(f'''Install a user-local binary without Rust or administrator access.\n\nmacOS/Linux:\n```sh\ncurl -fsSL https://maxiplux.github.io/agentmedia/install.sh | sh\n```\n\nWindows PowerShell:\n```powershell\nirm https://maxiplux.github.io/agentmedia/install.ps1 | iex\n```\n\nAlready downloaded? Run `mediaagent install`. Later use `mediaagent update --check`, `mediaagent update`, or `mediaagent update --rollback`.\n\nNative packages were built and tested on macOS Apple Silicon, macOS Intel, Linux x86-64 and Windows x86-64 from `{commit}`. Raw executables and archives include SHA-256 sidecars; the release manifest records their exact hashes. Installation/update preserves project configuration, keys, characters, media and installed skills. Project initialization and skill refresh remain separate.\n\nSee the [installation guide](https://github.com/{repo}/blob/{args.tag}/docs/INSTALLATION.md). These binaries are not signed or notarized; checksum checks are not code signing. No paid provider calls are performed by packaging.\n''')
+    notes.write_text(f'''Install a user-local binary without Rust or administrator access.\n\nmacOS/Linux:\n```sh\ncurl -fsSL https://maxiplux.github.io/agentmedia/install.sh | sh\n```\n\nWindows PowerShell:\n```powershell\nirm https://maxiplux.github.io/agentmedia/install.ps1 | iex\n```\n\nAlready downloaded? Run `mediaagent install`. Later use `mediaagent update --check`, `mediaagent update`, or `mediaagent update --rollback`.\n\nNative packages were built and tested on macOS Apple Silicon, Linux x86-64 and Windows x86-64 from `{commit}`. Raw executables and archives include SHA-256 sidecars; the release manifest records their exact hashes. Installation/update preserves project configuration, keys, characters, media and installed skills. Project initialization and skill refresh remain separate.\n\nSee the [installation guide](https://github.com/{repo}/blob/{args.tag}/docs/INSTALLATION.md). These binaries are not signed or notarized; checksum checks are not code signing. No paid provider calls are performed by packaging.\n''')
     subprocess.run(['gh', 'release', 'create', args.tag, '--repo', repo, '--verify-tag', '--draft', '--title', f'mediaagent {version}', '--notes-file', str(notes)], check=True)
 subprocess.run(['gh', 'release', 'upload', args.tag, '--repo', repo, '--clobber'] + [str(p) for p in files], check=True)
 # Verify GitHub's stored digests before making latest/download usable.

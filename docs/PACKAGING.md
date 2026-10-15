@@ -1,6 +1,6 @@
 # Native packages and downloads
 
-Use the [installation guide](INSTALLATION.md) for one-command installers, user-local installation and `mediaagent update`. Public binaries are available from [GitHub Releases](https://github.com/maxiplux/agentmedia/releases/latest), without requiring GitHub sign-in. Releases include raw executables and archives for macOS Apple Silicon, macOS Intel, Linux x86-64 and Windows x86-64, with SHA-256 sidecars and a manifest recording the exact source commit and hashes.
+Use the [installation guide](INSTALLATION.md) for one-command installers, user-local installation and `mediaagent update`. Public binaries are available from [GitHub Releases](https://github.com/maxiplux/agentmedia/releases/latest), without requiring GitHub sign-in. Releases include raw executables and archives for macOS Apple Silicon, Linux x86-64 and Windows x86-64, with SHA-256 sidecars and a manifest recording the exact source commit and hashes.
 
 Development builds remain available from the [Native packages workflow](https://github.com/maxiplux/agentmedia/actions/workflows/package.yml). Open a successful run and its Artifacts section. The wrapper ZIP contains a native archive, raw executable and their checksum files. CI artifacts are separate from stable releases and may require GitHub sign-in.
 
@@ -20,7 +20,7 @@ wizard and offers a different destination. In noninteractive mode it reports
 `init_path_conflict` without writing setup files. `--project PATH init` is also
 supported; an explicit `init PATH` takes precedence.
 
-Initialization opens a looping terminal checklist with OpenAI image/planning and Fish speech defaults. Add missing keys through masked input or the target project's root `.env`; process environment values take precedence. Review and finish, or save unfinished setup and run `init` again. No development credentials are bundled or copied. Project-local skills are included; user-level skill installation remains explicit. See the [web guide](https://maxiplux.github.io/agentmedia/) and [setup reference](../assets/skill/references/setup.md).
+Initialization opens a looping terminal checklist with Google image, speech, music and planning defaults, plus an explicit OpenAI alternative. Add missing keys through masked input or the target project's root `.env`; process environment values take precedence. Review and finish, or save unfinished setup and run `init` again. No development credentials are bundled or copied. Project-local skills are included; user-level skill installation remains explicit. See the [web guide](https://maxiplux.github.io/agentmedia/) and [setup reference](../assets/skill/references/setup.md).
 
 ## Building and verifying a package
 
@@ -35,7 +35,8 @@ For 0.3.1, Windows x86-64, macOS Apple Silicon and Linux x86-64 each pass 144 of
 To replace a local installation, stop its workers, keep the previous executable, copy the new one to the same PATH directory, and check `mediaagent --version`. Existing project files remain readable. Refresh installed skills/templates explicitly when desired; older pinned character models require an explicit new character version before new generation.
 
 
-The 0.4.0 distribution workflow adds native Intel Mac builds and publishes a stable
-release only after all four targets pass tests and package/bootstrap checks.
+Current releases target Windows x86-64, Linux x86-64 and macOS Apple Silicon.
+Publication requires all three targets to pass tests and package/bootstrap checks.
+Historical releases retain their original assets, including Intel Mac builds.
 `verification.json` records `source_commit` and `source_dirty`; release publication
 requires the exact clean tag checkout. See [release maintenance](INSTALLATION.md#maintainer-release-workflow).

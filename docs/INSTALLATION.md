@@ -1,6 +1,6 @@
 # Install and update mediaagent
 
-Install without Rust or administrator access. Public binaries support macOS Apple Silicon, macOS Intel, Linux x86-64 and Windows x86-64. Other targets can build from source; installers reject unsupported architectures rather than select a different binary.
+Install without Rust or administrator access. Public binaries support macOS Apple Silicon, Linux x86-64 and Windows x86-64. Other targets can build from source; installers reject unsupported architectures rather than select a different binary.
 
 ## macOS and Linux
 
@@ -68,4 +68,12 @@ Public releases include raw executables, native archives, SHA-256 sidecars, inst
 
 ## Maintainer release workflow
 
-Bump Cargo's version, update the lock file, merge tested changes, then push a matching stable tag such as `v0.5.1`. The `Publish release` workflow builds/tests all four native targets, runs isolated package and bootstrap tests, verifies archives and raw binary hashes, uploads to a draft GitHub Release and checks GitHub's stored digests before publishing it as latest. Existing published release bytes cannot be silently replaced; a changed build needs a new version.
+Bump Cargo's version, update the lock file, merge tested changes, then push a matching stable tag such as `v0.5.1`. The `Publish release` workflow builds/tests all three native targets, runs isolated package and bootstrap tests, verifies archives and raw binary hashes, uploads to a draft GitHub Release and checks GitHub's stored digests before publishing it as latest. Existing published release bytes cannot be silently replaced; a changed build needs a new version.
+
+
+To verify an already published release without rebuilding or republishing it, run
+`gh workflow run acceptance.yml --ref master -f version=v0.5.1`. This independently
+checks the public installer, read-only update, verified reinstallation and offline
+rollback on all three supported platforms. Failures include the updater's actual
+structured diagnostic; checks do not automatically retry failed updates.
+Historical releases retain their original assets, including older Intel Mac builds.

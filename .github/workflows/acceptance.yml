@@ -1,0 +1,34 @@
+name: Public release acceptance
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Published stable version to verify (for example v0.5.1)
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - name: Verify acceptance failure diagnostics offline
+        run: python scripts/test-accept-release.py
+      - name: Verify the public installer, update and offline rollback in isolation
+        env:
+          MEDIAAGENT_ACCEPT_VERSION: ${{ inputs.version }}
+        shell: bash
+        run: python scripts/accept-release.py --version "$MEDIAAGENT_ACCEPT_VERSION"

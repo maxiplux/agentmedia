@@ -72,4 +72,14 @@ else: raise SystemExit('Unexpected release asset')
     rejected = work / 'must not be installed'
     bad = run(rejected, bad=True)
     assert bad.returncode != 0 and not rejected.exists(), bad.stdout + bad.stderr
+    if os.name != 'nt':
+        # Intel Macs are deliberately outside the supported release matrix.
+        # Reject before any download, even while older releases retain assets.
+        uname = mock / 'uname'
+        uname.write_text('#!/bin/sh\ncase "$1" in -s) echo Darwin ;; -m) echo x86_64 ;; *) exit 1 ;; esac\n')
+        uname.chmod(0o755)
+        unsupported = work / 'unsupported platform'
+        result = run(unsupported)
+        assert result.returncode != 0 and not unsupported.exists()
+        assert 'No published native binary for this platform' in result.stderr
 print('Native bootstrap: real install, repeat install, checksum rejection, paths with spaces; zero network requests.')

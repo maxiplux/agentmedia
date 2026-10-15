@@ -92,7 +92,7 @@ mediaagent update --rollback
 Updates preserve project keys, configuration, characters, generated media and
 installed skills. See [installation options](docs/INSTALLATION.md) for exact
 versions, custom directories, PATH controls and agent-readable results. Public
-binaries for macOS Apple Silicon/Intel, Linux x86-64 and Windows x86-64 are on
+binaries for macOS Apple Silicon, Linux x86-64 and Windows x86-64 are on
 [GitHub Releases](https://github.com/maxiplux/agentmedia/releases/latest).
 
 ## Build and use

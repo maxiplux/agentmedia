@@ -139,6 +139,24 @@ New projects use Google Nano Banana 2.1 for images/infographics, Gemini 3.8 Flas
 
 Init reads the selected project's `.env`, creates it when absent and appends missing provider key names with empty values. Existing secrets, comments, exports, newline conventions and unrelated content are preserved. It does not copy keys from the process environment, executable folder or ancestor projects. Existing environment precedence remains intact. Invalid dotenv syntax stops noninteractive initialization before configuration or skill writes, without showing parser snippets. Both Codex and Claude project skills are installed by default; modified installed skills and existing configurations/characters are preserved. The result identifies the credential file and available project skill directories.
 
-Local formatting, strict Clippy and 165 offline Rust tests pass. New checks exercise single-key readiness, Google/OpenAI selection in real terminals, inherited built-in voice bindings, target-folder dotenv ownership, preserving partial credential files, empty entries and CRLF/comments, process/ancestor key isolation, secret-free output and invalid-file rejection. Linked credential files remain linked; required changes are refused with a clear action rather than detaching the link. Shared setup locking prevents a waiting initializer from overwriting credentials saved by another setup process. Ordinary checks make no provider calls. Native package and public release acceptance results will be recorded after publication. Media quality and character consistency acceptance remain unchanged.
+Local formatting, strict Clippy and 165 offline Rust tests pass. New checks exercise single-key readiness, Google/OpenAI selection in real terminals, inherited built-in voice bindings, target-folder dotenv ownership, preserving partial credential files, empty entries and CRLF/comments, process/ancestor key isolation, secret-free output and invalid-file rejection. Linked credential files remain linked; required changes are refused with a clear action rather than detaching the link. Shared setup locking prevents a waiting initializer from overwriting credentials saved by another setup process. Ordinary checks make no provider calls. Version [0.5.1](https://github.com/maxiplux/agentmedia/releases/tag/v0.5.1) is published from `3464b8831b1a02689891db4bdd86288538427dcf` with 20 original assets. All native builds passed 165 offline Rust tests and 16 package checks. Public Windows and Linux acceptance passed; the initial Apple Silicon CI acceptance failed at the read-only update check, with its diagnostic hidden by the harness. A local public Apple Silicon install/check/reinstall/rollback passed, as did a real 0.4.0 → 0.5.1 upgrade and offline rollback preserving existing configuration, identity, dotenv contents and installed skills. The upgraded binary initialized a new Google project with both skills and single-key offline readiness. CI diagnosis is tracked below; local success does not mark the failed CI job as passed. Media quality and character consistency acceptance remain unchanged.
 
 The initial v0.5.0 tag was not published: an additional Windows check exposed a worker completing between the launcher’s state read and child-exit check, incorrectly reporting worker_start. Version 0.5.1 reloads the recorded state before declaring startup failure, with a deterministic receipt-preservation regression. Actual startup failures still require inspecting the saved run; no requests are automatically resubmitted.
+
+
+## Supported release platforms and acceptance diagnostics
+
+Current build, packaging, publication and public acceptance matrices target only
+Windows x86-64, Linux x86-64 and macOS Apple Silicon (ARM64). Intel Mac builds are
+removed from active CI and the hosted installer; historical immutable releases
+retain their original assets. New releases contain 16 assets across three native
+targets, including installers, checksums and the source/hash manifest.
+
+Public acceptance can be rerun independently through the `Public release
+acceptance` workflow with an explicit published version. Updater nonzero exits
+now expose their structured stdout and stderr; timeout failures remain bounded
+and are not automatically retried. Three offline diagnostic regressions verify
+exit failures, structured failures and timeouts. The three-target publisher's
+offline integrity/idempotency regression and native bootstrap checks pass locally.
+The shell installer also rejects Intel Macs before downloading. No media-provider
+requests are made by these checks.

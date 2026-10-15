@@ -28,7 +28,7 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-publisher-test-') as tempora
         (root / 'docs/site' / name).write_text('offline installer fixture\n')
     artifacts = root / 'artifacts'
     artifacts.mkdir()
-    targets = ['aarch64-apple-darwin', 'x86_64-apple-darwin', 'x86_64-unknown-linux-gnu', 'x86_64-pc-windows-msvc']
+    targets = ['aarch64-apple-darwin', 'x86_64-unknown-linux-gnu', 'x86_64-pc-windows-msvc']
     for target in targets:
         windows = 'windows' in target
         data = ('native fixture: ' + target).encode()
@@ -76,7 +76,7 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-publisher-test-') as tempora
                 assets = [dict(a, digest='sha256:' + '0' * 64) for a in assets]
             output = json.dumps({'assets': assets})
         elif command[:3] == ['gh', 'release', 'edit']:
-            assert len(state['assets']) == 20 and '--draft=false' in command
+            assert len(state['assets']) == 16 and '--draft=false' in command
             state['draft'] = False
             output = ''
         else:

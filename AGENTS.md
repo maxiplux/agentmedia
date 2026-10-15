@@ -155,6 +155,10 @@ Keep build products, caches, and generated run artifacts out of this development
 
 ## Development and validation
 
+Supported native release targets are Windows x86-64, Linux x86-64 and macOS
+Apple Silicon (ARM64). Do not add Intel Mac builds to CI or release publication.
+Historical immutable releases may retain their original Intel assets.
+
 Keep provider details grounded in current official documentation and record explicit model choices. Do not assume website subscriptions, API credits, model access, or cloning permissions are interchangeable. Check account limitations during explicit live operations and report them accurately.
 
 For Rust code changes, run appropriate checks:
