@@ -20,7 +20,9 @@ require actual human acceptance. See docs/REMEDIATION.md and docs/ACCEPTANCE.md.
 ## Current setup and model policy
 
 The terminal initializer is a resumable checklist with arrow/search menus and
-masked optional key entry. New CLI projects use the reviewed OpenAI/Fish preset;
+masked optional key entry. New CLI projects use Google defaults for supported image, speech, music and text features,
+with OpenAI as an explicit alternative; standalone effects remain optional with ElevenLabs.
+Init preserves/appends project .env key names and installs Codex/Claude project skills.
 `--preset empty` preserves empty-scaffold behavior. Initialization stays offline.
 Only reviewed current stable model families may submit new provider requests,
 including retries, planning, reviews and voice design. Historical contracts,

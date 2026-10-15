@@ -32,7 +32,13 @@ pub enum Color {
 }
 #[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum Preset {
+    /// Google images, speech, podcasts, music and planning
     Recommended,
+    /// Same as recommended: Google for supported media
+    Google,
+    /// OpenAI images, speech, podcasts and planning; music/effects optional
+    Openai,
+    /// Empty scaffold without enabled generation features
     Empty,
 }
 #[derive(Debug, Clone, Copy, ValueEnum, PartialEq, Eq)]
@@ -108,7 +114,7 @@ pub enum Command {
         /// Complete configuration YAML: provider/models, settings, locales, consistency, and limits
         #[arg(long)]
         defaults_file: Option<PathBuf>,
-        /// New-project preset; existing files are preserved (default: recommended)
+        /// New-project preset: Google first, OpenAI alternative; existing choices are preserved
         #[arg(long, value_enum, conflicts_with = "defaults_file")]
         preset: Option<Preset>,
         /// Configure explicit provider/model, generation settings, limits, and identity policy offline
@@ -809,6 +815,18 @@ pub fn human_result(data: &Value) -> String {
         );
         if let Some(project) = data.get("project") {
             out += &format!("Project: {}\n", project.as_str().unwrap_or(""));
+            if let Some(path) = data["credentials_file"].as_str() {
+                out +=
+                    &format!("API keys: {path} (existing values preserved; missing names added)\n");
+            }
+            for (agent, folder) in [("codex", ".agents"), ("claude", ".claude")] {
+                if data["skills"][agent] == true {
+                    out += &format!(
+                        "Skill available: {}/{folder}/skills/mediaagent\n",
+                        project.as_str().unwrap_or("")
+                    );
+                }
+            }
         }
         if let Some(steps) = data["pending_steps"].as_array() {
             for step in steps {
@@ -1028,6 +1046,8 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                     project::config(path)?
                 } else if matches!(preset, Some(Preset::Empty)) {
                     Config::default()
+                } else if matches!(preset, Some(Preset::Openai)) {
+                    crate::setup::openai()
                 } else {
                     crate::setup::recommended()
                 };
@@ -1047,6 +1067,8 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                     let mut c = Config::default();
                     c.consistency.require_known_identity_model = true;
                     c
+                } else if matches!(preset, Some(Preset::Openai)) {
+                    crate::setup::openai()
                 } else {
                     crate::setup::recommended()
                 })

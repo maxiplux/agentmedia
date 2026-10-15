@@ -8,6 +8,16 @@ use serde_json::{Value, json};
 use std::path::Path;
 
 pub const VERIFIED_AT: &str = "2026-10-14";
+/// Selection order only; this never authorizes a provider fallback during generation.
+pub fn provider_preference(provider: Provider) -> usize {
+    match provider {
+        Provider::Google => 0,
+        Provider::Openai => 1,
+        Provider::Fish => 2,
+        Provider::Openrouter => 3,
+        Provider::Elevenlabs => 4,
+    }
+}
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Model {
     pub provider: Provider,
@@ -100,7 +110,7 @@ pub fn listing(root: &Path, filter: &Filter<'_>) -> Value {
             } else {
                 String::new()
             },
-            m.provider,
+            provider_preference(m.provider),
             m.model.clone(),
         )
     });

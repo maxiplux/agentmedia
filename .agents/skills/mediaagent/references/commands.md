@@ -1,4 +1,4 @@
-# mediaagent 0.4.0 command reference
+# mediaagent 0.5.0 command reference
 
 Generated from the executable's command definitions. Global flags are accepted before or after the command.
 
@@ -193,9 +193,13 @@ Options:
           Never prompt; supply YAML files or explicit flags for automation
 
       --preset <PRESET>
-          New-project preset; existing files are preserved (default: recommended)
+          New-project preset: Google first, OpenAI alternative; existing choices are preserved
 
-          [possible values: recommended, empty]
+          Possible values:
+          - recommended: Google images, speech, podcasts, music and planning
+          - google:      Same as recommended: Google for supported media
+          - openai:      OpenAI images, speech, podcasts and planning; music/effects optional
+          - empty:       Empty scaffold without enabled generation features
 
       --interactive
           Configure explicit provider/model, generation settings, limits, and identity policy offline
@@ -213,7 +217,7 @@ Options:
           [possible values: auto, always, never]
 
   -h, --help
-          Print help
+          Print help (see a summary with '-h')
 
 ```
 

@@ -4,6 +4,16 @@ use crate::{
 };
 use std::path::Path;
 
+pub const PROVIDERS: [Provider; 5] = [
+    Provider::Google,
+    Provider::Openai,
+    Provider::Fish,
+    Provider::Openrouter,
+    Provider::Elevenlabs,
+];
+pub const ENV_TEMPLATE: &str =
+    "GEMINI_API_KEY=\nOPENAI_API_KEY=\nFISH_API_KEY=\nOPENROUTER_API_KEY=\nELEVENLABS_API_KEY=\n";
+
 pub fn resolve(provider: Provider, root: &Path) -> Result<String> {
     resolve_with(provider.key(), root, |key| std::env::var(key).ok())
 }
@@ -44,7 +54,8 @@ fn nonempty(key: &str, value: String) -> Result<String> {
     }
 }
 
-/// Append missing keys or fill empty entries; preserve every unrelated byte.
+/// Fill explicitly supplied missing keys and append absent credential names with empty values.
+/// Preserve existing values, comments and unrelated entries, without copying process keys.
 /// This never changes a populated key or overrides process-environment precedence.
 pub fn render_missing(
     root: &Path,
@@ -158,6 +169,40 @@ pub fn render_missing(
                 "Credential did not round-trip; project .env was not changed",
             ));
         }
+    }
+    let newline = if original.contains("\r\n") {
+        "\r\n"
+    } else {
+        "\n"
+    };
+    for provider in PROVIDERS {
+        if !parsed.iter().any(|(name, _)| name == provider.key()) {
+            if !updated.is_empty() && !updated.ends_with('\n') {
+                updated.push_str(newline);
+            }
+            updated.push_str(provider.key());
+            updated.push('=');
+            updated.push_str(newline);
+        }
+    }
+    let final_entries = dotenvy::from_read_iter(updated.as_bytes())
+        .collect::<std::result::Result<Vec<_>, _>>()
+        .map_err(|_| {
+            Error::input("Cannot safely append credential names; project .env was not changed")
+        })?;
+    if !final_entries.starts_with(&parsed)
+        || PROVIDERS
+            .iter()
+            .any(|p| !final_entries.iter().any(|(name, _)| name == p.key()))
+    {
+        return Err(Error::input(
+            "Cannot safely append credential names; project .env was not changed",
+        ));
+    }
+    if updated != original && path.is_symlink() {
+        return Err(Error::input(
+            "Project .env is a symbolic link and needs changes. Edit the linked credential file explicitly or provide a project-local .env with the provider variable names. The link and target were preserved",
+        ));
     }
     Ok(if updated != original {
         Some(updated)

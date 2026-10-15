@@ -53,14 +53,17 @@ fn init_complete_defaults_is_offline_and_repeatable() {
                 .as_array()
                 .unwrap()
                 .len(),
-            7
+            6
         );
     }
     assert_eq!(
         fs::read_dir(root.join("mediaagent/runs")).unwrap().count(),
         0
     );
-    assert_eq!(fs::read(root.join(".env")).unwrap(), b"");
+    assert_eq!(
+        fs::read_to_string(root.join(".env")).unwrap(),
+        mediaagent::credentials::ENV_TEMPLATE
+    );
 }
 
 #[test]
