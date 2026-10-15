@@ -49,3 +49,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python scripts/publish-release.py --tag "$GITHUB_REF_NAME" --artifacts target/release-downloads
+  acceptance:
+    needs: publish
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-15-intel, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - name: Verify the public installer, update and offline rollback in isolation
+        shell: bash
+        run: python scripts/accept-release.py --version "$GITHUB_REF_NAME"
