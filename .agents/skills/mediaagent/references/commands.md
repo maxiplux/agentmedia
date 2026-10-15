@@ -1,4 +1,4 @@
-# mediaagent 0.2.0 command reference
+# mediaagent 0.3.0 command reference
 
 Generated from the executable's command definitions. Global flags are accepted before or after the command.
 
@@ -23,7 +23,7 @@ Commands:
   templates  Inspect or export embedded authoring templates
   persona    Create, inspect, bootstrap, accept, or port character definitions
   validate   Validate local YAML and all referenced files; never generate
-  generate   Generate one media job. Example: generate image --prompt 'A forest' --provider openai --model gpt-image-1 --output forest.png
+  generate   Generate one media job. Example: generate image --prompt 'A forest' --provider openai --model gpt-image-2.5-flare --output forest.png
   batch      Execute independent jobs concurrently using a YAML batch manifest
   runs       Inspect, wait, cancel, or resume durable runs
   resume     Continue a recorded run, preserving successes; ambiguous retries are explicit
@@ -52,7 +52,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -91,11 +91,16 @@ Options:
       --json
           Emit a structured JSON result; diagnostics stay on stderr, with no animation
 
-      --interactive
-          Configure explicit provider/model, generation settings, limits, and identity policy offline
-
       --non-interactive
           Never prompt; supply YAML files or explicit flags for automation
+
+      --preset <PRESET>
+          New-project preset; existing files are preserved (default: recommended)
+
+          [possible values: recommended, empty]
+
+      --interactive
+          Configure explicit provider/model, generation settings, limits, and identity policy offline
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
@@ -104,7 +109,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -125,6 +130,7 @@ Commands:
   wizard  Terminal-only guided defaults; agents use setup --file instead
   host    Explicit user-scope host concurrency ceilings, independent of agent settings
   show
+  status  Inspect local setup readiness without network calls or revealing credentials
   setup   Replace config only after validating the supplied file
   limits  Inspect finite generation limits
   help    Print this message or the help of the given subcommand(s)
@@ -148,7 +154,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -184,7 +190,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -225,7 +231,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -259,7 +265,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -296,7 +302,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -367,7 +373,43 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
+
+          [default: auto]
+          [possible values: auto, always, never]
+
+  -h, --help
+          Print help
+
+```
+
+## mediaagent config status
+
+```text
+Inspect local setup readiness without network calls or revealing credentials
+
+Usage: mediaagent config status [OPTIONS]
+
+Options:
+      --project <PROJECT>
+          Target project root; credentials are loaded only from this root's .env
+
+          [default: .]
+
+      --json
+          Emit a structured JSON result; diagnostics stay on stderr, with no animation
+
+      --non-interactive
+          Never prompt; supply YAML files or explicit flags for automation
+
+      --progress <PROGRESS>
+          Terminal progress mode; redirected auto progress uses plain stage updates
+
+          [default: auto]
+          [possible values: auto, plain, off]
+
+      --color <COLOR>
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -406,7 +448,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -442,7 +484,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -463,6 +505,7 @@ Commands:
   wizard  Terminal-only guided defaults; agents use setup --file instead
   host    Explicit user-scope host concurrency ceilings, independent of agent settings
   show
+  status  Inspect local setup readiness without network calls or revealing credentials
   setup   Replace config only after validating the supplied file
   limits  Inspect finite generation limits
   help    Print this message or the help of the given subcommand(s)
@@ -509,6 +552,15 @@ Usage: mediaagent config help host setup
 
 ```text
 Usage: mediaagent config help show
+
+```
+
+## mediaagent config help status
+
+```text
+Inspect local setup readiness without network calls or revealing credentials
+
+Usage: mediaagent config help status
 
 ```
 
@@ -574,7 +626,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -610,7 +662,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -652,7 +704,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -686,7 +738,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -725,7 +777,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -764,7 +816,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -858,7 +910,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -907,7 +959,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -947,7 +999,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -979,6 +1031,11 @@ Options:
       --provider <PROVIDER>
           [possible values: openai, google, fish, openrouter, elevenlabs]
 
+      --media <MEDIA>
+          Filter by generation purpose (infographic uses image; podcast uses speech)
+
+          [possible values: image, infographic, speech, podcast, music, sfx, text]
+
       --non-interactive
           Never prompt; supply YAML files or explicit flags for automation
 
@@ -988,11 +1045,26 @@ Options:
           [default: auto]
           [possible values: auto, plain, off]
 
+      --search <SEARCH>
+          Search model names, IDs and descriptions
+
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
+
+      --recommended
+          Show only recommended current supported models
+
+      --all
+          Include nonselectable historical and unsupported provider catalog entries
+
+      --sort <SORT>
+          Popularity requires --live --provider openrouter; no rankings are invented
+
+          [default: recommended]
+          [possible values: recommended, name, popular]
 
   -h, --help
           Print help
@@ -1037,7 +1109,7 @@ Options:
           ElevenLabs only: inspect one voice binding and provider verification status
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1106,7 +1178,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1140,7 +1212,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1178,7 +1250,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1219,7 +1291,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1316,7 +1388,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1364,7 +1436,7 @@ Options:
 
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1407,7 +1479,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1459,7 +1531,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1517,7 +1589,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1569,7 +1641,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1607,7 +1679,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1641,7 +1713,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1679,7 +1751,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1725,7 +1797,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1774,7 +1846,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1820,7 +1892,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1861,7 +1933,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -1902,7 +1974,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2086,7 +2158,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2099,7 +2171,7 @@ Options:
 ## mediaagent generate
 
 ```text
-Generate one media job. Example: generate image --prompt 'A forest' --provider openai --model gpt-image-1 --output forest.png
+Generate one media job. Example: generate image --prompt 'A forest' --provider openai --model gpt-image-2.5-flare --output forest.png
 
 Usage: mediaagent generate [OPTIONS] [MEDIA]
 
@@ -2140,7 +2212,7 @@ Options:
           Authorized audio sample for Fish reference synthesis or voice review evidence
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2152,7 +2224,7 @@ Options:
           Versioned permission record and referenced evidence for --voice-sample
 
       --image-quality <IMAGE_QUALITY>
-          OpenAI image quality: low, medium, high, or auto
+          OpenAI image quality: low/medium/high/auto; current 2.5 models also support xhigh/max
 
           [possible values: low, medium, high, auto]
 
@@ -2271,7 +2343,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2332,7 +2404,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2384,7 +2456,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2427,7 +2499,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2461,7 +2533,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2499,7 +2571,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2540,7 +2612,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2578,7 +2650,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2622,7 +2694,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2749,7 +2821,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2793,7 +2865,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2835,7 +2907,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2874,7 +2946,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2913,7 +2985,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -2961,7 +3033,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -3003,7 +3075,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -3125,7 +3197,7 @@ Options:
 
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -3176,7 +3248,7 @@ Options:
           Selected image/audio assets copied by the binary
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -3223,7 +3295,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -3264,7 +3336,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -3308,7 +3380,7 @@ Options:
           [possible values: auto, plain, off]
 
       --color <COLOR>
-          Progress colors; auto honors NO_COLOR
+          Terminal colors; auto honors NO_COLOR
 
           [default: auto]
           [possible values: auto, always, never]
@@ -3376,7 +3448,7 @@ Commands:
   templates  Inspect or export embedded authoring templates
   persona    Create, inspect, bootstrap, accept, or port character definitions
   validate   Validate local YAML and all referenced files; never generate
-  generate   Generate one media job. Example: generate image --prompt 'A forest' --provider openai --model gpt-image-1 --output forest.png
+  generate   Generate one media job. Example: generate image --prompt 'A forest' --provider openai --model gpt-image-2.5-flare --output forest.png
   batch      Execute independent jobs concurrently using a YAML batch manifest
   runs       Inspect, wait, cancel, or resume durable runs
   resume     Continue a recorded run, preserving successes; ambiguous retries are explicit
@@ -3408,6 +3480,7 @@ Commands:
   wizard  Terminal-only guided defaults; agents use setup --file instead
   host    Explicit user-scope host concurrency ceilings, independent of agent settings
   show
+  status  Inspect local setup readiness without network calls or revealing credentials
   setup   Replace config only after validating the supplied file
   limits  Inspect finite generation limits
 
@@ -3453,6 +3526,15 @@ Usage: mediaagent help config host setup
 
 ```text
 Usage: mediaagent help config show
+
+```
+
+## mediaagent help config status
+
+```text
+Inspect local setup readiness without network calls or revealing credentials
+
+Usage: mediaagent help config status
 
 ```
 
@@ -3754,7 +3836,7 @@ Usage: mediaagent help validate
 ## mediaagent help generate
 
 ```text
-Generate one media job. Example: generate image --prompt 'A forest' --provider openai --model gpt-image-1 --output forest.png
+Generate one media job. Example: generate image --prompt 'A forest' --provider openai --model gpt-image-2.5-flare --output forest.png
 
 Usage: mediaagent help generate
 

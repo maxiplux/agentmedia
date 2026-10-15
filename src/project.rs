@@ -119,7 +119,7 @@ pub fn install_with(root: &Path, agents: &[String], overwrite: bool) -> Result<V
     }
     Ok(existing)
 }
-fn check_agents(agents: &[String]) -> Result<()> {
+pub fn check_agents(agents: &[String]) -> Result<()> {
     if agents.iter().any(|a| a != "codex" && a != "claude") {
         return Err(Error::input(
             "Agent target must be codex or claude; use skills export for other agents",

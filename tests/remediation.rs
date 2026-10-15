@@ -326,7 +326,9 @@ impl Adapter for Uncertain {
 #[tokio::test]
 async fn manual_recovery_preserves_attempts_and_never_resubmits() {
     let r = root();
-    let input = validation::resolve(&job(r.path()), r.path(), &Config::default()).unwrap();
+    let mut job = job(r.path());
+    job.selection.as_mut().unwrap().model = "gpt-image-2.5-flare".into();
+    let input = validation::resolve(&job, r.path(), &Config::default()).unwrap();
     let run = engine::submit(r.path(), vec![input], Limits::default(), Default::default()).unwrap();
     let adapter = Arc::new(Uncertain {
         calls: AtomicUsize::new(0),

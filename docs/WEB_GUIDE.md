@@ -21,7 +21,7 @@ The HTML contains:
 
 - Compiled Tailwind CSS 4.3.3 with the guide's component styles in a `<style>` tag.
 - Embedded JavaScript for search, navigation and copy buttons.
-- Sixteen workflow/reference sections, including eight practical scenarios, and 62 expandable command help pages.
+- Sixteen workflow/reference sections, including eight practical scenarios, and 63 expandable command help pages.
 - Four download links carrying the same embedded ZIP of 35 example files.
 
 Example downloads extract into `examples/` in your target project. They retain
@@ -53,3 +53,5 @@ a vocal jingle, and bilingual narration. Each has input/output descriptions,
 commands, authoring files, an agent prompt and review criteria. The four new batch
 manifests passed eight offline validation and dry-run checks. Browser checks
 confirmed expandable walkthroughs, command copying and mobile layout.
+
+Version 0.3.0 updates initialization to a resumable keyboard-driven checklist, optional masked credential entry, OpenAI/Fish defaults, local readiness and a reviewed current-stable model policy. Its 63 command pages and 35 downloadable examples match the updated executable and templates. New-model execution uses mocked requests; this documentation update makes no paid provider requests.

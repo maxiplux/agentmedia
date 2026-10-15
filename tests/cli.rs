@@ -47,7 +47,7 @@ fn init_complete_defaults_is_offline_and_repeatable() {
             .clone();
         let response: Value = serde_json::from_slice(&output).unwrap();
         assert_eq!(response["data"]["generation"], false);
-        assert_eq!(response["data"]["setup_required"], false);
+        assert_eq!(response["data"]["setup_required"], true);
         assert_eq!(
             response["data"]["configured_media"]
                 .as_array()
@@ -150,7 +150,7 @@ fn json_missing_credentials_does_not_attempt_live_generation() {
             "--provider",
             "openai",
             "--model",
-            "gpt-image-1",
+            "gpt-image-2.5-flare",
         ])
         .output()
         .unwrap();
@@ -280,7 +280,7 @@ fn referenced_job_worker_startup_is_confirmed_without_lock_contention() {
                 "--provider",
                 "openai",
                 "--model",
-                "gpt-image-1",
+                "gpt-image-2.5-flare",
                 "--prompt",
                 "Reuse this reference",
                 "--fresh",

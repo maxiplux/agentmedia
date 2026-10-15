@@ -39,7 +39,7 @@ unknown and are never silently resubmitted. Providers whose adapter has no retri
 endpoint need account reconciliation before an explicit retry. Missing/expired IDs
 are actionable unknown outcomes rather than proof of failure.
 
-Audio AI review uses explicit Google `gemini-3.8-flash` or `gemini-2.5-flash`, actual
+Audio AI review uses explicit Google `gemini-3.8-flash`, actual
 WAV/MP3/FLAC bytes, exact script/ordered podcast turns or music/effect briefs, and
 accepted recording evidence. It can assess transcription, pronunciation, omissions,
 numbers, timing/clipping, and voice similarity where references exist. Image AI
@@ -60,22 +60,4 @@ budgets can leave a partial narration. Other models keep their script as supplie
 Podcasts may define every turn's selection/character and need no unrelated default
 on the local assembly job.
 
-`init` on a fresh interactive terminal opens offline setup automatically;
-`init --interactive` selects it explicitly. JSON/noninteractive callers provide
-`--defaults-file` or receive an honest unconfigured scaffold, without model guesses.
-Configuration and confirmation happen before initialization writes files. The
-wizard covers models, compatible output settings, saved voice choice, locales,
-consistency policy, and run limits. No keys are requested, copied, or validated by
-network calls. `default_settings.podcast` supplies settings for unconfigured turns;
-explicit alternate turn models and character bindings remain independent.
-
-Selected original identity assets pin provider/model before project defaults or
-job overrides. Source model metadata and hashes appear in effective/run snapshots
-and portable character references. See [continuity](consistency.md) for precedence,
-external origin declarations, and rejection of mismatched models.
-
-`doctor` remains offline. Explicit `doctor --live --json --non-interactive` checks
-all five providers with bounded read-only authentication requests; missing keys
-fail the live check without submitting requests. Filter with `--provider` and bound
-with `--timeout-seconds`. It generates no media. Read [connection checks](connections.md)
-for status meanings, exit codes, permission caveats, and the diagnostic scope.
+`init` uses the looping offline setup described in [setup](setup.md). New noninteractive projects receive the recommended OpenAI/Fish preset and report incomplete readiness until keys and voice IDs are supplied. `--preset empty` opts into an empty scaffold. Initialization never makes network calls; masked key entry writes only on explicit save. Existing project defaults and character identities are preserved. Only current stable models may make new provider requests, while older records and verified results remain inspectable.

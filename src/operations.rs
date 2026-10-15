@@ -111,6 +111,7 @@ where
     if record.attempts >= request.attempts {
         return Err(Error::limit("Operation attempt limit exhausted"));
     }
+    crate::catalog::require_current(&request.selection)?;
     let _slots = crate::engine::slots(request.selection.provider).await?;
     record.state = State::Running;
     record.error = None;

@@ -95,6 +95,10 @@ pub fn registry() -> Vec<Capability> {
         "gpt-image-1.5",
         "gpt-image-2",
         "gpt-image-1-mini",
+        "gpt-image-2.5-flare",
+        "gpt-image-2.5-flare-2026-09-08",
+        "gpt-image-2.5-sunburst",
+        "gpt-image-2.5-sunburst-2026-09-08",
     ] {
         result.push(Capability {
             audio_references: false,
@@ -125,6 +129,7 @@ pub fn registry() -> Vec<Capability> {
     for m in [
         "gemini-nano-banana-2.1",
         "gemini-3.1-flash-image",
+        "gemini-3.1-flash-lite-image",
         "gemini-3-pro-image",
         "gemini-2.5-flash-image",
     ] {
@@ -138,15 +143,17 @@ pub fn registry() -> Vec<Capability> {
             format: "png",
         });
     }
-    result.push(Capability {
-        audio_references: false,
-        provider: Provider::Google,
-        model: "gemini-3.8-flash-tts",
-        media: Media::Speech,
-        image_references: false,
-        voice_binding: true,
-        format: "wav",
-    });
+    for model in ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts"] {
+        result.push(Capability {
+            audio_references: false,
+            provider: Provider::Google,
+            model,
+            media: Media::Speech,
+            image_references: false,
+            voice_binding: true,
+            format: "wav",
+        });
+    }
     for model in ["lyria-3.5", "lyria-3-clip-preview"] {
         result.push(Capability {
             audio_references: false,
@@ -205,16 +212,45 @@ pub fn registry() -> Vec<Capability> {
         voice_binding: false,
         format: "mp3",
     });
-    result.push(Capability {
-        audio_references: false,
-        provider: Provider::Openrouter,
-        model: "openai/gpt-image-1",
-        media: Media::Image,
-        image_references: false,
-        voice_binding: false,
-        format: "png",
-    });
+    for model in [
+        "openai/gpt-image-1",
+        "openai/gpt-image-2.5-flare",
+        "openai/gpt-image-2.5-sunburst",
+        "google/gemini-nano-banana-2.1",
+    ] {
+        result.push(Capability {
+            audio_references: false,
+            provider: Provider::Openrouter,
+            model,
+            media: Media::Image,
+            image_references: false,
+            voice_binding: false,
+            format: "png",
+        });
+    }
     result
+}
+pub fn valid_image_size(model: &str, size: &str) -> bool {
+    if size == "auto" {
+        return true;
+    }
+    if !model.starts_with("gpt-image-2.5-") {
+        return ["1024x1024", "1024x1536", "1536x1024"].contains(&size);
+    }
+    let Some((w, h)) = size.split_once('x') else {
+        return false;
+    };
+    let (Ok(w), Ok(h)) = (w.parse::<u64>(), h.parse::<u64>()) else {
+        return false;
+    };
+    w > 0
+        && h > 0
+        && w <= 3840
+        && h <= 3840
+        && w % 16 == 0
+        && h % 16 == 0
+        && w.max(h) <= w.min(h) * 3
+        && (655360..=8294400).contains(&(w * h))
 }
 pub fn validate(e: &Effective) -> Result<()> {
     if e.media == Media::Podcast || (e.media == Media::Speech && !e.turns.is_empty()) {
@@ -338,10 +374,15 @@ pub fn validate(e: &Effective) -> Result<()> {
     }
     if let Some(quality) = &e.settings.image_quality
         && (!(media == Media::Image && e.selection.provider == Provider::Openai)
-            || !["low", "medium", "high", "auto"].contains(&quality.as_str()))
+            || !(if e.selection.model.starts_with("gpt-image-2.5-") {
+                &["low", "medium", "high", "xhigh", "max", "auto"][..]
+            } else {
+                &["low", "medium", "high", "auto"][..]
+            })
+            .contains(&quality.as_str()))
     {
         return Err(Error::input(
-            "image_quality is supported only for OpenAI images: low, medium, high, or auto",
+            "Unsupported image quality for this OpenAI image model; inspect mediaagent models",
         ));
     }
     if e.settings.instrumental.is_some() && media != Media::Music {
@@ -355,7 +396,7 @@ pub fn validate(e: &Effective) -> Result<()> {
         ));
     }
     if let Some(size) = &e.settings.size
-        && !["1024x1024", "1024x1536", "1536x1024", "auto"].contains(&size.as_str())
+        && !valid_image_size(&e.selection.model, size)
     {
         return Err(Error::input(
             "Supported image sizes: 1024x1024, 1024x1536, 1536x1024, auto",
@@ -569,6 +610,7 @@ impl HttpAdapter {
         artifact: &str,
         references: &[Reference],
     ) -> Result<crate::operations::Output> {
+        crate::catalog::require_current(selection)?;
         let body = audio_review_body(selection, prompt, bytes, format, references)?;
         let key = credentials::resolve(Provider::Google, &self.root)?;
         let (response, header_id) = self
@@ -867,6 +909,7 @@ impl HttpAdapter {
                 "Image AI review currently supports OpenAI and OpenRouter multimodal text models",
             ));
         }
+        crate::catalog::require_current(selection)?;
         let key = credentials::resolve(selection.provider, &self.root)?;
         let url = if selection.provider == Provider::Openai {
             "https://api.openai.com/v1/chat/completions"
@@ -1182,6 +1225,7 @@ impl Adapter for HttpAdapter {
     }
     async fn generate(&self, e: &Effective) -> Result<Generated> {
         validate(e)?;
+        crate::catalog::require_input(e)?;
         let key = credentials::resolve(e.selection.provider, &self.root)?;
         let model = &e.selection.model;
         let prompt = localized_direction(e);
@@ -1510,6 +1554,7 @@ impl crate::voices::Adapter for HttpAdapter {
         description: &str,
         text: &str,
     ) -> Result<crate::operations::Output> {
+        crate::catalog::require_current(selection)?;
         crate::voices::validate_design(selection, description, text)?;
         let key = credentials::resolve(Provider::Elevenlabs, &self.root)?;
         let (response, request_id) = self.json(self.client.post("https://api.elevenlabs.io/v1/text-to-voice/design?output_format=mp3_44100_128").header("xi-api-key",key).json(&json!({"model_id":selection.model,"voice_description":description,"text":text,"auto_generate_text":false,"should_enhance":false,"stream_previews":false}))).await?;
@@ -1690,6 +1735,34 @@ mod tests {
         root
     }
     #[tokio::test]
+    async fn current_image_families_and_snapshots_keep_exact_models_and_supported_settings() {
+        let root = root();
+        for model in [
+            "gpt-image-2.5-flare",
+            "gpt-image-2.5-flare-2026-09-08",
+            "gpt-image-2.5-sunburst",
+            "gpt-image-2.5-sunburst-2026-09-08",
+        ] {
+            let transport = fixture(
+                200,
+                json!({"data":[{"b64_json":STANDARD.encode(b"fixture")}]}),
+            );
+            let adapter = HttpAdapter::with_transport(root.path(), transport.clone()).unwrap();
+            let mut e = request(Provider::Openai, model, Media::Image);
+            e.settings.image_quality = Some("max".into());
+            e.settings.size = Some("2048x2048".into());
+            adapter.generate(&e).await.unwrap();
+            let calls = transport.captured.lock().unwrap();
+            assert_eq!(calls[0].1["model"], model);
+            assert_eq!(calls[0].1["quality"], "max");
+            assert_eq!(calls[0].1["size"], "2048x2048");
+            assert!(calls[0].1.get("input_fidelity").is_none());
+        }
+        for size in ["1x1", "2049x2048", "4096x4096", "2048x100"] {
+            assert!(!valid_image_size("gpt-image-2.5-flare", size));
+        }
+    }
+    #[tokio::test]
     async fn image_response_and_usage_are_translated_without_echoing_arbitrary_fields() {
         let root = root();
         let f = fixture(
@@ -1698,7 +1771,11 @@ mod tests {
         );
         let result = HttpAdapter::with_transport(root.path(), f.clone())
             .unwrap()
-            .generate(&request(Provider::Openai, "gpt-image-1", Media::Image))
+            .generate(&request(
+                Provider::Openai,
+                "gpt-image-2.5-flare",
+                Media::Image,
+            ))
             .await
             .unwrap();
         assert_eq!(result.bytes, b"image-bytes");
@@ -1706,7 +1783,7 @@ mod tests {
         assert_eq!(result.request_id.as_deref(), Some("mock-request"));
         let calls = f.captured.lock().unwrap();
         assert!(calls[0].0.ends_with("/images/generations"));
-        assert_eq!(calls[0].1["model"], "gpt-image-1");
+        assert_eq!(calls[0].1["model"], "gpt-image-2.5-flare");
     }
     #[tokio::test]
     async fn google_steps_and_openrouter_image_response_are_supported() {
@@ -1736,7 +1813,7 @@ mod tests {
             .unwrap()
             .generate(&request(
                 Provider::Openrouter,
-                "openai/gpt-image-1",
+                "openai/gpt-image-2.5-flare",
                 Media::Image,
             ))
             .await
@@ -1754,7 +1831,12 @@ mod tests {
                 "/audio/speech",
             ),
             (Provider::Fish, "s2.1-pro-free", Media::Speech, "/v1/tts"),
-            (Provider::Elevenlabs, "music_v1", Media::Music, "/v1/music"),
+            (
+                Provider::Elevenlabs,
+                "music_v2_5",
+                Media::Music,
+                "/v1/music",
+            ),
             (
                 Provider::Elevenlabs,
                 "eleven_text_to_sound_v2",
@@ -1790,7 +1872,11 @@ mod tests {
             let f = fixture(status, json!({"error":"Authorization Bearer secret-echo"}));
             let error = HttpAdapter::with_transport(root.path(), f)
                 .unwrap()
-                .generate(&request(Provider::Openai, "gpt-image-1", Media::Image))
+                .generate(&request(
+                    Provider::Openai,
+                    "gpt-image-2.5-flare",
+                    Media::Image,
+                ))
                 .await
                 .err()
                 .unwrap();
@@ -1881,7 +1967,7 @@ mod tests {
             .review_image(
                 &Selection {
                     provider: Provider::Openai,
-                    model: "gpt-4.1-mini".into(),
+                    model: "gpt-6-luna".into(),
                 },
                 "Review source",
                 b"fixture-image",
@@ -2149,7 +2235,11 @@ mod tests {
         let f = fixture(200, json!({"data":[]}));
         let adapter = HttpAdapter::with_transport(root.path(), f).unwrap();
         let error = adapter
-            .generate(&request(Provider::Openai, "gpt-image-1", Media::Image))
+            .generate(&request(
+                Provider::Openai,
+                "gpt-image-2.5-flare",
+                Media::Image,
+            ))
             .await
             .err()
             .unwrap();
@@ -2189,8 +2279,8 @@ mod tests {
             json!({"data":[{"b64_json":STANDARD.encode(b"image-result")}]}),
         );
         let adapter = HttpAdapter::with_transport(root.path(), f.clone()).unwrap();
-        let mut e = request(Provider::Openai, "gpt-image-1", Media::Image);
-        e.settings.input_fidelity = Some("high".into());
+        let mut e = request(Provider::Openai, "gpt-image-2.5-flare", Media::Image);
+        e.settings.input_fidelity = None;
         for (name, bytes) in [
             ("mira.png", b"first-identity".as_slice()),
             ("kito.png", b"second-identity".as_slice()),
@@ -2210,7 +2300,7 @@ mod tests {
         adapter.generate(&e).await.unwrap();
         let raw = f.raw.lock().unwrap()[0].clone();
         let body = String::from_utf8_lossy(&raw);
-        assert!(body.contains("name=\"input_fidelity\"\r\n\r\nhigh"));
+        assert!(!body.contains("name=\"input_fidelity\""));
         assert!(body.contains("first-identity"));
         assert!(body.contains("second-identity"));
         assert!(body.contains("filename=\"mira.png\""));
@@ -2224,6 +2314,8 @@ mod tests {
         assert!(adapter.generate(&e).await.is_err());
         assert_eq!(f.captured.lock().unwrap().len(), 1);
         e.settings.input_fidelity = None;
+        assert!(adapter.generate(&e).await.is_err());
+        e.selection.model = "gpt-image-2.5-sunburst".into();
         adapter.generate(&e).await.unwrap();
         assert!(
             !String::from_utf8_lossy(&f.raw.lock().unwrap()[1]).contains("name=\"input_fidelity\"")

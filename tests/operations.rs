@@ -10,7 +10,7 @@ fn request(retry: bool) -> Request {
     Request {
         selection: Selection {
             provider: Provider::Openai,
-            model: "gpt-4.1-mini".into(),
+            model: "gpt-6-luna".into(),
         },
         input: json!({"kind":"image_review","artifact":"fixture"}),
         attempts: 3,
