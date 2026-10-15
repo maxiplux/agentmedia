@@ -11,7 +11,7 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-public-acceptance-') as temp
     environment = {k: v for k, v in os.environ.items() if k not in ['OPENAI_API_KEY','GEMINI_API_KEY','FISH_API_KEY','ELEVENLABS_API_KEY','OPENROUTER_API_KEY']}
     if os.name == 'nt':
         # CI starts in PowerShell 7; Windows PowerShell 5.1 must load its own modules.
-        environment.pop('PSModulePath', None)
+        environment = {k: v for k, v in environment.items() if k.upper() != 'PSMODULEPATH'}
     script_name = 'install.ps1' if os.name == 'nt' else 'install.sh'
     request = urllib.request.Request('https://maxiplux.github.io/agentmedia/' + script_name, headers={'User-Agent': 'mediaagent-release-acceptance'})
     with urllib.request.urlopen(request, timeout=60) as response: script = response.read(1024 * 1024)
