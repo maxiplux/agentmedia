@@ -5,11 +5,11 @@ Use `voices --provider PROVIDER` for built-in names and `--account` for a bounde
 For descriptive ElevenLabs voice design, enable a supported explicit ElevenLabs speech profile in the character YAML. Author `voice.md` as the stable description, 20–1000 characters. Supply a separate exact 100–1000 character preview script, such as `templates/voice-preview.md`. Design uses the explicitly chosen current `eleven_ttv_v3` model; the character's speech model is independent and remains pinned.
 
 ```sh
-mediaagent persona voice-design narrator --model eleven_ttv_v3 \
+framechord persona voice-design narrator --model eleven_ttv_v3 \
   --text-file preview.md --run-id narrator-design-1 --dry-run --json
-mediaagent persona voice-design narrator --model eleven_ttv_v3 \
+framechord persona voice-design narrator --model eleven_ttv_v3 \
   --text-file preview.md --run-id narrator-design-1 --json
-mediaagent persona voice-status narrator-design-1 --json
+framechord persona voice-status narrator-design-1 --json
 ```
 
 One request returns up to three preview candidates. They stay in the recorded run and do not create a saved voice or change canonical character files. `--limits-file` supplies explicit volume limits; reservations cover three previews of the exact script. Decoded durations are recorded, and overrun candidates remain available while further calls stop. Saved responses recover without another design request. To retry an uncertain design, use the same `--run-id` with explicit `--retry-unknown`; it may already have incurred charges.
@@ -17,9 +17,9 @@ One request returns up to three preview candidates. They stay in the recorded ru
 After the user selects a candidate and requests creating a provider-side voice, use its exact candidate ID:
 
 ```sh
-mediaagent persona voice-create narrator --design-run narrator-design-1 \
+framechord persona voice-create narrator --design-run narrator-design-1 \
   --candidate SELECTED_CANDIDATE_ID --name Narrator --dry-run --json
-mediaagent persona voice-create narrator --design-run narrator-design-1 \
+framechord persona voice-create narrator --design-run narrator-design-1 \
   --candidate SELECTED_CANDIDATE_ID --name Narrator --bind --json
 ```
 
@@ -29,7 +29,7 @@ Binding does not accept the preview as a canonical recording. If the user also s
 
 ## Authorized recordings and cloning
 
-Audio reference synthesis is supported by Fish speech models in `mediaagent models`.
+Audio reference synthesis is supported by Fish speech models in `framechord models`.
 A sample requires an actual recording, its exact transcript Markdown, and a granted
 `voice_consent` YAML with `reference_synthesis` purpose plus permission evidence.
 Templates `voice-consent.yaml`, `voice-permission.md`, `voice-sample.yaml`, and
@@ -37,10 +37,10 @@ Templates `voice-consent.yaml`, `voice-permission.md`, `voice-sample.yaml`, and
 never invent the speaker/rightsholder's authorization.
 
 ```sh
-mediaagent validate --kind voice_consent consent.yaml --json
-mediaagent persona accept-sample narrator --audio selected.wav \
+framechord validate --kind voice_consent consent.yaml --json
+framechord persona accept-sample narrator --audio selected.wav \
   --transcript selected-transcript.md --consent consent.yaml --json
-mediaagent generate speech --provider fish --model s2.1-pro-free \
+framechord generate speech --provider fish --model s2.1-pro-free \
   --text-file article.md --voice-sample selected.wav \
   --sample-transcript selected-transcript.md --consent-file consent.yaml \
   --output narration.wav --dry-run --json
@@ -61,10 +61,10 @@ include `saved_voice_clone`. The name is 1–100 characters; combined recordings
 fit the 48 MiB encoded budget. Creating a provider account voice is explicit:
 
 ```sh
-mediaagent validate --kind voice_clone clone.yaml --json
-mediaagent persona voice-clone --request clone.yaml --dry-run --json
-mediaagent persona voice-clone --request clone.yaml --json
-mediaagent persona voice-clone-status narrator-clone-1 --json
+framechord validate --kind voice_clone clone.yaml --json
+framechord persona voice-clone --request clone.yaml --dry-run --json
+framechord persona voice-clone --request clone.yaml --json
+framechord persona voice-clone-status narrator-clone-1 --json
 ```
 
 `bind: false` creates without changing the canonical voice. `bind: true` binds only

@@ -1,6 +1,6 @@
 [package]
-name = "mediaagent"
-version = "0.5.1"
+name = "framechord"
+version = "0.6.0"
 edition = "2024"
 rust-version = "1.89"
 description = "Local, agent-friendly media generation with reusable identities"

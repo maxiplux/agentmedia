@@ -1,8 +1,8 @@
 # Rust build output
 /target
-/mediaagent/runs/
-/mediaagent/cache/
-/mediaagent/characters/*/character.lock
+/framechord/runs/
+/framechord/cache/
+/framechord/characters/*/character.lock
 **/*.rs.bk
 *.pdb
 
@@ -20,8 +20,15 @@
 .DS_Store
 Thumbs.db
 
-/mediaagent/blobs/
+/framechord/blobs/
 
-/mediaagent/setup.lock
+/framechord/setup.lock
 
 /scripts/__pycache__/
+
+# Preserve ignored state for projects initialized before the FrameChord rename.
+/mediaagent/runs/
+/mediaagent/cache/
+/mediaagent/blobs/
+/mediaagent/setup.lock
+/mediaagent/characters/*/character.lock

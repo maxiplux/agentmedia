@@ -1,11 +1,13 @@
 ---
-name: mediaagent
-description: Generate images, infographics, speech, podcasts, music, and sound effects with the mediaagent CLI, using optional reusable character identities and local YAML and Markdown briefs.
+name: framechord
+description: Generate images, infographics, speech, podcasts, music, and sound effects with the framechord CLI, using optional reusable character identities and local YAML and Markdown briefs.
 ---
 
-# Mediaagent
+# FrameChord
 
-Use the `mediaagent` binary from any agent that can run a process. If it is missing, read [installation](references/installation.md) for public installers, user-local installation and explicit updates, or explain `cargo install --path /path/to/mediaagent` for a source checkout. Do not switch media tools or make provider API calls inside the skill.
+Use the `framechord` binary from any agent that can run a process. If it is missing, read [installation](references/installation.md) for public installers, user-local installation and explicit updates, or explain `cargo install --path /path/to/framechord` for a source checkout. Do not switch media tools or make provider API calls inside the skill.
+
+Existing `mediaagent/` projects are supported in place. Read [renaming and legacy projects](references/renaming.md) before upgrading an older installation; use returned `data_directory` paths rather than assuming the folder name.
 
 Read [commands](references/commands.md) for every command and flag in this binary version; [workflow](references/workflow.md) for outputs, limits, recovery, and review; [authoring](references/authoring.md) for character and infographic templates. Machine-readable schemas are in `references/schemas/`. Exported templates are in `templates/`.
 
@@ -29,4 +31,4 @@ Use `plan --character MANIFEST --asset FILE` to select dependencies explicitly; 
 
 For acceptance tests, preview `verify --suite SUITE --json` and obtain approval for the bounded paid batch before `--execute --preview-hash HASH`. Missing credentials are skipped, not passed. Voice creation/cloning use their separate explicit persona commands and approvals. `review report` compares generated artifacts and saved references; only actual user selections authorize canonical acceptance.
 
-`models --live` reads provider catalogs; visibility is not generation entitlement. `usage` reports returned units and unknown costs honestly. `storage plan --output cleanup.yaml` prepares a conservative cleanup preview outside mediaagent/; `storage clean --plan cleanup.yaml` only removes unreferenced blobs after revalidation. `migrate --kind job|config|run --file FILE` previews; `--apply` preserves a v1 backup. For uncertain jobs, `runs recover` requires the recorded fingerprint and reconciliation evidence, then `runs resume` publishes the supplied response without regeneration.
+`models --live` reads provider catalogs; visibility is not generation entitlement. `usage` reports returned units and unknown costs honestly. `storage plan --output cleanup.yaml` prepares a conservative cleanup preview outside framechord/; `storage clean --plan cleanup.yaml` only removes unreferenced blobs after revalidation. `migrate --kind job|config|run --file FILE` previews; `--apply` preserves a v1 backup. For uncertain jobs, `runs recover` requires the recorded fingerprint and reconciliation evidence, then `runs resume` publishes the supplied response without regeneration.

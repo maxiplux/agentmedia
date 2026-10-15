@@ -57,12 +57,12 @@ pub fn require_current(selection: &Selection) -> Result<()> {
     let mut error = Error::new(
         "model_not_current",
         format!(
-            "Model {} is not an approved current stable model (catalog verified {VERIFIED_AT}). Inspect mediaagent models, then explicitly update the job/configuration. For a pinned character, create a new character version and accept new references; never relabel the original model. Existing results remain readable.",
+            "Model {} is not an approved current stable model (catalog verified {VERIFIED_AT}). Inspect framechord models, then explicitly update the job/configuration. For a pinned character, create a new character version and accept new references; never relabel the original model. Existing results remain readable.",
             selection.model
         ),
         2,
     );
-    error.corrective_argv = vec!["mediaagent".into(), "models".into()];
+    error.corrective_argv = vec!["framechord".into(), "models".into()];
     Err(error)
 }
 pub fn require_input(input: &Effective) -> Result<()> {
@@ -114,7 +114,9 @@ pub fn listing(root: &Path, filter: &Filter<'_>) -> Value {
             m.model.clone(),
         )
     });
-    let cached = crate::storage::yaml::<Value>(&root.join("mediaagent/cache/models.yaml")).ok();
+    let cached =
+        crate::storage::yaml::<Value>(&crate::project::directory(root).join("cache/models.yaml"))
+            .ok();
     let mut entries = rows
         .into_iter()
         .map(|row| {

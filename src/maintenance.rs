@@ -83,7 +83,7 @@ pub fn usage(root: &Path) -> Result<Value> {
         }
     }
     let mut files = Vec::new();
-    walk(&root.join("mediaagent/runs"), &mut files)?;
+    walk(&crate::project::directory(root).join("runs"), &mut files)?;
     let mut operations = Vec::new();
     for path in files
         .iter()
@@ -136,7 +136,7 @@ fn walk(dir: &Path, files: &mut Vec<PathBuf>) -> Result<()> {
 }
 pub fn storage_plan(root: &Path) -> Result<Value> {
     let root = fs::canonicalize(root)?;
-    let media = root.join("mediaagent");
+    let media = crate::project::directory(&root);
     let mut files = Vec::new();
     walk(&media, &mut files)?;
     files.sort();
@@ -176,7 +176,7 @@ pub fn storage_plan(root: &Path) -> Result<Value> {
 }
 pub fn clean(root: &Path, plan: &Path) -> Result<Value> {
     let expected: Value = yaml(plan)?;
-    let submit = lock(&root.join("mediaagent/runs/submissions.lock"))?;
+    let submit = lock(&crate::project::directory(root).join("runs/submissions.lock"))?;
     submit.lock_exclusive()?;
     let mut workers = Vec::new();
     for run in engine::list(root)? {

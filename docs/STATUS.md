@@ -1,5 +1,7 @@
 # Implementation status
 
+FrameChord is the project name from 0.6.0 onward. Earlier evidence below keeps its original MediaAgent commands, release names and artifact paths. Existing `mediaagent/` projects remain supported in place. See [rename and upgrade guidance](../assets/skill/references/renaming.md).
+
 Development snapshot, October 15, 2026. The first-version command families are implemented within the provider boundaries below. Visual character consistency has failed user acceptance and must not be described as complete. Native validation is separate from media-quality acceptance; public binary availability is recorded on the [Releases page](https://github.com/maxiplux/agentmedia/releases/latest).
 
 Implemented: Rust package/library/CLI, versioned contracts and schemas, offline preserving initialization, embedded skills/templates and explicit bundled-file refresh, portable character import/export and reference acceptance, direct/job/batch validation and explicit job overrides, infographic compilation, text planning with contained validated authoring bundles, concurrent durable runs, dependencies, finite limits, verified cache, submission idempotency, worker startup/loss handling, cancellation/resume, native audio assembly, review records, durable image AI review receipts/reuse/retry history, ElevenLabs descriptive voice previews and explicit saved-voice creation/binding/verification refresh, child revisions, targeted podcast revisions, consent-gated recorded-voice cloning, portable exact-transcript voice samples, Fish binary reference synthesis, Google audio AI review/retrieval, Google generation reconciliation, bounded paginated/filterable voice discovery, a terminal configuration wizard, and explicit user host concurrency controls. Reference media is decoded before acceptance or generation. Failed cached publication preserves independent jobs.
@@ -188,3 +190,28 @@ also pass on all three supported platforms, with 16 isolated checks per package.
 The downloaded packages from the exact clean tooling commit pass the publisher's
 dry run as a complete 16-asset, three-target release set. This validates future
 publication without changing the immutable 0.5.1 release or creating another tag.
+
+
+## FrameChord rename (0.6.0)
+
+The package, executable and bundled skill are renamed to `framechord`; new
+projects initialize `framechord/`. Existing `mediaagent/` project directories
+remain supported in place, including original configuration, jobs, character
+references, reference blobs and run receipts. Initialization returns the actual
+`data_directory` and `legacy_layout`; roots containing both directories are
+rejected before selecting or modifying a project. Old installed skills are
+preserved; renamed project skills install in their own directories. The shared
+host concurrency lock namespace is retained to coordinate old and new binaries.
+
+Release tooling, three-platform native builds, installers, self-updates,
+maintained skill copies, templates, command help and downloadable examples use
+the FrameChord name. Older executables require an explicit new installation;
+`mediaagent update` does not rename the product. Historical release bytes,
+acceptance evidence and authored project files are preserved.
+
+Local formatting, strict Clippy and 169 offline Rust tests pass, including
+legacy initialization/configuration/skill preservation, unchanged readable run
+receipts and rejection of ambiguous project roots. Native release and public
+installation acceptance are recorded after they execute. No paid provider calls
+are made by rename validation. The owned `framechord.com` domain requires
+separate DNS/HTTPS verification; see [domain setup](DOMAIN.md).

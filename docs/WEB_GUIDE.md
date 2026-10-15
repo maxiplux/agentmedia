@@ -1,10 +1,13 @@
-# Single-file MediaAgent guide
+# Single-file FrameChord guide
+
+FrameChord is the project name from 0.6.0 onward. Earlier evidence below keeps its original MediaAgent commands, release names and artifact paths. Existing `mediaagent/` projects remain supported in place. See [rename and upgrade guidance](../assets/skill/references/renaming.md).
 
 The complete deliverable is `docs/site/index.html`. Open it in a browser or serve
 that one file. No other assets, CDN, build step or internet access are required to
 render the guide.
 
-The public guide is hosted at <https://maxiplux.github.io/agentmedia/>.
+The FrameChord guide is published at <https://maxiplux.github.io/framechord/>.
+The owned custom domain is `framechord.com`; see [domain setup](DOMAIN.md).
 The `Publish documentation` GitHub Actions workflow publishes only `docs/site/`
 to GitHub Pages after changes to that folder or the workflow on `master`. It can
 also be started manually:
@@ -65,3 +68,9 @@ Version 0.4.0 adds public installer links, the install/update/rollback workflow 
 The 0.4.0 public guide and both installer downloads were fetched from GitHub Pages and matched byte-for-byte with the merged source on October 15, 2026. Public native installation, self-update and offline rollback passed on all four supported release targets; see [the recorded results](STATUS.md#user-installation-and-updates-040).
 
 Version 0.5.1 updates the setup walkthrough and generated command help for Google-first defaults, the explicit OpenAI preset, built-in speech voices, target-project dotenv creation/update and default installation of Codex/Claude project skills. Examples that name other providers remain explicit provider choices and require their corresponding credentials.
+
+
+Version 0.6.0 renames the guide, all 65 generated command pages, installers and
+all four embedded example archives to FrameChord. The upgrade note distinguishes
+new `framechord/` projects from preserved legacy `mediaagent/` directories.
+The custom domain's registration is separate from DNS and HTTPS deployment.

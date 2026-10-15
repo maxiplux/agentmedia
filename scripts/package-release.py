@@ -17,7 +17,7 @@ parser.add_argument('--offline', action='store_true', help='Use cached Rust depe
 args = parser.parse_args()
 root = pathlib.Path(__file__).resolve().parents[1]
 manifest = json.loads(subprocess.run(['cargo', 'metadata', '--format-version', '1', '--no-deps', '--locked', '--offline', '--manifest-path', str(root / 'Cargo.toml')], capture_output=True, text=True, check=True).stdout)
-package = next(package for package in manifest['packages'] if package['name'] == 'mediaagent')
+package = next(package for package in manifest['packages'] if package['name'] == 'framechord')
 version = package['version']
 rust = subprocess.run(['rustc', '-vV'], capture_output=True, text=True, check=True).stdout
 host = next(line.split(': ', 1)[1] for line in rust.splitlines() if line.startswith('host: '))
@@ -25,13 +25,13 @@ command = ['cargo', 'build', '--release', '--locked', '--manifest-path', str(roo
 if args.offline:
     command.append('--offline')
 subprocess.run(command, cwd=root, check=True)
-executable = 'mediaagent.exe' if os.name == 'nt' else 'mediaagent'
+executable = 'framechord.exe' if os.name == 'nt' else 'framechord'
 binary = root / 'target/release' / executable
 credentials = ['OPENAI_API_KEY', 'GEMINI_API_KEY', 'FISH_API_KEY', 'OPENROUTER_API_KEY', 'ELEVENLABS_API_KEY']
 # These subprocesses exercise only offline commands and never receive live keys.
 smoke_environment = {key: value for key, value in os.environ.items() if key not in credentials}
 checks = []
-with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
+with tempfile.TemporaryDirectory(prefix='framechord-package-') as temporary:
     isolated = pathlib.Path(temporary)
     copied = isolated / executable
     shutil.copy2(binary, copied)
@@ -45,9 +45,9 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
         if not response['ok']:
             raise RuntimeError('Offline binary verification failed')
         return response
-    # A downloaded Unix executable is itself named mediaagent. Its directory
-    # cannot also contain the required mediaagent/ project configuration folder.
-    blocker = isolated / 'mediaagent'
+    # A downloaded Unix executable is itself named framechord. Its directory
+    # cannot also contain the required framechord/ project configuration folder.
+    blocker = isolated / 'framechord'
     if not blocker.exists():
         blocker.write_text('fixture name collision')
     blocker_bytes = blocker.read_bytes()
@@ -62,7 +62,7 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
     assert (project / '.env').read_text() == preserved + 'GEMINI_API_KEY=\nOPENAI_API_KEY=\nFISH_API_KEY=\nOPENROUTER_API_KEY=\nELEVENLABS_API_KEY=\n'
     checks.append('offline_repeat_initialization_preserves_env')
     for agent in ['.agents', '.claude']:
-        skill = project / agent / 'skills/mediaagent'
+        skill = project / agent / 'skills/framechord'
         assert (skill / 'SKILL.md').is_file()
         assert (skill / 'references/voices.md').is_file()
         assert (skill / 'references/schemas/operation.json').is_file()
@@ -77,15 +77,28 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
     assert recommended['setup_complete'] is False and recommended['pending_steps']
     readiness = cli(['--project', str(recommended_project), 'config', 'status'])['data']
     assert readiness['setup_complete'] is False and readiness['account_access_verified'] is False
-    assert (project / '.agents/skills/mediaagent/references/setup.md').is_file()
+    assert (project / '.agents/skills/framechord/references/setup.md').is_file()
     checks.append('recommended_init_and_resumable_setup_readiness')
+    # A renamed installed executable must keep pre-rename project paths intact.
+    legacy = isolated / 'legacy-project'
+    cli(['init', str(legacy), '--preset', 'empty'])
+    (legacy / 'framechord').rename(legacy / 'mediaagent')
+    legacy_config = (legacy / 'mediaagent/config.yaml').read_bytes()
+    legacy_persona = (legacy / 'mediaagent/characters/persona/character.yaml').read_bytes()
+    result = cli(['init', str(legacy)])['data']
+    assert result['legacy_layout'] is True and pathlib.Path(result['data_directory']).samefile(legacy / 'mediaagent')
+    assert not (legacy / 'framechord').exists()
+    assert (legacy / 'mediaagent/config.yaml').read_bytes() == legacy_config
+    assert (legacy / 'mediaagent/characters/persona/character.yaml').read_bytes() == legacy_persona
+    assert (legacy / '.agents/skills/framechord/SKILL.md').is_file()
+    checks.append('legacy_project_paths_identity_and_configuration_preserved')
     exported = isolated / 'portable-skill'
     cli(['--project', str(project), 'skills', 'export', str(exported)])
     assert (exported / 'templates/voice-preview.md').is_file()
     checks.append('portable_skill_export_without_checkout')
     out = cli(['--project', str(project), 'generate', 'image', '--provider', 'openai', '--model', 'gpt-image-2.5-flare', '--prompt', 'An offline dry-run leaf', '--output', str(isolated / 'leaf.png'), '--dry-run'])
     assert out['data']['dry_run'] and not (isolated / 'leaf.png').exists()
-    assert not list((project / 'mediaagent/runs').glob('*/run.yaml'))
+    assert not list((project / 'framechord/runs').glob('*/run.yaml'))
     checks.append('offline_direct_generation_dry_run')
     schema = cli(['schema', 'voice_design'])['data']
     assert schema['additionalProperties'] is False
@@ -119,7 +132,7 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
     preview = cli(['--project', str(project), 'verify', '--suite', str(jobs / 'suite.yaml')])['data']
     assert preview['estimated_reservation']['requests'] == 1
     assert len(preview['preview_hash']) == 64 and preview['generation_performed'] is False
-    assert not list((project / 'mediaagent/runs').glob('*/run.yaml'))
+    assert not list((project / 'framechord/runs').glob('*/run.yaml'))
     checks.append('bounded_verification_preview_without_provider_calls')
     before = (jobs / 'job.yaml').read_bytes()
     cli(['--project', str(project), 'migrate', '--kind', 'job', '--file', str(jobs / 'job.yaml')])
@@ -142,42 +155,42 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
         installation = cli(['install', '--bin-dir', str(installed_bin), '--no-modify-path'])['data']
         assert installation['project_files_changed'] is False and installation['network_requested'] is False
     installed = installed_bin / executable
-    assert subprocess.run([str(installed), '--version'], capture_output=True, text=True, check=True).stdout.strip() == f'mediaagent {version}'
+    assert subprocess.run([str(installed), '--version'], capture_output=True, text=True, check=True).stdout.strip() == f'framechord {version}'
     assert (project / '.env').read_text() == preserved + 'GEMINI_API_KEY=\nOPENAI_API_KEY=\nFISH_API_KEY=\nOPENROUTER_API_KEY=\nELEVENLABS_API_KEY=\n'
     checks.append('offline_user_install_repeat_and_version_without_project_changes')
     subprocess.run([sys.executable, str(root / 'scripts/test-installers.py'), '--binary', str(copied), '--target', host], env=smoke_environment, check=True)
     checks.append('native_bootstrap_download_install_repeat_and_checksum_rejection_offline')
     reported = subprocess.run([str(copied), '--version'], cwd=isolated, env=smoke_environment, capture_output=True, text=True, check=True).stdout.strip()
-    assert reported == f'mediaagent {version}'
+    assert reported == f'framechord {version}'
 
-name = f'mediaagent-{version}-{host}'
+name = f'framechord-{version}-{host}'
 destination = root / 'target/package-dist'
 destination.mkdir(parents=True, exist_ok=True)
 source_commit = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=root, capture_output=True, text=True, check=True).stdout.strip()
 source_dirty = bool(subprocess.run(['git', 'status', '--porcelain'], cwd=root, capture_output=True, text=True, check=True).stdout.strip())
-metadata = {'source_commit': source_commit, 'source_dirty': source_dirty, 'schema_version': 1, 'package': 'mediaagent', 'version': version, 'target': host,
+metadata = {'source_commit': source_commit, 'source_dirty': source_dirty, 'schema_version': 1, 'package': 'framechord', 'version': version, 'target': host,
             'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
             'native_offline_checks': checks, 'publication_performed_by_packager': False,
             'live_provider_testing_performed_by_packager': False}
-with tempfile.TemporaryDirectory(prefix='mediaagent-archive-') as temporary:
+with tempfile.TemporaryDirectory(prefix='framechord-archive-') as temporary:
     staged = pathlib.Path(temporary) / name
     staged.mkdir()
     shutil.copy2(binary, staged / executable)
     (staged / '.env.example').write_text(''.join(f'{key}=\n' for key in credentials))
     (staged / 'verification.json').write_text(json.dumps(metadata, indent=2) + '\n')
-    (staged / 'README.md').write_text(f'''# mediaagent {version}
+    (staged / 'README.md').write_text(f'''# framechord {version}
 
 Native binary for `{host}`. From the download folder, run `./{executable} install` to install in your user bin directory without administrator access. Open a new terminal afterwards. Installation does not initialize a project or copy provider keys.
 
 ```sh
-mediaagent --help
-mediaagent update --check
-mediaagent update
-mediaagent update --rollback
-mediaagent init /path/to/project
-mediaagent models --json
-mediaagent doctor --live --json  # Explicit read-only checks; no media generation
-mediaagent skills export /path/to/portable-skill
+framechord --help
+framechord update --check
+framechord update
+framechord update --rollback
+framechord init /path/to/project
+framechord models --json
+framechord doctor --live --json  # Explicit read-only checks; no media generation
+framechord skills export /path/to/portable-skill
 ```
 
 Initialization is offline and preserves existing files. The binary embeds the maintained Codex/Claude skills, all command/flag help, YAML schemas, and authoring templates; no source checkout or Rust installation is needed at runtime. Use project-local skills by default; user installation is a separate explicit command.
@@ -205,7 +218,7 @@ Images, infographics, speech, podcasts, music, sound effects, optional character
             member = bundle.extractfile(f'{name}/{executable}')
             assert hashlib.sha256(member.read()).hexdigest() == metadata['binary_sha256']
 # Raw release assets avoid extraction tools in installers and the built-in updater.
-raw = destination / (f'mediaagent-{host}' + ('.exe' if os.name == 'nt' else ''))
+raw = destination / (f'framechord-{host}' + ('.exe' if os.name == 'nt' else ''))
 shutil.copy2(binary, raw)
 raw.with_name(raw.name + '.sha256').write_text(f'{metadata["binary_sha256"]}  {raw.name}\n')
 checksum = hashlib.sha256(archive.read_bytes()).hexdigest()

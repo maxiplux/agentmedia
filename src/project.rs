@@ -11,8 +11,30 @@ use std::{
     path::{Path, PathBuf},
 };
 
+/// Keep historical manifest paths, receipts and reference hashes intact.
+/// New projects use framechord/; existing mediaagent/ projects stay in place.
+pub fn directory(root: &Path) -> PathBuf {
+    if root.join("mediaagent").is_dir() {
+        root.join("mediaagent")
+    } else {
+        root.join("framechord")
+    }
+}
+
+pub fn check_layout(root: &Path) -> Result<()> {
+    if root.join("mediaagent").is_dir() && root.join("framechord").is_dir() {
+        return Err(Error::new(
+            "project_layout_conflict",
+            "This project contains both framechord/ and legacy mediaagent/ directories. Keep the intended project directory at this root and move the other to a separate project before continuing. No project was selected or merged automatically.",
+            2,
+        ));
+    }
+    Ok(())
+}
+
 pub fn config(root: &Path) -> Result<Config> {
-    let path = root.join("mediaagent/config.yaml");
+    check_layout(root)?;
+    let path = crate::project::directory(root).join("config.yaml");
     let cfg = if path.exists() {
         yaml(&path)?
     } else {
@@ -27,21 +49,22 @@ pub fn init(root: &Path, agents: &[String]) -> Result<serde_json::Value> {
 /// Detect the executable/configuration name collision before any setup files are written.
 pub fn check_init_destination(root: &Path) -> Result<()> {
     let root = absolute(root)?;
+    check_layout(&root)?;
     for path in root
         .ancestors()
-        .chain(std::iter::once(root.join("mediaagent").as_path()))
+        .chain(std::iter::once(crate::project::directory(&root).as_path()))
     {
         if fs::symlink_metadata(path).is_ok() && !path.is_dir() {
             let mut error = Error::new(
                 "init_path_conflict",
                 format!(
-                    "Cannot initialize this project: {} is a file, but setup needs a directory. The mediaagent executable and the mediaagent/ configuration folder cannot share a path. Choose a project folder, for example: mediaagent init ./my-project. The existing file has not been changed.",
+                    "Cannot initialize this project: {} is a file, but setup needs a directory. The framechord executable and the framechord/ configuration folder cannot share a path. Choose a project folder, for example: framechord init ./my-project. The existing file has not been changed.",
                     path.display()
                 ),
                 2,
             );
             error.field = Some("path".into());
-            error.corrective_argv = vec!["mediaagent".into(), "init".into(), "./my-project".into()];
+            error.corrective_argv = vec!["framechord".into(), "init".into(), "./my-project".into()];
             return Err(error);
         }
     }
@@ -59,7 +82,7 @@ pub fn init_with_config(
         validation::config(configured)?;
     }
     crate::credentials::render_missing(root, &Default::default())?;
-    let guard = lock(&root.join("mediaagent/setup.lock"))?;
+    let guard = lock(&crate::project::directory(root).join("setup.lock"))?;
     guard.lock_exclusive()?;
     init_locked(root, agents, configured)
 }
@@ -74,7 +97,7 @@ pub(crate) fn init_locked(
     if let Some(configured) = configured {
         validation::config(configured)?;
     }
-    let existing_path = root.join("mediaagent/config.yaml");
+    let existing_path = crate::project::directory(root).join("config.yaml");
     if existing_path.exists()
         && let Some(configured) = configured
     {
@@ -97,8 +120,11 @@ pub(crate) fn init_locked(
     let cfg =
         serde_saphyr::to_string(&initial).map_err(|_| Error::input("Cannot serialize config"))?;
     let mut existing = vec![];
-    if !create(&root.join("mediaagent/config.yaml"), cfg.as_bytes())? {
-        existing.push("mediaagent/config.yaml".into());
+    if !create(
+        &crate::project::directory(&root).join("config.yaml"),
+        cfg.as_bytes(),
+    )? {
+        existing.push(directory(&root).join("config.yaml").display().to_string());
     }
     create(
         &root.join(".env.example"),
@@ -108,7 +134,7 @@ pub(crate) fn init_locked(
         atomic(&root.join(".env"), content.as_bytes(), true)?;
     }
     create(
-        &root.join("mediaagent/.gitignore"),
+        &crate::project::directory(&root).join(".gitignore"),
         b"runs/\ncache/\nblobs/\nsetup.lock\n",
     )?;
     // Preserve existing ignore rules; add only missing credential/artifact protection.
@@ -119,6 +145,10 @@ pub(crate) fn init_locked(
         ".env",
         ".env.*",
         "!.env.example",
+        "/framechord/runs/",
+        "/framechord/cache/",
+        "/framechord/blobs/",
+        "/framechord/setup.lock",
         "/mediaagent/runs/",
         "/mediaagent/cache/",
         "/mediaagent/blobs/",
@@ -135,18 +165,23 @@ pub(crate) fn init_locked(
     if updated != original {
         atomic(&ignore, updated.as_bytes(), true)?;
     }
-    existing.extend(assets::templates(&root.join("mediaagent/templates"))?);
+    existing.extend(assets::templates(
+        &crate::project::directory(&root).join("templates"),
+    )?);
     for dir in ["characters", "jobs", "runs"] {
-        fs::create_dir_all(root.join("mediaagent").join(dir))?;
+        fs::create_dir_all(crate::project::directory(&root).join(dir))?;
     }
-    if !root.join("mediaagent/characters/persona").exists() {
+    if !crate::project::directory(&root)
+        .join("characters/persona")
+        .exists()
+    {
         add_persona(&root, "persona")?;
     }
     existing.extend(install(&root, agents)?);
     let config = config(&root)?;
     let configured_media = config.defaults.keys().collect::<Vec<_>>();
     Ok(
-        serde_json::json!({"project":root,"credentials_file":root.join(".env"),"credential_variables":crate::credentials::PROVIDERS.iter().map(|p|p.key()).collect::<Vec<_>>(),"existing_preserved":existing,"generation":false,"configured_media":configured_media,"configuration":config,"setup_required":configured_media.is_empty(),"next_steps":if configured_media.is_empty(){vec!["mediaagent config wizard","mediaagent config setup --file config.yaml"]}else{vec![]}}),
+        serde_json::json!({"project":root,"data_directory":directory(&root),"legacy_layout":directory(&root).file_name().is_some_and(|name|name=="mediaagent"),"credentials_file":root.join(".env"),"credential_variables":crate::credentials::PROVIDERS.iter().map(|p|p.key()).collect::<Vec<_>>(),"existing_preserved":existing,"generation":false,"configured_media":configured_media,"configuration":config,"setup_required":configured_media.is_empty(),"next_steps":if configured_media.is_empty(){vec!["framechord config wizard","framechord config setup --file config.yaml"]}else{vec![]}}),
     )
 }
 pub fn install(root: &Path, agents: &[String]) -> Result<Vec<String>> {
@@ -157,8 +192,8 @@ pub fn install_with(root: &Path, agents: &[String], overwrite: bool) -> Result<V
     let mut existing = vec![];
     for agent in agents {
         let dir = match agent.as_str() {
-            "codex" => ".agents/skills/mediaagent",
-            "claude" => ".claude/skills/mediaagent",
+            "codex" => ".agents/skills/framechord",
+            "claude" => ".claude/skills/framechord",
             _ => {
                 return Err(Error::input(
                     "Agent target must be codex or claude; use skills export for any other agent",
@@ -180,7 +215,9 @@ pub fn check_agents(agents: &[String]) -> Result<()> {
 pub fn add_persona(root: &Path, name: &str) -> Result<PathBuf> {
     id(name)?;
     let configured = config(root)?;
-    let dir = root.join("mediaagent/characters").join(name);
+    let dir = crate::project::directory(root)
+        .join("characters")
+        .join(name);
     if dir.exists() {
         return Err(Error::input(
             "Character ID already exists; inspect or import with a different ID",
@@ -243,8 +280,8 @@ pub fn add_persona(root: &Path, name: &str) -> Result<PathBuf> {
 }
 pub fn character_path(root: &Path, name: &str) -> Result<PathBuf> {
     id(name)?;
-    Ok(root
-        .join("mediaagent/characters")
+    Ok(crate::project::directory(root)
+        .join("characters")
         .join(name)
         .join("character.yaml"))
 }
@@ -364,7 +401,9 @@ pub fn import(root: &Path, source: &Path, new_id: Option<&str>) -> Result<PathBu
     id(name)?;
     bundle(
         &source,
-        &root.join("mediaagent/characters").join(name),
+        &crate::project::directory(root)
+            .join("characters")
+            .join(name),
         new_id,
     )
 }

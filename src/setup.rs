@@ -49,8 +49,8 @@ pub fn validate_host(limits: &HostLimits) -> Result<()> {
 pub fn host_path() -> Result<PathBuf> {
     let home = std::env::var_os("HOME")
         .or_else(|| std::env::var_os("USERPROFILE"))
-        .ok_or_else(|| Error::input("Cannot locate user home for mediaagent host settings"))?;
-    Ok(PathBuf::from(home).join(".config/mediaagent/host.yaml"))
+        .ok_or_else(|| Error::input("Cannot locate user home for framechord host settings"))?;
+    Ok(PathBuf::from(home).join(".config/framechord/host.yaml"))
 }
 pub fn host() -> Result<HostLimits> {
     let path = host_path()?;
@@ -226,15 +226,15 @@ fn readiness(
 }
 pub fn status(root: &Path) -> Result<serde_json::Value> {
     let mut result = readiness(root, &project::config(root)?, &Default::default());
-    if !root.join("mediaagent/config.yaml").exists() {
+    if !crate::project::directory(root).join("config.yaml").exists() {
         result["setup_complete"] = false.into();
         result["setup_required"] = true.into();
         result["pending_steps"]
             .as_array_mut()
             .unwrap()
-            .push("Initialize this project first with mediaagent init".into());
+            .push("Initialize this project first with framechord init".into());
     }
-    result["skills"] = serde_json::json!({"codex":root.join(".agents/skills/mediaagent/SKILL.md").is_file(),"claude":root.join(".claude/skills/mediaagent/SKILL.md").is_file()});
+    result["skills"] = serde_json::json!({"codex":root.join(".agents/skills/framechord/SKILL.md").is_file(),"claude":root.join(".claude/skills/framechord/SKILL.md").is_file()});
     Ok(result)
 }
 
@@ -271,10 +271,10 @@ impl Session {
         validation::config(&self.config)?;
         project::check_agents(&self.agents)?;
         project::check_init_destination(root)?;
-        let guard = lock(&root.join("mediaagent/setup.lock"))?;
+        let guard = lock(&crate::project::directory(root).join("setup.lock"))?;
         guard.lock_exclusive()?;
         if expected.is_some_and(|(config_hash, env_hash)| {
-            &std::fs::read(root.join("mediaagent/config.yaml"))
+            &std::fs::read(crate::project::directory(root).join("config.yaml"))
                 .ok()
                 .map(|b| hash(&b))
                 != config_hash
@@ -287,13 +287,17 @@ impl Session {
         let credentials = credentials::render_missing(root, &self.pending_keys)?;
         for name in &self.personas {
             crate::storage::id(name)?;
-            if root.join("mediaagent/characters").join(name).exists() {
+            if crate::project::directory(root)
+                .join("characters")
+                .join(name)
+                .exists()
+            {
                 return Err(Error::input(
                     "Character ID already exists; choose another ID",
                 ));
             }
         }
-        let existing = root.join("mediaagent/config.yaml").exists();
+        let existing = crate::project::directory(root).join("config.yaml").exists();
         let mut result = project::init_locked(
             root,
             &self.agents,
@@ -305,7 +309,10 @@ impl Session {
         if existing
             && serde_json::to_value(project::config(root)?)? != serde_json::to_value(&self.config)?
         {
-            save(&root.join("mediaagent/config.yaml"), &self.config)?;
+            save(
+                &crate::project::directory(root).join("config.yaml"),
+                &self.config,
+            )?;
         }
         for name in &self.personas {
             project::add_persona(root, name)?;
@@ -870,13 +877,13 @@ pub fn run(
     project::check_init_destination(root)?;
     eprintln!("Project folder: {}", absolute(root)?.display());
     let mut session = Session::new(initial, agents);
-    let initial_hash = std::fs::read(root.join("mediaagent/config.yaml"))
+    let initial_hash = std::fs::read(crate::project::directory(root).join("config.yaml"))
         .ok()
         .map(|b| hash(&b));
     let initial_env_hash = std::fs::read(root.join(".env")).ok().map(|b| hash(&b));
     if initial_hash.is_none() {
         let Some(choice) = ui.choose(
-            "Welcome to MediaAgent — offline setup",
+            "Welcome to FrameChord — offline setup",
             &options(&[
                 "Recommended setup — Google",
                 "OpenAI setup — images, speech and planning",
@@ -988,12 +995,13 @@ pub fn run(
                     0,
                 )? {
                     if i == 1 {
-                        let paths = std::fs::read_dir(root.join("mediaagent/characters"))
-                            .into_iter()
-                            .flatten()
-                            .flatten()
-                            .map(|p| p.file_name().to_string_lossy().into_owned())
-                            .collect::<Vec<_>>();
+                        let paths =
+                            std::fs::read_dir(crate::project::directory(root).join("characters"))
+                                .into_iter()
+                                .flatten()
+                                .flatten()
+                                .map(|p| p.file_name().to_string_lossy().into_owned())
+                                .collect::<Vec<_>>();
                         eprintln!(
                             "Existing character IDs: {:?}. Pending scaffolds: {:?}",
                             paths, session.personas
@@ -1001,7 +1009,7 @@ pub fn run(
                     }
                     if i == 2 {
                         let name = ui.input("New stable character ID", "")?;
-                        match crate::storage::id(&name){Ok(()) if !session.personas.contains(&name)&&!root.join("mediaagent/characters").join(&name).exists()&&name!="persona"=>session.personas.push(name),_=>ui.message("Choose a unique valid character ID; existing identities are preserved",false)}
+                        match crate::storage::id(&name){Ok(()) if !session.personas.contains(&name)&&!crate::project::directory(root).join("characters").join(&name).exists()&&name!="persona"=>session.personas.push(name),_=>ui.message("Choose a unique valid character ID; existing identities are preserved",false)}
                     }
                 }
                 eprintln!(
@@ -1033,7 +1041,7 @@ pub fn run(
                 {
                     continue;
                 }
-                let now = std::fs::read(root.join("mediaagent/config.yaml"))
+                let now = std::fs::read(crate::project::directory(root).join("config.yaml"))
                     .ok()
                     .map(|b| hash(&b));
                 if now != initial_hash
@@ -1080,7 +1088,7 @@ pub fn wizard(root: &Path, color: crate::cli::Color) -> Result<serde_json::Value
     let root = selected.as_path();
     run(
         root,
-        if root.join("mediaagent/config.yaml").exists() {
+        if crate::project::directory(root).join("config.yaml").exists() {
             project::config(root)?
         } else {
             recommended()
@@ -1097,7 +1105,7 @@ mod tests {
     fn reviewed_save_rejects_stale_files_without_losing_credentials() {
         let root = tempfile::tempdir().unwrap();
         project::init(root.path(), &[]).unwrap();
-        let config_file = root.path().join("mediaagent/config.yaml");
+        let config_file = root.path().join("framechord/config.yaml");
         let before = std::fs::read(&config_file).unwrap();
         let config_hash = Some(hash(&before));
         let env_hash = Some(hash(&std::fs::read(root.path().join(".env")).unwrap()));

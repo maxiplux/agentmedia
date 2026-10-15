@@ -16,8 +16,8 @@ import zipfile
 
 source = pathlib.Path(__file__).resolve().parents[1]
 commit = '1' * 40
-api_url = 'https://api.github.com/repos/maxiplux/agentmedia/releases/123'
-with tempfile.TemporaryDirectory(prefix='mediaagent-publisher-test-') as temporary:
+api_url = 'https://api.github.com/repos/maxiplux/framechord/releases/123'
+with tempfile.TemporaryDirectory(prefix='framechord-publisher-test-') as temporary:
     root = pathlib.Path(temporary)
     (root / 'scripts').mkdir()
     script = root / 'scripts/publish-release.py'
@@ -32,11 +32,11 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-publisher-test-') as tempora
     for target in targets:
         windows = 'windows' in target
         data = ('native fixture: ' + target).encode()
-        binary = artifacts / ('mediaagent-' + target + ('.exe' if windows else ''))
+        binary = artifacts / ('framechord-' + target + ('.exe' if windows else ''))
         binary.write_bytes(data)
-        metadata = json.dumps({'binary_sha256': hashlib.sha256(data).hexdigest(), 'target': target, 'version': '0.4.0', 'source_commit': commit, 'source_dirty': False, 'native_offline_checks': ['offline fixture'] * 16, 'live_provider_testing_performed_by_packager': False}).encode()
-        archive = artifacts / ('mediaagent-0.4.0-' + target + ('.zip' if windows else '.tar.gz'))
-        entries = {'package/verification.json': metadata, 'package/mediaagent' + ('.exe' if windows else ''): data}
+        metadata = json.dumps({'binary_sha256': hashlib.sha256(data).hexdigest(), 'target': target, 'version': '0.4.0', 'source_commit': commit, 'source_dirty': False, 'native_offline_checks': ['offline fixture'] * 16 + ['legacy_project_paths_identity_and_configuration_preserved'], 'live_provider_testing_performed_by_packager': False}).encode()
+        archive = artifacts / ('framechord-0.4.0-' + target + ('.zip' if windows else '.tar.gz'))
+        entries = {'package/verification.json': metadata, 'package/framechord' + ('.exe' if windows else ''): data}
         if windows:
             with zipfile.ZipFile(archive, 'w') as bundle:
                 for name, content in entries.items():

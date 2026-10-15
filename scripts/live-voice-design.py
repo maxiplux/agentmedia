@@ -10,7 +10,7 @@ import tempfile
 import uuid
 
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--binary', default='target/debug/mediaagent')
+parser.add_argument('--binary', default='target/debug/framechord')
 parser.add_argument('--project', default='.')
 parser.add_argument('--model', required=True, choices=['eleven_multilingual_ttv_v2', 'eleven_ttv_v3'])
 parser.add_argument('--speech-model', required=True, choices=['eleven_multilingual_v2', 'eleven_flash_v2_5', 'eleven_turbo_v2_5', 'eleven_v3'])
@@ -31,15 +31,15 @@ if not next(row['configured'] for row in credentials if row['provider'] == 'elev
     sys.exit(0)
 run_id = str(uuid.uuid4())
 character_id = 'smoke-design-' + uuid.uuid4().hex[:12]
-character = root / 'mediaagent/characters' / character_id
+character = root / 'framechord/characters' / character_id
 character.mkdir(parents=True, exist_ok=False)
 try:
     (character / 'character.yaml').write_text(f'schema_version: 1\nid: {character_id}\npersona: persona.md\nvoice:\n  description: voice.md\n  selection:\n    provider: elevenlabs\n    model: {args.speech_model}\n  binding: null\n  references: []\n')
     (character / 'persona.md').write_text('A fictional narrator used only for a bounded local API preview test. No real person is represented.')
     (character / 'voice.md').write_text('A fictional English narrator with warm mid-range pitch, clear diction, a relaxed conversational pace, and calm curiosity.')
-    snapshot = root / 'mediaagent/runs' / run_id / 'fixtures' / character_id
+    snapshot = root / 'framechord/runs' / run_id / 'fixtures' / character_id
     shutil.copytree(character, snapshot)
-    with tempfile.TemporaryDirectory(prefix='mediaagent-design-') as temp:
+    with tempfile.TemporaryDirectory(prefix='framechord-design-') as temp:
         temp = pathlib.Path(temp)
         script = temp / 'script.md'
         script.write_text('Hello, welcome to this short narration preview. We are testing a fictional voice with clear words, a gentle pace, and a friendly tone.')

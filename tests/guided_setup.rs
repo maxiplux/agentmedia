@@ -1,5 +1,5 @@
 use assert_cmd::cargo::cargo_bin_cmd;
-use mediaagent::{catalog, contracts::*, credentials, engine, operations, project, setup, storage};
+use framechord::{catalog, contracts::*, credentials, engine, operations, project, setup, storage};
 use serde_json::{Value, json};
 use std::{
     collections::BTreeMap,
@@ -13,9 +13,9 @@ use std::{
 #[test]
 fn init_reports_blocking_executable_before_writing_and_preserves_all_existing_files() {
     let root = tempfile::tempdir().unwrap();
-    fs::write(root.path().join("mediaagent"), "fixture executable").unwrap();
+    fs::write(root.path().join("framechord"), "fixture executable").unwrap();
     fs::write(root.path().join(".env"), "OTHER=keep-existing\n").unwrap();
-    let output = cargo_bin_cmd!("mediaagent")
+    let output = cargo_bin_cmd!("framechord")
         .current_dir(root.path())
         .args(["init", "--json", "--non-interactive"])
         .assert()
@@ -29,14 +29,14 @@ fn init_reports_blocking_executable_before_writing_and_preserves_all_existing_fi
         result["errors"][0]["message"]
             .as_str()
             .unwrap()
-            .contains("mediaagent init ./my-project")
+            .contains("framechord init ./my-project")
     );
     assert_eq!(
         result["errors"][0]["corrective_argv"],
-        json!(["mediaagent", "init", "./my-project"])
+        json!(["framechord", "init", "./my-project"])
     );
     assert_eq!(
-        fs::read_to_string(root.path().join("mediaagent")).unwrap(),
+        fs::read_to_string(root.path().join("framechord")).unwrap(),
         "fixture executable"
     );
     assert_eq!(
@@ -55,8 +55,8 @@ fn init_reports_blocking_executable_before_writing_and_preserves_all_existing_fi
 #[test]
 fn init_honors_global_project_and_explicit_destination_with_executable_beside_it() {
     let root = tempfile::tempdir().unwrap();
-    fs::write(root.path().join("mediaagent"), "fixture executable").unwrap();
-    cargo_bin_cmd!("mediaagent")
+    fs::write(root.path().join("framechord"), "fixture executable").unwrap();
+    cargo_bin_cmd!("framechord")
         .current_dir(root.path())
         .args([
             "--project",
@@ -69,10 +69,10 @@ fn init_honors_global_project_and_explicit_destination_with_executable_beside_it
         .success();
     assert!(
         root.path()
-            .join("selected project/mediaagent/config.yaml")
+            .join("selected project/framechord/config.yaml")
             .is_file()
     );
-    cargo_bin_cmd!("mediaagent")
+    cargo_bin_cmd!("framechord")
         .current_dir(root.path())
         .args([
             "--project",
@@ -86,12 +86,12 @@ fn init_honors_global_project_and_explicit_destination_with_executable_beside_it
         .success();
     assert!(
         root.path()
-            .join("explicit project/mediaagent/config.yaml")
+            .join("explicit project/framechord/config.yaml")
             .is_file()
     );
     assert!(!root.path().join("unused").exists());
     assert_eq!(
-        fs::read_to_string(root.path().join("mediaagent")).unwrap(),
+        fs::read_to_string(root.path().join("framechord")).unwrap(),
         "fixture executable"
     );
 }
@@ -113,7 +113,7 @@ fn init_rejects_project_paths_with_a_blocking_file_or_ancestor_without_mutations
 fn recommended_init_and_status_are_noninteractive_offline_and_resumable() {
     let t = tempfile::tempdir().unwrap();
     let root = t.path().join("project with spaces");
-    let result = cargo_bin_cmd!("mediaagent")
+    let result = cargo_bin_cmd!("framechord")
         .args(["--json", "--non-interactive", "init"])
         .arg(&root)
         .assert()
@@ -142,8 +142,8 @@ fn recommended_init_and_status_are_noninteractive_offline_and_resumable() {
         fs::read_to_string(root.join(".env")).unwrap(),
         credentials::ENV_TEMPLATE
     );
-    let before = fs::read(root.join("mediaagent/config.yaml")).unwrap();
-    cargo_bin_cmd!("mediaagent")
+    let before = fs::read(root.join("framechord/config.yaml")).unwrap();
+    cargo_bin_cmd!("framechord")
         .args(["--non-interactive", "init"])
         .arg(&root)
         .args(["--preset", "empty"])
@@ -151,9 +151,9 @@ fn recommended_init_and_status_are_noninteractive_offline_and_resumable() {
         .success();
     assert_eq!(
         before,
-        fs::read(root.join("mediaagent/config.yaml")).unwrap()
+        fs::read(root.join("framechord/config.yaml")).unwrap()
     );
-    let shown = cargo_bin_cmd!("mediaagent")
+    let shown = cargo_bin_cmd!("framechord")
         .arg("--project")
         .arg(&root)
         .args(["config", "status", "--json"])
@@ -182,7 +182,7 @@ fn google_and_openai_presets_are_ready_with_one_key_and_preserve_existing_identi
             format!("# Keep my key\n{key}=fixture-private\n"),
         )
         .unwrap();
-        let output = cargo_bin_cmd!("mediaagent")
+        let output = cargo_bin_cmd!("framechord")
             .arg("--project")
             .arg(&root)
             .args(["init", "--preset", preset, "--json", "--non-interactive"])
@@ -222,7 +222,7 @@ fn google_and_openai_presets_are_ready_with_one_key_and_preserve_existing_identi
         );
         let original = fs::read(&character_path).unwrap();
         let env = fs::read(root.join(".env")).unwrap();
-        cargo_bin_cmd!("mediaagent")
+        cargo_bin_cmd!("framechord")
             .arg("--project")
             .arg(&root)
             .args([
@@ -256,7 +256,7 @@ fn init_updates_only_target_env_and_never_copies_process_or_ancestor_credentials
     let prefix = "# Preserve comments\r\nOTHER=value\r\nexport GEMINI_API_KEY='project-private'\r\nOPENAI_API_KEY=\r\n";
     fs::write(root.join(".env"), prefix).unwrap();
     for _ in 0..2 {
-        let output = cargo_bin_cmd!("mediaagent")
+        let output = cargo_bin_cmd!("framechord")
             .current_dir(&root)
             .env_remove("GEMINI_API_KEY")
             .env("OPENAI_API_KEY", "process-private")
@@ -282,7 +282,7 @@ fn init_updates_only_target_env_and_never_copies_process_or_ancestor_credentials
         );
     }
     let target = root.join("different target");
-    cargo_bin_cmd!("mediaagent")
+    cargo_bin_cmd!("framechord")
         .current_dir(&root)
         .arg("--project")
         .arg(&target)
@@ -317,7 +317,7 @@ fn malformed_env_stops_init_before_project_or_skill_writes_without_secret_output
     let root = temporary.path();
     let content = "GEMINI_API_KEY=\"fixture-secret-unclosed\n";
     fs::write(root.join(".env"), content).unwrap();
-    let result = cargo_bin_cmd!("mediaagent")
+    let result = cargo_bin_cmd!("framechord")
         .current_dir(root)
         .args(["init", "--json", "--non-interactive"])
         .assert()
@@ -336,9 +336,9 @@ fn init_waits_for_setup_lock_and_preserves_credentials_saved_while_waiting() {
     let root = temporary.path();
     project::init(root, &[]).unwrap();
     fs::write(root.join(".env"), "GEMINI_API_KEY=\n").unwrap();
-    let guard = storage::lock(&root.join("mediaagent/setup.lock")).unwrap();
+    let guard = storage::lock(&root.join("framechord/setup.lock")).unwrap();
     guard.lock_exclusive().unwrap();
-    let mut child = std::process::Command::new(env!("CARGO_BIN_EXE_mediaagent"))
+    let mut child = std::process::Command::new(env!("CARGO_BIN_EXE_framechord"))
         .current_dir(root)
         .args(["init", "--json", "--non-interactive"])
         .stdout(std::process::Stdio::piped())
@@ -416,8 +416,8 @@ fn readiness_requires_voice_and_keys_and_preserves_explicitly_disabled_features(
     assert_eq!(saved["setup_complete"], true);
     assert_eq!(saved["account_access_verified"], false);
     assert!(!s.config.defaults.contains_key(&Media::Music));
-    assert!(t.path().join(".agents/skills/mediaagent/SKILL.md").exists());
-    assert!(t.path().join(".claude/skills/mediaagent/SKILL.md").exists());
+    assert!(t.path().join(".agents/skills/framechord/SKILL.md").exists());
+    assert!(t.path().join(".claude/skills/framechord/SKILL.md").exists());
 }
 #[test]
 fn credentials_round_trip_literal_characters_without_touching_existing_content() {
@@ -507,11 +507,11 @@ fn catalog_filters_and_current_policy_cannot_be_bypassed_by_arbitrary_text_ids()
 }
 struct Count(AtomicUsize);
 #[async_trait::async_trait]
-impl mediaagent::providers::Adapter for Count {
+impl framechord::providers::Adapter for Count {
     async fn generate(
         &self,
         _: &Effective,
-    ) -> mediaagent::error::Result<mediaagent::providers::Generated> {
+    ) -> framechord::error::Result<framechord::providers::Generated> {
         self.0.fetch_add(1, Ordering::SeqCst);
         panic!("retired models must never reach the provider")
     }
@@ -586,7 +586,7 @@ async fn older_projects_are_readable_but_new_submissions_and_side_operations_are
 #[test]
 fn cached_discovery_is_browsable_but_cannot_authorize_execution() {
     let t = tempfile::tempdir().unwrap();
-    storage::save(&t.path().join("mediaagent/cache/models.yaml"),&json!({"catalogs":[{"provider":"openai","models":[{"model":"future-image-model","media":"image","current":true,"supported":true}]}]})).unwrap();
+    storage::save(&t.path().join("framechord/cache/models.yaml"),&json!({"catalogs":[{"provider":"openai","models":[{"model":"future-image-model","media":"image","current":true,"supported":true}]}]})).unwrap();
     let list = catalog::listing(
         t.path(),
         &catalog::Filter {
@@ -698,8 +698,8 @@ fn concurrent_character_creation_never_overwrites_a_winning_scaffold() {
     });
     assert_eq!(results.iter().filter(|r| r.is_ok()).count(), 1);
     assert!(
-        mediaagent::validation::character(
-            &path.join("mediaagent/characters/unique/character.yaml")
+        framechord::validation::character(
+            &path.join("framechord/characters/unique/character.yaml")
         )
         .is_ok()
     );
@@ -709,7 +709,7 @@ fn concurrent_character_creation_never_overwrites_a_winning_scaffold() {
 fn direct_cli_accepts_current_image_quality_and_size_controls_without_generation() {
     let root = tempfile::tempdir().unwrap();
     for quality in ["xhigh", "max"] {
-        let output = cargo_bin_cmd!("mediaagent")
+        let output = cargo_bin_cmd!("framechord")
             .arg("--project")
             .arg(root.path())
             .args([
@@ -738,7 +738,7 @@ fn direct_cli_accepts_current_image_quality_and_size_controls_without_generation
             result["data"]["inputs"][0]["settings"]["image_quality"],
             quality
         );
-        assert!(!root.path().join("mediaagent/runs").exists());
+        assert!(!root.path().join("framechord/runs").exists());
     }
 }
 
@@ -746,7 +746,7 @@ fn direct_cli_accepts_current_image_quality_and_size_controls_without_generation
 fn unchanged_setup_save_preserves_configuration_comments_and_formatting() {
     let root = tempfile::tempdir().unwrap();
     project::init(root.path(), &[]).unwrap();
-    let path = root.path().join("mediaagent/config.yaml");
+    let path = root.path().join("framechord/config.yaml");
     let original = format!(
         "# Keep my configuration notes\n{}",
         fs::read_to_string(&path).unwrap()
@@ -762,7 +762,7 @@ fn unchanged_setup_save_preserves_configuration_comments_and_formatting() {
 fn live_bundled_catalog_hides_historical_models_unless_all_is_explicit() {
     let root = tempfile::tempdir().unwrap();
     for all in [false, true] {
-        let mut command = cargo_bin_cmd!("mediaagent");
+        let mut command = cargo_bin_cmd!("framechord");
         command.arg("--project").arg(root.path()).args([
             "models",
             "--live",

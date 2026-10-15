@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use base64::{Engine as _, engine::general_purpose::STANDARD};
-use mediaagent::{
+use framechord::{
     assets,
     contracts::*,
     credentials,
@@ -88,7 +88,7 @@ impl Adapter for Fake {
             return Err(Error::new("provider_rejected", "Mock rejection", 3));
         }
         let (bytes, format) = if e.media == Media::Speech {
-            (mediaagent::audio::wav(&[0.1; 2400])?, "wav")
+            (framechord::audio::wav(&[0.1; 2400])?, "wav")
         } else {
             (png(), "png")
         };
@@ -106,20 +106,20 @@ fn offline_init_preserves_credentials_user_content_and_skills() {
     let root = t.path();
     fs::write(root.join(".env"), "PRIVATE_TEST_VALUE=keep-me\n").unwrap();
     project::init(root, &["codex".into(), "claude".into()]).unwrap();
-    let config = root.join("mediaagent/config.yaml");
+    let config = root.join("framechord/config.yaml");
     let mut c = project::config(root).unwrap();
     c.defaults.insert(Media::Image, input("x").selection);
     storage::save(&config, &c).unwrap();
-    let visual = root.join("mediaagent/templates/visual.md");
+    let visual = root.join("framechord/templates/visual.md");
     fs::write(&visual, "User authored visual identity").unwrap();
-    let skill = root.join(".claude/skills/mediaagent/SKILL.md");
+    let skill = root.join(".claude/skills/framechord/SKILL.md");
     fs::write(&skill, "Modified local skill").unwrap();
     project::init(root, &["codex".into(), "claude".into()]).unwrap();
     assert_eq!(
         fs::read_to_string(root.join(".env")).unwrap(),
         format!(
             "PRIVATE_TEST_VALUE=keep-me\n{}",
-            mediaagent::credentials::ENV_TEMPLATE
+            framechord::credentials::ENV_TEMPLATE
         )
     );
     assert_eq!(
@@ -134,18 +134,18 @@ fn offline_init_preserves_credentials_user_content_and_skills() {
             .contains_key(&Media::Image)
     );
     assert!(
-        root.join(".agents/skills/mediaagent/references/commands.md")
+        root.join(".agents/skills/framechord/references/commands.md")
             .is_file()
     );
     assert!(
-        root.join(".agents/skills/mediaagent/references/schemas/job.json")
+        root.join(".agents/skills/framechord/references/schemas/job.json")
             .is_file()
     );
 }
 #[test]
 fn initialization_preserves_an_incomplete_existing_persona() {
     let t = tempfile::tempdir().unwrap();
-    let p = t.path().join("mediaagent/characters/persona");
+    let p = t.path().join("framechord/characters/persona");
     fs::create_dir_all(&p).unwrap();
     fs::write(p.join("persona.md"), "original").unwrap();
     project::init(t.path(), &[]).unwrap();
@@ -160,8 +160,8 @@ fn user_scope_install_uses_the_same_embedded_bundle() {
     let home = tempfile::tempdir().unwrap();
     project::install(home.path(), &["codex".into(), "claude".into()]).unwrap();
     assert_eq!(
-        fs::read(home.path().join(".agents/skills/mediaagent/SKILL.md")).unwrap(),
-        fs::read(home.path().join(".claude/skills/mediaagent/SKILL.md")).unwrap()
+        fs::read(home.path().join(".agents/skills/framechord/SKILL.md")).unwrap(),
+        fs::read(home.path().join(".claude/skills/framechord/SKILL.md")).unwrap()
     );
     let export = tempfile::tempdir().unwrap();
     assets::skill(export.path()).unwrap();
@@ -171,7 +171,7 @@ fn user_scope_install_uses_the_same_embedded_bundle() {
 fn invalid_agent_target_causes_no_partial_initialization() {
     let t = tempfile::tempdir().unwrap();
     assert!(project::init(t.path(), &["codex".into(), "unknown".into()]).is_err());
-    assert!(!t.path().join("mediaagent").exists());
+    assert!(!t.path().join("framechord").exists());
 }
 fn make_character(root: &Path) -> std::path::PathBuf {
     let path = project::add_persona(root, "mira").unwrap();
@@ -265,7 +265,7 @@ fn schemas_and_parser_reject_unknown_fields_and_versions() {
         ..Default::default()
     };
     assert!(validation::config(&cfg).is_err());
-    let schema = mediaagent::cli::schema("job").unwrap();
+    let schema = framechord::cli::schema("job").unwrap();
     assert_eq!(schema["additionalProperties"], false);
     assert!(schema["$schema"].as_str().unwrap().contains("2020-12"));
 }
@@ -625,8 +625,8 @@ fn submission_idempotency_detects_input_conflicts() {
 }
 #[test]
 fn rust_audio_assembly_has_known_duration_rate_and_channels() {
-    let bytes = mediaagent::audio::wav(&[0.2; 4800]).unwrap();
-    let (samples, rate) = mediaagent::audio::decode(&bytes).unwrap();
+    let bytes = framechord::audio::wav(&[0.2; 4800]).unwrap();
+    let (samples, rate) = framechord::audio::decode(&bytes).unwrap();
     assert_eq!(rate, 24000);
     assert_eq!(samples.len(), 4800);
     let reader = hound::WavReader::new(Cursor::new(bytes)).unwrap();
@@ -650,7 +650,7 @@ fn rust_audio_assembly_has_known_duration_rate_and_channels() {
         }
         w.finalize().unwrap();
     }
-    let converted = mediaagent::audio::mono_24k(&bytes.into_inner()).unwrap();
+    let converted = framechord::audio::mono_24k(&bytes.into_inner()).unwrap();
     assert_eq!(converted.len(), 2400);
     assert!((converted[1200] - 2000.0 / 32768.0).abs() < 0.002);
 }
@@ -792,7 +792,7 @@ async fn revisions_preserve_original_artifacts_and_inherit_budget() {
         .unwrap();
     let artifact = &original.jobs[0].artifacts[0];
     let old = fs::read(&artifact.path).unwrap();
-    let (child, method) = mediaagent::cli::prepare_revision(
+    let (child, method) = framechord::cli::prepare_revision(
         t.path(),
         &artifact.id,
         "Use a lighter background.",
@@ -841,7 +841,7 @@ async fn podcast_revision_regenerates_only_the_selected_turn() {
         .await
         .unwrap();
     let combined = &original.jobs[2].artifacts[0];
-    let (revision, method) = mediaagent::cli::prepare_revision(
+    let (revision, method) = framechord::cli::prepare_revision(
         t.path(),
         &combined.id,
         "A warmer delivery.",
@@ -1077,11 +1077,11 @@ fn planned_files_use_the_shared_validator_and_contained_dependencies() {
         {"path":"brief.md","content":"Draw exactly three teal leaves."}
     ]}).to_string();
     let manifest =
-        mediaagent::planning::stage(&content, "job", stage.path(), &Config::default()).unwrap();
+        framechord::planning::stage(&content, "job", stage.path(), &Config::default()).unwrap();
     let job: Job = storage::yaml(&manifest).unwrap();
     let effective = validation::resolve(&job, stage.path(), &Config::default()).unwrap();
     assert_eq!(effective.prompt, "Draw exactly three teal leaves.");
-    assert!(!stage.path().join("mediaagent/runs").exists());
+    assert!(!stage.path().join("framechord/runs").exists());
 }
 
 #[test]
@@ -1092,14 +1092,14 @@ fn planner_rejects_escape_dependencies_and_non_authoring_files() {
     fs::create_dir(&stage).unwrap();
     let content = serde_json::json!({"files":[{"path":"job.yaml","content":"schema_version: 1\nid: planned\nmedia: image\nselection:\n  provider: openai\n  model: gpt-image-1\nbrief: ../outside.md\n"}]}).to_string();
     let error =
-        mediaagent::planning::stage(&content, "job", &stage, &Config::default()).unwrap_err();
+        framechord::planning::stage(&content, "job", &stage, &Config::default()).unwrap_err();
     assert!(error.to_string().contains("escapes"));
     assert!(!error.to_string().contains("Private outside content"));
     for path in [".env", "run.sh", "../outside.md", ""] {
         let stage = tempfile::tempdir().unwrap();
         let content = serde_json::json!({"files":[{"path":"brief.md","content":"Valid first file"},{"path":path,"content":"Bad file"}]}).to_string();
         assert!(
-            mediaagent::planning::stage(&content, "job", stage.path(), &Config::default()).is_err()
+            framechord::planning::stage(&content, "job", stage.path(), &Config::default()).is_err()
         );
         assert!(!stage.path().join("brief.md").exists());
     }
@@ -1118,7 +1118,7 @@ fn planner_checks_nested_character_dependencies_before_resolution() {
         {"path":"mira/visual.md","content":"Teal leaf mascot"}
     ]}).to_string();
     assert!(
-        mediaagent::planning::stage(&content, "job", &stage, &Config::default())
+        framechord::planning::stage(&content, "job", &stage, &Config::default())
             .unwrap_err()
             .to_string()
             .contains("escapes")
@@ -1182,7 +1182,7 @@ fn reference_validation_checks_media_bytes_before_acceptance() {
     assert!(project::accept(&character, &root.path().join("broken.png"), "image").is_err());
     let saved: Character = storage::yaml(&character).unwrap();
     assert!(saved.visual.unwrap().references.is_empty());
-    let audio = mediaagent::audio::wav(&[0.1; 2400]).unwrap();
+    let audio = framechord::audio::wav(&[0.1; 2400]).unwrap();
     fs::write(root.path().join("voice.wav"), &audio).unwrap();
     assert_eq!(
         validation::reference(root.path(), Path::new("voice.wav"))
@@ -1211,8 +1211,8 @@ async fn unsupported_ai_review_and_corrupt_manual_review_never_make_paid_request
         .await
         .unwrap();
     let artifact = &run.jobs[0].artifacts[0];
-    let config = mediaagent::cli::Cli::try_parse_from([
-        "mediaagent",
+    let config = framechord::cli::Cli::try_parse_from([
+        "framechord",
         "--project",
         root.path().to_str().unwrap(),
         "review",
@@ -1227,7 +1227,7 @@ async fn unsupported_ai_review_and_corrupt_manual_review_never_make_paid_request
     ])
     .unwrap();
     assert_eq!(
-        mediaagent::cli::dispatch(&config).await.unwrap_err().exit,
+        framechord::cli::dispatch(&config).await.unwrap_err().exit,
         2
     );
     let budget: Budget = storage::yaml(
@@ -1251,8 +1251,8 @@ async fn unsupported_ai_review_and_corrupt_manual_review_never_make_paid_request
     )
     .unwrap();
     fs::write(&artifact.path, b"changed after generation").unwrap();
-    let config = mediaagent::cli::Cli::try_parse_from([
-        "mediaagent",
+    let config = framechord::cli::Cli::try_parse_from([
+        "framechord",
         "--project",
         root.path().to_str().unwrap(),
         "review",
@@ -1262,7 +1262,7 @@ async fn unsupported_ai_review_and_corrupt_manual_review_never_make_paid_request
     ])
     .unwrap();
     assert_eq!(
-        mediaagent::cli::dispatch(&config).await.unwrap_err().code,
+        framechord::cli::dispatch(&config).await.unwrap_err().code,
         "artifact_corrupt"
     );
     assert_eq!(
@@ -1401,7 +1401,7 @@ fn planned_identity_references_cannot_escape_the_authoring_bundle() {
         path.display()
     );
     let content=serde_json::json!({"files":[{"path":"job.yaml","content":job},{"path":"brief.md","content":"A scene."}]}).to_string();
-    assert!(mediaagent::planning::stage(&content, "job", root.path(), &Config::default()).is_err());
+    assert!(framechord::planning::stage(&content, "job", root.path(), &Config::default()).is_err());
 }
 
 fn derived_job(path: &Path) -> Job {
@@ -1471,7 +1471,7 @@ fn initialization_applies_complete_defaults_before_creating_profiles() {
         fs::read_to_string(root.join(".env")).unwrap(),
         format!(
             "TEST_PRIVATE=preserve\n{}",
-            mediaagent::credentials::ENV_TEMPLATE
+            framechord::credentials::ENV_TEMPLATE
         )
     );
     assert_eq!(project::config(&root).unwrap().limits.concurrency, 3);
@@ -1579,7 +1579,7 @@ async fn original_receipt_pins_model_settings_and_survives_character_export() {
     let destination = tempfile::tempdir().unwrap();
     project::init_with_config(destination.path(), &[], Some(&cfg)).unwrap();
     let imported = project::import(destination.path(), &bundle, Some("imported")).unwrap();
-    fs::remove_dir_all(root.join("mediaagent/runs")).unwrap();
+    fs::remove_dir_all(root.join("framechord/runs")).unwrap();
     fs::write(destination.path().join("brief.md"), "Same original").unwrap();
     job.references.clear();
     job.character = Some(imported);

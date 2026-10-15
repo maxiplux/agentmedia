@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Published stable version to verify (for example v0.5.1)
+        description: Published stable version to verify (for example v0.6.0)
         required: true
         type: string
   workflow_call:
@@ -29,6 +29,6 @@ jobs:
         run: python scripts/test-accept-release.py
       - name: Verify the public installer, update and offline rollback in isolation
         env:
-          MEDIAAGENT_ACCEPT_VERSION: ${{ inputs.version }}
+          FRAMECHORD_ACCEPT_VERSION: ${{ inputs.version }}
         shell: bash
-        run: python scripts/accept-release.py --version "$MEDIAAGENT_ACCEPT_VERSION"
+        run: python scripts/accept-release.py --version "$FRAMECHORD_ACCEPT_VERSION"

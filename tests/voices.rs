@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use base64::{Engine as _, engine::general_purpose::STANDARD};
-use mediaagent::{
+use framechord::{
     contracts::*,
     error::Result,
     operations::Output,
@@ -51,7 +51,7 @@ impl Adapter for Fake {
     }
     async fn design(&self, _: &Selection, _: &str, _: &str) -> Result<Output> {
         self.designs.fetch_add(1, Ordering::SeqCst);
-        let bytes = mediaagent::audio::wav(&[0.1; 2400])?;
+        let bytes = framechord::audio::wav(&[0.1; 2400])?;
         let previews = vec![Preview {
             id: "candidate-1".into(),
             audio: Reference {
@@ -325,7 +325,7 @@ fn design_requires_exact_script_model_profile_and_bounded_volume() {
         .exit,
         6
     );
-    assert!(!root.path().join("mediaagent/runs").exists());
+    assert!(!root.path().join("framechord/runs").exists());
 }
 
 #[tokio::test]
@@ -392,7 +392,7 @@ async fn clone_consent_idempotency_and_verification_preserve_canonical_samples()
     let path = character(root.path());
     fs::write(
         root.path().join("sample.wav"),
-        mediaagent::audio::wav(&[0.1; 2400]).unwrap(),
+        framechord::audio::wav(&[0.1; 2400]).unwrap(),
     )
     .unwrap();
     fs::write(
@@ -451,7 +451,7 @@ async fn clone_consent_idempotency_and_verification_preserve_canonical_samples()
     .await
     .unwrap();
     assert_eq!(dry["provider_voice_created"], false);
-    assert!(!root.path().join("mediaagent/runs/clone-test").exists());
+    assert!(!root.path().join("framechord/runs/clone-test").exists());
     let result = voices::clone_voice(
         root.path(),
         &manifest,

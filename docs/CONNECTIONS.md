@@ -1,10 +1,10 @@
 # API connection and credential checks
 
 ```sh
-mediaagent doctor                         # Offline key-presence check
-mediaagent doctor --live                  # Check all five providers
-mediaagent doctor --live --provider openai,google --timeout-seconds 10
-mediaagent doctor --live --json --non-interactive
+framechord doctor                         # Offline key-presence check
+framechord doctor --live                  # Check all five providers
+framechord doctor --live --provider openai,google --timeout-seconds 10
+framechord doctor --live --json --non-interactive
 ```
 
 `doctor` stays offline unless `--live` is explicitly supplied. No initialization is

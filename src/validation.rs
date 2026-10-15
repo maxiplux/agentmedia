@@ -29,7 +29,7 @@ pub fn config(config: &Config) -> Result<()> {
         };
         if !supported {
             return Err(Error::input(format!(
-                "Unsupported default provider/model for {media:?}; inspect mediaagent models"
+                "Unsupported default provider/model for {media:?}; inspect framechord models"
             )));
         }
     }

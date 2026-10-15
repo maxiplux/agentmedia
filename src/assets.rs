@@ -166,6 +166,10 @@ pub fn skill_with(path: &Path, overwrite: bool) -> Result<Vec<String>> {
             include_str!("../assets/skill/references/installation.md").to_owned(),
         ),
         (
+            "references/renaming.md",
+            include_str!("../assets/skill/references/renaming.md").to_owned(),
+        ),
+        (
             "references/workflow.md",
             include_str!("../assets/skill/references/workflow.md").to_owned(),
         ),

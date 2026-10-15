@@ -20,7 +20,7 @@ pub struct Index {
 impl Index {
     pub fn load(root: &Path) -> Result<Self> {
         let mut records = vec![];
-        let runs = root.join("mediaagent/runs");
+        let runs = crate::project::directory(root).join("runs");
         if runs.exists() {
             for entry in fs::read_dir(runs)? {
                 let path = entry?.path().join("run.yaml");

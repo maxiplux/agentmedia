@@ -285,7 +285,7 @@ pub fn validate(e: &Effective) -> Result<()> {
         }
         return Ok(());
     }
-    let c=cap.ok_or_else(||Error::new("unsupported_capability","Provider/model/media combination is not in the implemented capability registry; inspect mediaagent models",2))?;
+    let c=cap.ok_or_else(||Error::new("unsupported_capability","Provider/model/media combination is not in the implemented capability registry; inspect framechord models",2))?;
     if media == Media::Speech {
         if e.references
             .iter()
@@ -382,7 +382,7 @@ pub fn validate(e: &Effective) -> Result<()> {
             .contains(&quality.as_str()))
     {
         return Err(Error::input(
-            "Unsupported image quality for this OpenAI image model; inspect mediaagent models",
+            "Unsupported image quality for this OpenAI image model; inspect framechord models",
         ));
     }
     if e.settings.instrumental.is_some() && media != Media::Music {

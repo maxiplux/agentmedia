@@ -44,6 +44,6 @@ jobs:
         run: python scripts/package-release.py --offline
       - uses: actions/upload-artifact@v7
         with:
-          name: mediaagent-${{ matrix.os }}
+          name: framechord-${{ matrix.os }}
           path: target/package-dist/*
           if-no-files-found: error

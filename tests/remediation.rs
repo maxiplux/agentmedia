@@ -1,9 +1,9 @@
 use async_trait::async_trait;
-use mediaagent::{
+use framechord::{
     audio, contracts::*, engine, maintenance, planning, project, storage::*, validation,
     verification,
 };
-use mediaagent::{
+use framechord::{
     error::{Error, Result},
     providers::{Adapter, Generated},
 };
@@ -159,14 +159,14 @@ fn blobs_roundtrip_deduplicate_and_detect_corruption() {
         validation::fingerprint(&loaded.jobs[0].input).unwrap()
     );
     assert_eq!(
-        fs::read_dir(r.path().join("mediaagent/blobs"))
+        fs::read_dir(r.path().join("framechord/blobs"))
             .unwrap()
             .count(),
         1
     );
     fs::write(
         r.path()
-            .join("mediaagent/blobs")
+            .join("framechord/blobs")
             .join(&input.references[0].sha256),
         b"bad",
     )
@@ -182,9 +182,9 @@ fn metadata_rebuild_does_not_need_reference_bytes() {
     let p = engine::run_path(r.path(), &run.id)
         .unwrap()
         .join("run.yaml");
-    let before = mediaagent::blobs::read_metadata(&p).unwrap();
+    let before = framechord::blobs::read_metadata(&p).unwrap();
     fs::remove_file(p.with_file_name("metadata.json")).unwrap();
-    assert_eq!(before, mediaagent::blobs::read_metadata(&p).unwrap());
+    assert_eq!(before, framechord::blobs::read_metadata(&p).unwrap());
 }
 #[test]
 fn migration_preview_is_nonmutating_and_backup_is_exact() {
@@ -207,18 +207,18 @@ fn cleanup_removes_only_orphans_and_rejects_stale_plan() {
     let r = root();
     let bytes = png();
     let sha = hash(&bytes);
-    let blob = r.path().join("mediaagent/blobs").join(&sha);
+    let blob = r.path().join("framechord/blobs").join(&sha);
     atomic(&blob, &bytes, false).unwrap();
     let p = r.path().join("cleanup.yaml");
     let plan = maintenance::storage_plan(r.path()).unwrap();
     save(&p, &plan).unwrap();
-    fs::write(r.path().join("mediaagent/new.md"), "Changed").unwrap();
+    fs::write(r.path().join("framechord/new.md"), "Changed").unwrap();
     assert!(maintenance::clean(r.path(), &p).is_err());
     assert!(blob.exists());
     save(&p, &maintenance::storage_plan(r.path()).unwrap()).unwrap();
     maintenance::clean(r.path(), &p).unwrap();
     assert!(!blob.exists());
-    assert!(r.path().join("mediaagent/new.md").exists());
+    assert!(r.path().join("framechord/new.md").exists());
 }
 #[test]
 fn cleanup_protects_references_in_every_run() {
@@ -299,7 +299,7 @@ fn verification_preview_is_offline_bounded_and_content_bound() {
     let a = verification::prepare(r.path(), &p).unwrap();
     assert_eq!(a.preview["estimated_reservation"]["requests"], 1);
     assert_eq!(
-        fs::read_dir(r.path().join("mediaagent/runs"))
+        fs::read_dir(r.path().join("framechord/runs"))
             .unwrap()
             .count(),
         0
@@ -392,7 +392,7 @@ fn verification_execution_with_missing_keys_is_skipped_not_passed() {
     let r = root();
     let p = suite(r.path());
     let preview = verification::prepare(r.path(), &p).unwrap();
-    let mut command = assert_cmd::Command::new(assert_cmd::cargo::cargo_bin!("mediaagent"));
+    let mut command = assert_cmd::Command::new(assert_cmd::cargo::cargo_bin!("framechord"));
     for provider in [
         Provider::Openai,
         Provider::Google,
@@ -419,7 +419,7 @@ fn verification_execution_with_missing_keys_is_skipped_not_passed() {
     let value: serde_json::Value = serde_json::from_slice(&result.get_output().stdout).unwrap();
     assert_eq!(value["data"]["skipped"][0]["status"], "skipped");
     assert_eq!(
-        fs::read_dir(r.path().join("mediaagent/runs"))
+        fs::read_dir(r.path().join("framechord/runs"))
             .unwrap()
             .count(),
         0
@@ -428,7 +428,7 @@ fn verification_execution_with_missing_keys_is_skipped_not_passed() {
 #[test]
 fn usage_keeps_voice_operations_and_unknown_costs_separate() {
     let r = root();
-    let dir = r.path().join("mediaagent/runs/voice-test");
+    let dir = r.path().join("framechord/runs/voice-test");
     fs::create_dir_all(&dir).unwrap();
     let op = Operation {
         schema_version: 1,
@@ -467,7 +467,7 @@ fn cleanup_refuses_symlinks_and_does_not_touch_their_targets() {
     let r = root();
     let external = tempfile::tempdir().unwrap();
     fs::write(external.path().join("keep"), "keep").unwrap();
-    std::os::unix::fs::symlink(external.path(), r.path().join("mediaagent/linked")).unwrap();
+    std::os::unix::fs::symlink(external.path(), r.path().join("framechord/linked")).unwrap();
     assert!(maintenance::storage_plan(r.path()).is_err());
     assert!(external.path().join("keep").exists());
 }

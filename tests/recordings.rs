@@ -1,4 +1,4 @@
-use mediaagent::{audio, contracts::*, project, setup, storage, validation};
+use framechord::{audio, contracts::*, project, setup, storage, validation};
 use std::{fs, path::Path};
 fn recording(root: &Path, granted: bool) -> VoiceSample {
     fs::write(root.join("sample.wav"), audio::wav(&[0.1; 2400]).unwrap()).unwrap();

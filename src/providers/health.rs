@@ -240,7 +240,7 @@ impl Client {
                 row.status = Status::Configured;
                 row.message = "Credential is present; authentication has not been tested".into();
                 row.action = Some(
-                    "Run mediaagent doctor --live for read-only endpoint/authentication checks"
+                    "Run framechord doctor --live for read-only endpoint/authentication checks"
                         .into(),
                 );
                 credentials.push(row);
@@ -300,7 +300,7 @@ impl Client {
             })?);
         }
         credentials.sort_by_key(|c| c.provider);
-        Ok(Report {schema_version:1,project:root.into(),initialized:root.join("mediaagent/config.yaml").exists(),live_requested:live,network_checked:credentials.iter().any(|c|c.network_checked),generation_performed:false,credentials,scope:if live {"Checks only the listed read-only authentication endpoints. Media generation endpoints, model/voice entitlements, billing readiness, and output quality remain untested. No media was generated."} else {"No network calls were made. Key presence does not establish key validity."}.into()})
+        Ok(Report {schema_version:1,project:root.into(),initialized:crate::project::directory(root).join("config.yaml").exists(),live_requested:live,network_checked:credentials.iter().any(|c|c.network_checked),generation_performed:false,credentials,scope:if live {"Checks only the listed read-only authentication endpoints. Media generation endpoints, model/voice entitlements, billing readiness, and output quality remain untested. No media was generated."} else {"No network calls were made. Key presence does not establish key validity."}.into()})
     }
 }
 fn classify(row: &mut Check, response: WireResponse) {

@@ -1,6 +1,6 @@
 fn main() {
     println!(
-        "cargo::rustc-env=MEDIAAGENT_TARGET={}",
+        "cargo::rustc-env=FRAMECHORD_TARGET={}",
         std::env::var("TARGET").unwrap()
     );
     println!("cargo::rerun-if-changed=build.rs");
@@ -12,6 +12,6 @@ fn main() {
         // Reserve 8 MiB for the executable's main thread; leave initial commit
         // unchanged. This also applies to cargo install and packaged binaries,
         // without requiring users to set environment variables.
-        println!("cargo::rustc-link-arg-bin=mediaagent=/STACK:8388608");
+        println!("cargo::rustc-link-arg-bin=framechord=/STACK:8388608");
     }
 }

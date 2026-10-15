@@ -1,5 +1,5 @@
 use clap::{CommandFactory, FromArgMatches};
-use mediaagent::cli::{Cli, dispatch};
+use framechord::cli::{Cli, dispatch};
 
 #[tokio::main]
 async fn main() {
@@ -11,7 +11,7 @@ async fn main() {
             if e.use_stderr() && wants_json {
                 println!(
                     "{}",
-                    serde_json::json!({"schema_version":1,"command":"parse","ok":false,"data":null,"errors":[mediaagent::error::Error::input(e.to_string())],"warnings":[]})
+                    serde_json::json!({"schema_version":1,"command":"parse","ok":false,"data":null,"errors":[framechord::error::Error::input(e.to_string())],"warnings":[]})
                 );
                 std::process::exit(2);
             }
@@ -30,14 +30,14 @@ async fn main() {
     let command = names.join(".");
     let exit = match dispatch(&cli).await {
         Ok((data, exit)) => {
-            let (data, warnings) = mediaagent::cli::result_view(data);
+            let (data, warnings) = framechord::cli::result_view(data);
             if cli.json {
                 println!(
                     "{}",
-                    serde_json::json!({"schema_version":1,"command":command,"ok":exit==0,"data":data,"errors":if exit==0 {vec![]} else {vec![mediaagent::error::Error::new("operation_incomplete","Inspect returned diagnostics, jobs, or review findings",exit)]},"warnings":warnings})
+                    serde_json::json!({"schema_version":1,"command":command,"ok":exit==0,"data":data,"errors":if exit==0 {vec![]} else {vec![framechord::error::Error::new("operation_incomplete","Inspect returned diagnostics, jobs, or review findings",exit)]},"warnings":warnings})
                 );
             } else {
-                println!("{}", mediaagent::cli::human_result(&data));
+                println!("{}", framechord::cli::human_result(&data));
             }
             exit
         }

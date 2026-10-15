@@ -29,10 +29,10 @@ still undergo contained-path and capability validation before atomic publication
 ## Verification and quality
 
 ```sh
-mediaagent verify --suite suite.yaml --json
+framechord verify --suite suite.yaml --json
 # Only after approving the concrete bounded batch:
-mediaagent verify --suite suite.yaml --execute --preview-hash HASH --json
-mediaagent review report --artifact ARTIFACT_ID --output comparison.md --json
+framechord verify --suite suite.yaml --execute --preview-hash HASH --json
+framechord review report --artifact ARTIFACT_ID --output comparison.md --json
 ```
 
 Suites contain `schema_version: 1`, `id`, `description`, `jobs`, `limits` and
@@ -76,9 +76,9 @@ response and is not a new charge.
 For an uncertain job, first try supported provider reconciliation. Otherwise:
 
 ```sh
-mediaagent runs recover RUN --job JOB --file result.png --format png \
+framechord runs recover RUN --job JOB --file result.png --format png \
   --fingerprint RECORDED_FINGERPRINT --evidence recovery-evidence.md
-mediaagent runs resume RUN
+framechord runs resume RUN
 ```
 
 Recovery checks the exact uncertain leaf job, media format, bytes and evidence. It
@@ -95,13 +95,13 @@ loudness uses the native [EBU R128 analyzer](https://docs.rs/ebur128/0.1.10/ebur
 A -1 dBFS sample-peak ceiling takes precedence over the requested loudness target;
 silence has no measurable loudness. This is not a true-peak mastering limiter.
 
-New v2 run YAML stores reference blobs by SHA-256 under `mediaagent/blobs/`. Loading
+New v2 run YAML stores reference blobs by SHA-256 under `framechord/blobs/`. Loading
 checks hashes before hydrating adapter inputs. Legacy inline references remain
 readable. Metadata indexes are derived/rebuildable; YAML is canonical. Ignore blobs
-alongside runs/cache, not the entire mediaagent directory.
+alongside runs/cache, not the entire framechord directory.
 
 `storage inspect` reports size and orphan candidates. `storage plan --output
-cleanup.yaml` saves a preview **outside mediaagent/**. `storage clean --plan
+cleanup.yaml` saves a preview **outside framechord/**. `storage clean --plan
 cleanup.yaml` rejects stale plans, symlinks and active workers. It removes only
 unreferenced blobs. All runs, outputs, reviews, authoring files and history are
 retained, including unknown submissions. Archive/deletion of whole runs is not

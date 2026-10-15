@@ -49,7 +49,7 @@ pub enum ModelSort {
 }
 #[derive(Debug, Parser)]
 #[command(
-    name = "mediaagent",
+    name = "framechord",
     version,
     about = "Generate media from explicit briefs and optional reusable identities",
     long_about = "Generate images, infographics, exact speech, podcasts, music, and sound effects. Use direct flags for one asset or versioned YAML jobs for repeated work. Run --help on any command for inputs, output destinations, and examples. Initialization and validation are offline."
@@ -77,13 +77,13 @@ pub struct Cli {
 pub enum Command {
     /// Install this downloaded binary in your user bin directory, offline and without administrator access
     Install {
-        /// Executable destination directory (default: ~/.local/bin; Windows: LOCALAPPDATA/mediaagent/bin)
+        /// Executable destination directory (default: ~/.local/bin; Windows: LOCALAPPDATA/framechord/bin)
         #[arg(long)]
         bin_dir: Option<PathBuf>,
         /// Do not add the directory to your user PATH or shell profile
         #[arg(long)]
         no_modify_path: bool,
-        /// Explicitly replace an existing executable not managed by mediaagent
+        /// Explicitly replace an existing executable not managed by framechord
         #[arg(long)]
         force: bool,
     },
@@ -107,7 +107,7 @@ pub enum Command {
     },
     /// Initialize offline, preserving existing files and credentials
     Init {
-        /// Project folder (defaults to --project or the current directory); must allow a mediaagent/ subfolder
+        /// Project folder (defaults to --project or the current directory); must allow a framechord/ subfolder
         path: Option<PathBuf>,
         #[arg(long, value_delimiter = ',', default_value = "codex,claude")]
         agents: Vec<String>,
@@ -751,10 +751,10 @@ pub fn command_reference() -> String {
         }
     }
     let mut out = format!(
-        "# mediaagent {} command reference\n\nGenerated from the executable's command definitions. Global flags are accepted before or after the command.\n",
+        "# framechord {} command reference\n\nGenerated from the executable's command definitions. Global flags are accepted before or after the command.\n",
         env!("CARGO_PKG_VERSION")
     );
-    visit(Cli::command(), "mediaagent".into(), &mut out);
+    visit(Cli::command(), "framechord".into(), &mut out);
     out.lines()
         .map(str::trim_end)
         .collect::<Vec<_>>()
@@ -807,9 +807,9 @@ pub fn human_result(data: &Value) -> String {
                 "Setup locally ready. Provider access has not been verified."
             } else {
                 if data.get("project").is_some() {
-                    "Setup saved but unfinished. Run mediaagent init to continue."
+                    "Setup saved but unfinished. Run framechord init to continue."
                 } else {
-                    "Setup incomplete. Run mediaagent init to continue."
+                    "Setup incomplete. Run framechord init to continue."
                 }
             }
         );
@@ -819,10 +819,13 @@ pub fn human_result(data: &Value) -> String {
                 out +=
                     &format!("API keys: {path} (existing values preserved; missing names added)\n");
             }
+            if let Some(path) = data["data_directory"].as_str() {
+                out += &format!("Project files: {path}\n");
+            }
             for (agent, folder) in [("codex", ".agents"), ("claude", ".claude")] {
                 if data["skills"][agent] == true {
                     out += &format!(
-                        "Skill available: {}/{folder}/skills/mediaagent\n",
+                        "Skill available: {}/{folder}/skills/framechord\n",
                         project.as_str().unwrap_or("")
                     );
                 }
@@ -833,7 +836,7 @@ pub fn human_result(data: &Value) -> String {
                 out += &format!("  - {}\n", step.as_str().unwrap_or(""));
             }
         }
-        out += "Inspect readiness: mediaagent config status --json\n";
+        out += "Inspect readiness: framechord config status --json\n";
         return out;
     }
 
@@ -993,6 +996,12 @@ fn batch(root: &Path, path: &Path) -> Result<Vec<Effective>> {
 }
 pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
     let root = absolute(&cli.project)?;
+    if !matches!(
+        cli.command,
+        Command::Install { .. } | Command::Update { .. } | Command::Init { .. }
+    ) {
+        project::check_layout(&root)?;
+    }
     match &cli.command {
         Command::Install {
             bin_dir,
@@ -1041,7 +1050,7 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
             if terminal {
                 let selected = crate::setup::init_destination(path, cli.color)?;
                 let path = selected.as_path();
-                let exists = path.join("mediaagent/config.yaml").exists();
+                let exists = crate::project::directory(path).join("config.yaml").exists();
                 let initial = if exists {
                     project::config(path)?
                 } else if matches!(preset, Some(Preset::Empty)) {
@@ -1057,7 +1066,7 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                 ));
             }
             project::check_init_destination(path)?;
-            let exists = path.join("mediaagent/config.yaml").exists();
+            let exists = crate::project::directory(path).join("config.yaml").exists();
             let configured = if let Some(file) = defaults_file {
                 Some(yaml::<Config>(file)?)
             } else if exists {
@@ -1106,7 +1115,7 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
             ConfigAction::Setup { file } => {
                 let c: Config = yaml(file)?;
                 validation::config(&c)?;
-                save(&root.join("mediaagent/config.yaml"), &c)?;
+                save(&crate::project::directory(&root).join("config.yaml"), &c)?;
                 Ok((json!(c), 0))
             }
         },
@@ -1223,7 +1232,10 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                         0
                     };
                 if exit == 0 {
-                    save(&root.join("mediaagent/cache/models.yaml"), &result)?;
+                    save(
+                        &crate::project::directory(&root).join("cache/models.yaml"),
+                        &result,
+                    )?;
                 }
                 Ok((result, exit))
             } else {
@@ -1488,7 +1500,7 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                         .await
                         .map_err(|mut error| {
                             error.corrective_argv = vec![
-                                "mediaagent".into(),
+                                "framechord".into(),
                                 "--project".into(),
                                 root.to_string_lossy().into_owned(),
                                 "persona".into(),
@@ -1543,7 +1555,7 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                 Ok((json!({"character":project::add_persona(&root,id)?}), 0))
             }
             PersonaAction::List => {
-                let dir = root.join("mediaagent/characters");
+                let dir = crate::project::directory(&root).join("characters");
                 let mut entries = vec![];
                 if dir.exists() {
                     for e in fs::read_dir(dir)? {
@@ -2399,7 +2411,7 @@ async fn plan(
             )
             .into_boxed_str();
             error.corrective_argv = vec![
-                "mediaagent".into(),
+                "framechord".into(),
                 "--project".into(),
                 root.to_string_lossy().into_owned(),
                 "runs".into(),

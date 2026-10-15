@@ -8,7 +8,7 @@ import tempfile
 import sys
 
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--binary', default='target/debug/mediaagent')
+parser.add_argument('--binary', default='target/debug/framechord')
 parser.add_argument('--project', default='.')
 parser.add_argument('--provider', required=True, choices=['openai', 'google', 'fish', 'openrouter', 'elevenlabs'])
 parser.add_argument('--model', required=True)
@@ -32,13 +32,13 @@ if args.media == 'speech' and not args.voice:
     print(json.dumps({'status':'skipped','provider':args.provider,'passed':False,'reason':'explicit voice binding required'}))
     sys.exit(0)
 if args.voice in ('saved-voice-id', 'VOICE_ID', 'YOUR_VOICE_ID'):
-    parser.error('Use a real provider voice ID, not a placeholder; inspect mediaagent voices --account')
+    parser.error('Use a real provider voice ID, not a placeholder; inspect framechord voices --account')
 duration = 3
 if args.provider == 'google' and args.media == 'music':
     if args.model != 'lyria-3-clip-preview':
         parser.error('Use lyria-3-clip-preview for bounded Google music smoke testing')
     duration = 30
-with tempfile.TemporaryDirectory(prefix='mediaagent-smoke-') as temp:
+with tempfile.TemporaryDirectory(prefix='framechord-smoke-') as temp:
     limits = pathlib.Path(temp) / 'limits.yaml'
     limits.write_text(f'requests: 1\nimages: 1\naudio_seconds: {max(10, duration + 2)}\nspeech_chars: 100\nrevisions: 1\nattempts: 1\nconcurrency: 1\nper_provider: 1\n')
     argv = base + ['generate', args.media, '--provider', args.provider, '--model', args.model,

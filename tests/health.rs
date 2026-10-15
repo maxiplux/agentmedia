@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use mediaagent::{
+use framechord::{
     contracts::Provider,
     error::{Error, Result},
     providers::{
@@ -127,7 +127,7 @@ async fn live_checks_use_all_authenticated_read_only_routes_concurrently_and_red
     ] {
         assert!(seen.iter().any(|url| url.ends_with(suffix)));
     }
-    assert!(!root.path().join("mediaagent").exists());
+    assert!(!root.path().join("framechord").exists());
     let mixed = Arc::new(Mock::new(
         200,
         Some(json!({"data":[],"models":[],"credit":"0","user_id":"PRIVATE"})),
@@ -371,7 +371,7 @@ async fn model_popularity_is_provider_scoped_and_discovery_does_not_enable_unkno
         .models_filtered(
             root.path(),
             &[Provider::Openrouter],
-            Some(mediaagent::contracts::Media::Image),
+            Some(framechord::contracts::Media::Image),
             true,
         )
         .await
@@ -384,8 +384,8 @@ async fn model_popularity_is_provider_scoped_and_discovery_does_not_enable_unkno
     assert_eq!(report["generation_performed"], false);
     let before = fake.calls.load(Ordering::SeqCst);
     for media in [
-        mediaagent::contracts::Media::Music,
-        mediaagent::contracts::Media::Sfx,
+        framechord::contracts::Media::Music,
+        framechord::contracts::Media::Sfx,
     ] {
         let unsupported = health::Client::with_transport(2, fake.clone())
             .unwrap()

@@ -16,8 +16,8 @@ use std::{
     time::Duration,
 };
 
-pub const REPOSITORY: &str = "maxiplux/agentmedia";
-pub const TARGET: &str = env!("MEDIAAGENT_TARGET");
+pub const REPOSITORY: &str = "maxiplux/framechord";
+pub const TARGET: &str = env!("FRAMECHORD_TARGET");
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 const MAX_BINARY: usize = 128 * 1024 * 1024;
 const MAX_METADATA: usize = 1024 * 1024;
@@ -26,23 +26,23 @@ fn problem(message: impl Into<String>) -> Error {
 }
 fn executable_name() -> &'static str {
     if cfg!(windows) {
-        "mediaagent.exe"
+        "framechord.exe"
     } else {
-        "mediaagent"
+        "framechord"
     }
 }
 fn receipt(dir: &Path) -> PathBuf {
-    dir.join(".mediaagent-install.yaml")
+    dir.join(".framechord-install.yaml")
 }
 fn backup_path(dir: &Path) -> PathBuf {
     dir.join(if cfg!(windows) {
-        ".mediaagent-previous.exe"
+        ".framechord-previous.exe"
     } else {
-        ".mediaagent-previous"
+        ".framechord-previous"
     })
 }
 fn backup_receipt(dir: &Path) -> PathBuf {
-    dir.join(".mediaagent-previous.yaml")
+    dir.join(".framechord-previous.yaml")
 }
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -76,7 +76,7 @@ fn existing_record(path: &Path, bytes: &[u8]) -> Result<Record> {
 fn stable_version(value: &str) -> Result<Version> {
     let value = value.strip_prefix('v').unwrap_or(value);
     let v =
-        Version::parse(value).map_err(|_| Error::input("Choose a stable version such as 0.5.1"))?;
+        Version::parse(value).map_err(|_| Error::input("Choose a stable version such as 0.6.0"))?;
     if !v.pre.is_empty() || !v.build.is_empty() {
         return Err(Error::input("Only stable release versions are supported"));
     }
@@ -84,7 +84,7 @@ fn stable_version(value: &str) -> Result<Version> {
 }
 pub fn default_bin_dir() -> Result<PathBuf> {
     if cfg!(windows) {
-        std::env::var_os("LOCALAPPDATA").map(|p| PathBuf::from(p).join("mediaagent/bin"))
+        std::env::var_os("LOCALAPPDATA").map(|p| PathBuf::from(p).join("framechord/bin"))
     } else {
         std::env::var_os("HOME").map(|p| PathBuf::from(p).join(".local/bin"))
     }
@@ -105,7 +105,7 @@ fn executable_write(path: &Path, bytes: &[u8], overwrite: bool) -> Result<()> {
             .set_permissions(fs::Permissions::from_mode(0o755))?;
     }
     if overwrite { staged.persist(path) } else { staged.persist_noclobber(path) }
-        .map_err(|_| problem("Cannot replace the executable; close running mediaagent workers and check directory permissions. Existing backups are preserved"))?;
+        .map_err(|_| problem("Cannot replace the executable; close running framechord workers and check directory permissions. Existing backups are preserved"))?;
     Ok(())
 }
 fn keep_backup(executable: &Path, version: &str) -> Result<()> {
@@ -140,7 +140,7 @@ pub fn configure_unix_path(bin: &Path, profile: &Path) -> Result<bool> {
     if !next.is_empty() && !next.ends_with('\n') {
         next.push('\n');
     }
-    next.push_str(&format!("\n# mediaagent user installation\n{entry}\n"));
+    next.push_str(&format!("\n# framechord user installation\n{entry}\n"));
     // Do not replace a symlinked shell profile with a regular file.
     let target = if profile.is_symlink() {
         fs::canonicalize(profile)?
@@ -170,10 +170,10 @@ fn configure_path(bin: &Path) -> Result<Value> {
     #[cfg(windows)]
     let bin = ordinary.as_path();
     if cfg!(windows) {
-        let code = r#"$ErrorActionPreference='Stop'; $b=$env:MEDIAAGENT_INSTALL_BIN; $p=[Environment]::GetEnvironmentVariable('Path','User'); if(-not (($p -split ';') | Where-Object { $_.TrimEnd('\') -ieq $b.TrimEnd('\') })) { [Environment]::SetEnvironmentVariable('Path', ($b+';'+$p), 'User') }"#;
+        let code = r#"$ErrorActionPreference='Stop'; $b=$env:FRAMECHORD_INSTALL_BIN; $p=[Environment]::GetEnvironmentVariable('Path','User'); if(-not (($p -split ';') | Where-Object { $_.TrimEnd('\') -ieq $b.TrimEnd('\') })) { [Environment]::SetEnvironmentVariable('Path', ($b+';'+$p), 'User') }"#;
         let status = std::process::Command::new("powershell.exe")
             .args(["-NoProfile", "-NonInteractive", "-Command", code])
-            .env("MEDIAAGENT_INSTALL_BIN", bin)
+            .env("FRAMECHORD_INSTALL_BIN", bin)
             .status()?;
         if !status.success() {
             return Err(problem(
@@ -214,7 +214,7 @@ pub fn install(bin_dir: Option<&Path>, modify_path: bool, force: bool) -> Result
     }
     fs::create_dir_all(&bin)?;
     let bin = fs::canonicalize(bin)?;
-    let lock = storage::lock(&bin.join(".mediaagent-install.lock"))?;
+    let lock = storage::lock(&bin.join(".framechord-install.lock"))?;
     lock.lock_exclusive()?;
     let destination = bin.join(executable_name());
     let bytes = fs::read(&source)?;
@@ -246,15 +246,15 @@ pub fn install(bin_dir: Option<&Path>, modify_path: bool, force: bool) -> Result
         json!({"configured":false,"requested":false})
     };
     let message = format!(
-        "{} Use the executable path above now. Then run mediaagent init in your project folder. Updates: mediaagent update; read-only check: mediaagent update --check. Skills and project settings are refreshed separately.",
+        "{} Use the executable path above now. Then run framechord init in your project folder. Updates: framechord update; read-only check: framechord update --check. Skills and project settings are refreshed separately.",
         if path["configured"] == true {
-            "Open a new terminal to use mediaagent on PATH."
+            "Open a new terminal to use framechord on PATH."
         } else {
             "PATH was not changed; add the executable directory to PATH when wanted."
         }
     );
     Ok(
-        json!({"distribution_action":"Installed mediaagent","version":VERSION,"target":TARGET,"executable":destination,"replaced":replaced,"path":path,"project_files_changed":false,"network_requested":false,"message":message}),
+        json!({"distribution_action":"Installed framechord","version":VERSION,"target":TARGET,"executable":destination,"replaced":replaced,"path":path,"project_files_changed":false,"network_requested":false,"message":message}),
     )
 }
 
@@ -297,7 +297,7 @@ impl ReleaseClient {
     pub fn new() -> Result<Self> {
         let client = reqwest::Client::builder()
             .https_only(true)
-            .user_agent(concat!("mediaagent/", env!("CARGO_PKG_VERSION")))
+            .user_agent(concat!("framechord/", env!("CARGO_PKG_VERSION")))
             .timeout(Duration::from_secs(120))
             .connect_timeout(Duration::from_secs(15))
             .build()
@@ -344,7 +344,7 @@ impl ReleaseClient {
         }
         let current = stable_version(VERSION)?;
         let asset_name = format!(
-            "mediaagent-{TARGET}{}",
+            "framechord-{TARGET}{}",
             if cfg!(windows) { ".exe" } else { "" }
         );
         let asset = release.assets.into_iter().find(|a|a.name==asset_name).ok_or_else(|| problem(format!("No native binary for {TARGET} in this release; keep this executable or build from source")))?;
@@ -357,7 +357,7 @@ impl ReleaseClient {
         let digest = asset.digest.strip_prefix("sha256:").filter(|s|s.len()==64&&s.bytes().all(|b|b.is_ascii_hexdigit())).ok_or_else(|| problem("Release asset is missing its GitHub SHA-256 digest; no executable was replaced"))?;
         if check || (selected == current && !force) || (selected < current && version.is_none()) {
             return Ok(
-                json!({"distribution_action":"Release check complete","installed_version":VERSION,"available_version":selected.to_string(),"update_available":selected>current,"executable":executable,"target":TARGET,"check_only":check,"replaced":false,"message":if selected>current {"Update available. Run mediaagent update to install it."} else {"This executable is current or newer than the latest stable release."}}),
+                json!({"distribution_action":"Release check complete","installed_version":VERSION,"available_version":selected.to_string(),"update_available":selected>current,"executable":executable,"target":TARGET,"check_only":check,"replaced":false,"message":if selected>current {"Update available. Run framechord update to install it."} else {"This executable is current or newer than the latest stable release."}}),
             );
         }
         if selected < current && !allow_downgrade {
@@ -366,7 +366,7 @@ impl ReleaseClient {
             ));
         }
         let dir = executable.parent().unwrap();
-        let lock = storage::lock(&dir.join(".mediaagent-install.lock"))?;
+        let lock = storage::lock(&dir.join(".framechord-install.lock"))?;
         lock.lock_exclusive()?;
         let installed = fs::read(&executable)?;
         if observed_hash.as_deref() != Some(storage::hash(&installed).as_str())
@@ -374,10 +374,10 @@ impl ReleaseClient {
                 && existing_record(&receipt(dir), &installed)?.version != VERSION)
         {
             return Err(problem(
-                "The installed executable changed during this update; run mediaagent update again from the installed version. The preceding backup was preserved",
+                "The installed executable changed during this update; run framechord update again from the installed version. The preceding backup was preserved",
             ));
         }
-        eprintln!("Downloading mediaagent {selected} for {TARGET}…");
+        eprintln!("Downloading framechord {selected} for {TARGET}…");
         let bytes = self.transport.get(&expected_url, MAX_BINARY).await?;
         if bytes.len() != asset.size || storage::hash(&bytes) != digest.to_lowercase() {
             return Err(problem(
@@ -397,7 +397,7 @@ impl ReleaseClient {
         })?;
         record(&receipt(dir), &selected.to_string(), &bytes)?;
         Ok(
-            json!({"distribution_action":"Updated mediaagent","version":selected.to_string(),"previous_version":VERSION,"executable":executable,"target":TARGET,"sha256":digest,"replaced":true,"backup":backup_path(dir),"project_files_changed":false,"message":"Update complete. Existing projects and skills were preserved. Use mediaagent update --rollback to restore the preceding executable."}),
+            json!({"distribution_action":"Updated framechord","version":selected.to_string(),"previous_version":VERSION,"executable":executable,"target":TARGET,"sha256":digest,"replaced":true,"backup":backup_path(dir),"project_files_changed":false,"message":"Update complete. Existing projects and skills were preserved. Use framechord update --rollback to restore the preceding executable."}),
         )
     }
 }
@@ -431,7 +431,7 @@ async fn verify_version(path: &Path, expected: &str) -> Result<()> {
             problem("New executable cannot run on this computer; existing executable preserved")
         })?;
     if !output.status.success()
-        || String::from_utf8_lossy(&output.stdout).trim() != format!("mediaagent {expected}")
+        || String::from_utf8_lossy(&output.stdout).trim() != format!("framechord {expected}")
     {
         return Err(problem(
             "New executable version check failed; existing executable preserved",
@@ -442,7 +442,7 @@ async fn verify_version(path: &Path, expected: &str) -> Result<()> {
 pub async fn rollback() -> Result<Value> {
     let executable = fs::canonicalize(std::env::current_exe()?)?;
     let dir = executable.parent().unwrap();
-    let lock = storage::lock(&dir.join(".mediaagent-install.lock"))?;
+    let lock = storage::lock(&dir.join(".framechord-install.lock"))?;
     lock.lock_exclusive()?;
     let backup = backup_path(dir);
     let bytes =
@@ -462,6 +462,6 @@ pub async fn rollback() -> Result<Value> {
         record(&receipt(dir), &prior.version, &bytes)?;
     }
     Ok(
-        json!({"distribution_action":"Restored previous mediaagent","version":prior.version,"executable":executable,"project_files_changed":false,"network_requested":false,"message":"Rollback complete. Project configuration, keys, characters and skills were preserved."}),
+        json!({"distribution_action":"Restored previous framechord","version":prior.version,"executable":executable,"project_files_changed":false,"network_requested":false,"message":"Rollback complete. Project configuration, keys, characters and skills were preserved."}),
     )
 }

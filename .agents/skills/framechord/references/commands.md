@@ -1,13 +1,13 @@
-# mediaagent 0.5.1 command reference
+# framechord 0.6.0 command reference
 
 Generated from the executable's command definitions. Global flags are accepted before or after the command.
 
-## mediaagent
+## framechord
 
 ```text
 Generate images, infographics, exact speech, podcasts, music, and sound effects. Use direct flags for one asset or versioned YAML jobs for repeated work. Run --help on any command for inputs, output destinations, and examples. Initialization and validation are offline.
 
-Usage: mediaagent [OPTIONS] <COMMAND>
+Usage: framechord [OPTIONS] <COMMAND>
 
 Commands:
   install    Install this downloaded binary in your user bin directory, offline and without administrator access
@@ -67,16 +67,16 @@ Options:
 
 ```
 
-## mediaagent install
+## framechord install
 
 ```text
 Install this downloaded binary in your user bin directory, offline and without administrator access
 
-Usage: mediaagent install [OPTIONS]
+Usage: framechord install [OPTIONS]
 
 Options:
       --bin-dir <BIN_DIR>
-          Executable destination directory (default: ~/.local/bin; Windows: LOCALAPPDATA/mediaagent/bin)
+          Executable destination directory (default: ~/.local/bin; Windows: LOCALAPPDATA/framechord/bin)
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
@@ -90,7 +90,7 @@ Options:
           Do not add the directory to your user PATH or shell profile
 
       --force
-          Explicitly replace an existing executable not managed by mediaagent
+          Explicitly replace an existing executable not managed by framechord
 
       --non-interactive
           Never prompt; supply YAML files or explicit flags for automation
@@ -112,12 +112,12 @@ Options:
 
 ```
 
-## mediaagent update
+## framechord update
 
 ```text
 Update this executable from a verified public GitHub Release; project files stay untouched
 
-Usage: mediaagent update [OPTIONS]
+Usage: framechord update [OPTIONS]
 
 Options:
       --check
@@ -163,16 +163,16 @@ Options:
 
 ```
 
-## mediaagent init
+## framechord init
 
 ```text
 Initialize offline, preserving existing files and credentials
 
-Usage: mediaagent init [OPTIONS] [PATH]
+Usage: framechord init [OPTIONS] [PATH]
 
 Arguments:
   [PATH]
-          Project folder (defaults to --project or the current directory); must allow a mediaagent/ subfolder
+          Project folder (defaults to --project or the current directory); must allow a framechord/ subfolder
 
 Options:
       --agents <AGENTS>
@@ -221,12 +221,12 @@ Options:
 
 ```
 
-## mediaagent config
+## framechord config
 
 ```text
 Inspect or explicitly replace validated configuration
 
-Usage: mediaagent config [OPTIONS] <COMMAND>
+Usage: framechord config [OPTIONS] <COMMAND>
 
 Commands:
   wizard  Terminal-only guided defaults; agents use setup --file instead
@@ -266,12 +266,12 @@ Options:
 
 ```
 
-## mediaagent config wizard
+## framechord config wizard
 
 ```text
 Terminal-only guided defaults; agents use setup --file instead
 
-Usage: mediaagent config wizard [OPTIONS]
+Usage: framechord config wizard [OPTIONS]
 
 Options:
       --project <PROJECT>
@@ -302,12 +302,12 @@ Options:
 
 ```
 
-## mediaagent config host
+## framechord config host
 
 ```text
 Explicit user-scope host concurrency ceilings, independent of agent settings
 
-Usage: mediaagent config host [OPTIONS] <COMMAND>
+Usage: framechord config host [OPTIONS] <COMMAND>
 
 Commands:
   show
@@ -343,10 +343,10 @@ Options:
 
 ```
 
-## mediaagent config host show
+## framechord config host show
 
 ```text
-Usage: mediaagent config host show [OPTIONS]
+Usage: framechord config host show [OPTIONS]
 
 Options:
       --project <PROJECT>
@@ -377,10 +377,10 @@ Options:
 
 ```
 
-## mediaagent config host setup
+## framechord config host setup
 
 ```text
-Usage: mediaagent config host setup [OPTIONS] --file <FILE>
+Usage: framechord config host setup [OPTIONS] --file <FILE>
 
 Options:
       --file <FILE>
@@ -414,12 +414,12 @@ Options:
 
 ```
 
-## mediaagent config host help
+## framechord config host help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent config host help [COMMAND]
+Usage: framechord config host help [COMMAND]
 
 Commands:
   show
@@ -428,33 +428,33 @@ Commands:
 
 ```
 
-## mediaagent config host help show
+## framechord config host help show
 
 ```text
-Usage: mediaagent config host help show
+Usage: framechord config host help show
 
 ```
 
-## mediaagent config host help setup
+## framechord config host help setup
 
 ```text
-Usage: mediaagent config host help setup
+Usage: framechord config host help setup
 
 ```
 
-## mediaagent config host help help
+## framechord config host help help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent config host help help
+Usage: framechord config host help help
 
 ```
 
-## mediaagent config show
+## framechord config show
 
 ```text
-Usage: mediaagent config show [OPTIONS]
+Usage: framechord config show [OPTIONS]
 
 Options:
       --project <PROJECT>
@@ -485,12 +485,12 @@ Options:
 
 ```
 
-## mediaagent config status
+## framechord config status
 
 ```text
 Inspect local setup readiness without network calls or revealing credentials
 
-Usage: mediaagent config status [OPTIONS]
+Usage: framechord config status [OPTIONS]
 
 Options:
       --project <PROJECT>
@@ -521,12 +521,12 @@ Options:
 
 ```
 
-## mediaagent config setup
+## framechord config setup
 
 ```text
 Replace config only after validating the supplied file
 
-Usage: mediaagent config setup [OPTIONS] --file <FILE>
+Usage: framechord config setup [OPTIONS] --file <FILE>
 
 Options:
       --file <FILE>
@@ -560,12 +560,12 @@ Options:
 
 ```
 
-## mediaagent config limits
+## framechord config limits
 
 ```text
 Inspect finite generation limits
 
-Usage: mediaagent config limits [OPTIONS]
+Usage: framechord config limits [OPTIONS]
 
 Options:
       --project <PROJECT>
@@ -596,12 +596,12 @@ Options:
 
 ```
 
-## mediaagent config help
+## framechord config help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent config help [COMMAND]
+Usage: framechord config help [COMMAND]
 
 Commands:
   wizard  Terminal-only guided defaults; agents use setup --file instead
@@ -614,21 +614,21 @@ Commands:
 
 ```
 
-## mediaagent config help wizard
+## framechord config help wizard
 
 ```text
 Terminal-only guided defaults; agents use setup --file instead
 
-Usage: mediaagent config help wizard
+Usage: framechord config help wizard
 
 ```
 
-## mediaagent config help host
+## framechord config help host
 
 ```text
 Explicit user-scope host concurrency ceilings, independent of agent settings
 
-Usage: mediaagent config help host [COMMAND]
+Usage: framechord config help host [COMMAND]
 
 Commands:
   show
@@ -636,69 +636,69 @@ Commands:
 
 ```
 
-## mediaagent config help host show
+## framechord config help host show
 
 ```text
-Usage: mediaagent config help host show
+Usage: framechord config help host show
 
 ```
 
-## mediaagent config help host setup
+## framechord config help host setup
 
 ```text
-Usage: mediaagent config help host setup
+Usage: framechord config help host setup
 
 ```
 
-## mediaagent config help show
+## framechord config help show
 
 ```text
-Usage: mediaagent config help show
+Usage: framechord config help show
 
 ```
 
-## mediaagent config help status
+## framechord config help status
 
 ```text
 Inspect local setup readiness without network calls or revealing credentials
 
-Usage: mediaagent config help status
+Usage: framechord config help status
 
 ```
 
-## mediaagent config help setup
+## framechord config help setup
 
 ```text
 Replace config only after validating the supplied file
 
-Usage: mediaagent config help setup
+Usage: framechord config help setup
 
 ```
 
-## mediaagent config help limits
+## framechord config help limits
 
 ```text
 Inspect finite generation limits
 
-Usage: mediaagent config help limits
+Usage: framechord config help limits
 
 ```
 
-## mediaagent config help help
+## framechord config help help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent config help help
+Usage: framechord config help help
 
 ```
 
-## mediaagent verify
+## framechord verify
 
 ```text
 Preview a bounded live verification suite; execution requires the exact approved preview hash
 
-Usage: mediaagent verify [OPTIONS] --suite <SUITE>
+Usage: framechord verify [OPTIONS] --suite <SUITE>
 
 Options:
       --project <PROJECT>
@@ -738,12 +738,12 @@ Options:
 
 ```
 
-## mediaagent usage
+## framechord usage
 
 ```text
 Report provider-returned usage separately from unknown costs
 
-Usage: mediaagent usage [OPTIONS]
+Usage: framechord usage [OPTIONS]
 
 Options:
       --project <PROJECT>
@@ -774,12 +774,12 @@ Options:
 
 ```
 
-## mediaagent storage
+## framechord storage
 
 ```text
 Inspect storage or apply a previously reviewed conservative cleanup plan
 
-Usage: mediaagent storage [OPTIONS] <COMMAND>
+Usage: framechord storage [OPTIONS] <COMMAND>
 
 Commands:
   inspect
@@ -816,10 +816,10 @@ Options:
 
 ```
 
-## mediaagent storage inspect
+## framechord storage inspect
 
 ```text
-Usage: mediaagent storage inspect [OPTIONS]
+Usage: framechord storage inspect [OPTIONS]
 
 Options:
       --project <PROJECT>
@@ -850,12 +850,12 @@ Options:
 
 ```
 
-## mediaagent storage plan
+## framechord storage plan
 
 ```text
 Save a cleanup preview; only unreferenced blobs can be removed
 
-Usage: mediaagent storage plan [OPTIONS] --output <OUTPUT>
+Usage: framechord storage plan [OPTIONS] --output <OUTPUT>
 
 Options:
       --output <OUTPUT>
@@ -889,12 +889,12 @@ Options:
 
 ```
 
-## mediaagent storage clean
+## framechord storage clean
 
 ```text
 Revalidate and apply a saved cleanup preview; fails if stale or workers active
 
-Usage: mediaagent storage clean [OPTIONS] --plan <PLAN>
+Usage: framechord storage clean [OPTIONS] --plan <PLAN>
 
 Options:
       --plan <PLAN>
@@ -928,12 +928,12 @@ Options:
 
 ```
 
-## mediaagent storage help
+## framechord storage help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent storage help [COMMAND]
+Usage: framechord storage help [COMMAND]
 
 Commands:
   inspect
@@ -943,46 +943,46 @@ Commands:
 
 ```
 
-## mediaagent storage help inspect
+## framechord storage help inspect
 
 ```text
-Usage: mediaagent storage help inspect
+Usage: framechord storage help inspect
 
 ```
 
-## mediaagent storage help plan
+## framechord storage help plan
 
 ```text
 Save a cleanup preview; only unreferenced blobs can be removed
 
-Usage: mediaagent storage help plan
+Usage: framechord storage help plan
 
 ```
 
-## mediaagent storage help clean
+## framechord storage help clean
 
 ```text
 Revalidate and apply a saved cleanup preview; fails if stale or workers active
 
-Usage: mediaagent storage help clean
+Usage: framechord storage help clean
 
 ```
 
-## mediaagent storage help help
+## framechord storage help help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent storage help help
+Usage: framechord storage help help
 
 ```
 
-## mediaagent migrate
+## framechord migrate
 
 ```text
 Preview migration of a v1 job, config or run; --apply creates a non-overwriting backup
 
-Usage: mediaagent migrate [OPTIONS] --kind <KIND> --file <FILE>
+Usage: framechord migrate [OPTIONS] --kind <KIND> --file <FILE>
 
 Options:
       --kind <KIND>
@@ -1022,12 +1022,12 @@ Options:
 
 ```
 
-## mediaagent doctor
+## framechord doctor
 
 ```text
 Inspect credentials offline, or explicitly check all provider endpoints and keys with --live
 
-Usage: mediaagent doctor [OPTIONS]
+Usage: framechord doctor [OPTIONS]
 
 Options:
       --live
@@ -1071,12 +1071,12 @@ Options:
 
 ```
 
-## mediaagent schema
+## framechord schema
 
 ```text
 Print a JSON Schema for a versioned manifest
 
-Usage: mediaagent schema [OPTIONS] <KIND>
+Usage: framechord schema [OPTIONS] <KIND>
 
 Arguments:
   <KIND>
@@ -1111,12 +1111,12 @@ Options:
 
 ```
 
-## mediaagent models
+## framechord models
 
 ```text
 List implemented provider/model capabilities (not account entitlements)
 
-Usage: mediaagent models [OPTIONS]
+Usage: framechord models [OPTIONS]
 
 Options:
       --live
@@ -1173,12 +1173,12 @@ Options:
 
 ```
 
-## mediaagent voices
+## framechord voices
 
 ```text
 List built-in voices or search bounded pages of provider account voices
 
-Usage: mediaagent voices [OPTIONS] --provider <PROVIDER>
+Usage: framechord voices [OPTIONS] --provider <PROVIDER>
 
 Options:
       --project <PROJECT>
@@ -1248,12 +1248,12 @@ Options:
 
 ```
 
-## mediaagent templates
+## framechord templates
 
 ```text
 Inspect or export embedded authoring templates
 
-Usage: mediaagent templates [OPTIONS] <COMMAND>
+Usage: framechord templates [OPTIONS] <COMMAND>
 
 Commands:
   list
@@ -1290,10 +1290,10 @@ Options:
 
 ```
 
-## mediaagent templates list
+## framechord templates list
 
 ```text
-Usage: mediaagent templates list [OPTIONS]
+Usage: framechord templates list [OPTIONS]
 
 Options:
       --project <PROJECT>
@@ -1324,10 +1324,10 @@ Options:
 
 ```
 
-## mediaagent templates show
+## framechord templates show
 
 ```text
-Usage: mediaagent templates show [OPTIONS] <NAME>
+Usage: framechord templates show [OPTIONS] <NAME>
 
 Arguments:
   <NAME>
@@ -1362,10 +1362,10 @@ Options:
 
 ```
 
-## mediaagent templates export
+## framechord templates export
 
 ```text
-Usage: mediaagent templates export [OPTIONS] <DIRECTORY>
+Usage: framechord templates export [OPTIONS] <DIRECTORY>
 
 Arguments:
   <DIRECTORY>
@@ -1403,12 +1403,12 @@ Options:
 
 ```
 
-## mediaagent templates help
+## framechord templates help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent templates help [COMMAND]
+Usage: framechord templates help [COMMAND]
 
 Commands:
   list
@@ -1418,42 +1418,42 @@ Commands:
 
 ```
 
-## mediaagent templates help list
+## framechord templates help list
 
 ```text
-Usage: mediaagent templates help list
+Usage: framechord templates help list
 
 ```
 
-## mediaagent templates help show
+## framechord templates help show
 
 ```text
-Usage: mediaagent templates help show
+Usage: framechord templates help show
 
 ```
 
-## mediaagent templates help export
+## framechord templates help export
 
 ```text
-Usage: mediaagent templates help export
+Usage: framechord templates help export
 
 ```
 
-## mediaagent templates help help
+## framechord templates help help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent templates help help
+Usage: framechord templates help help
 
 ```
 
-## mediaagent persona
+## framechord persona
 
 ```text
 Create, inspect, bootstrap, accept, or port character definitions
 
-Usage: mediaagent persona [OPTIONS] <COMMAND>
+Usage: framechord persona [OPTIONS] <COMMAND>
 
 Commands:
   voice-clone         Explicitly create an ElevenLabs clone from selected authorized recordings
@@ -1500,12 +1500,12 @@ Options:
 
 ```
 
-## mediaagent persona voice-clone
+## framechord persona voice-clone
 
 ```text
 Explicitly create an ElevenLabs clone from selected authorized recordings
 
-Usage: mediaagent persona voice-clone [OPTIONS] --request <REQUEST>
+Usage: framechord persona voice-clone [OPTIONS] --request <REQUEST>
 
 Options:
       --project <PROJECT>
@@ -1551,12 +1551,12 @@ Options:
 
 ```
 
-## mediaagent persona voice-clone-status
+## framechord persona voice-clone-status
 
 ```text
 Inspect cloned-voice receipts and unresolved creation attempts
 
-Usage: mediaagent persona voice-clone-status [OPTIONS] <RUN_ID>
+Usage: framechord persona voice-clone-status [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
@@ -1591,12 +1591,12 @@ Options:
 
 ```
 
-## mediaagent persona voice-design
+## framechord persona voice-design
 
 ```text
 Generate ElevenLabs voice preview candidates without creating or binding a saved voice
 
-Usage: mediaagent persona voice-design [OPTIONS] --model <MODEL> --text-file <TEXT_FILE> <ID>
+Usage: framechord persona voice-design [OPTIONS] --model <MODEL> --text-file <TEXT_FILE> <ID>
 
 Arguments:
   <ID>
@@ -1651,12 +1651,12 @@ Options:
 
 ```
 
-## mediaagent persona voice-create
+## framechord persona voice-create
 
 ```text
 Create a provider voice from one selected candidate; canonical binding is explicit
 
-Usage: mediaagent persona voice-create [OPTIONS] --design-run <DESIGN_RUN> --candidate <CANDIDATE> --name <NAME> <ID>
+Usage: framechord persona voice-create [OPTIONS] --design-run <DESIGN_RUN> --candidate <CANDIDATE> --name <NAME> <ID>
 
 Arguments:
   <ID>
@@ -1715,12 +1715,12 @@ Options:
 
 ```
 
-## mediaagent persona voice-status
+## framechord persona voice-status
 
 ```text
 Inspect saved voice candidates, creation results, and uncertain operations
 
-Usage: mediaagent persona voice-status [OPTIONS] <RUN_ID>
+Usage: framechord persona voice-status [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
@@ -1755,10 +1755,10 @@ Options:
 
 ```
 
-## mediaagent persona add
+## framechord persona add
 
 ```text
-Usage: mediaagent persona add [OPTIONS] <ID>
+Usage: framechord persona add [OPTIONS] <ID>
 
 Arguments:
   <ID>
@@ -1793,10 +1793,10 @@ Options:
 
 ```
 
-## mediaagent persona list
+## framechord persona list
 
 ```text
-Usage: mediaagent persona list [OPTIONS]
+Usage: framechord persona list [OPTIONS]
 
 Options:
       --project <PROJECT>
@@ -1827,10 +1827,10 @@ Options:
 
 ```
 
-## mediaagent persona show
+## framechord persona show
 
 ```text
-Usage: mediaagent persona show [OPTIONS] <ID>
+Usage: framechord persona show [OPTIONS] <ID>
 
 Arguments:
   <ID>
@@ -1865,12 +1865,12 @@ Options:
 
 ```
 
-## mediaagent persona bootstrap
+## framechord persona bootstrap
 
 ```text
 Generate visual candidates; this never promotes references
 
-Usage: mediaagent persona bootstrap [OPTIONS] --output-dir <OUTPUT_DIR> <ID>
+Usage: framechord persona bootstrap [OPTIONS] --output-dir <OUTPUT_DIR> <ID>
 
 Arguments:
   <ID>
@@ -1911,12 +1911,12 @@ Options:
 
 ```
 
-## mediaagent persona accept-sample
+## framechord persona accept-sample
 
 ```text
 Accept a selected recording, exact transcript, and granted consent as a portable voice sample
 
-Usage: mediaagent persona accept-sample [OPTIONS] --audio <AUDIO> --transcript <TRANSCRIPT> --consent <CONSENT> <ID>
+Usage: framechord persona accept-sample [OPTIONS] --audio <AUDIO> --transcript <TRANSCRIPT> --consent <CONSENT> <ID>
 
 Arguments:
   <ID>
@@ -1960,12 +1960,12 @@ Options:
 
 ```
 
-## mediaagent persona accept
+## framechord persona accept
 
 ```text
 Accept a user-selected image or recording into the canonical profile
 
-Usage: mediaagent persona accept [OPTIONS] --reference <REFERENCE> --kind <KIND> <ID>
+Usage: framechord persona accept [OPTIONS] --reference <REFERENCE> --kind <KIND> <ID>
 
 Arguments:
   <ID>
@@ -2006,10 +2006,10 @@ Options:
 
 ```
 
-## mediaagent persona export
+## framechord persona export
 
 ```text
-Usage: mediaagent persona export [OPTIONS] --destination <DESTINATION> <ID>
+Usage: framechord persona export [OPTIONS] --destination <DESTINATION> <ID>
 
 Arguments:
   <ID>
@@ -2047,10 +2047,10 @@ Options:
 
 ```
 
-## mediaagent persona import
+## framechord persona import
 
 ```text
-Usage: mediaagent persona import [OPTIONS] <DIRECTORY>
+Usage: framechord persona import [OPTIONS] <DIRECTORY>
 
 Arguments:
   <DIRECTORY>
@@ -2088,12 +2088,12 @@ Options:
 
 ```
 
-## mediaagent persona help
+## framechord persona help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent persona help [COMMAND]
+Usage: framechord persona help [COMMAND]
 
 Commands:
   voice-clone         Explicitly create an ElevenLabs clone from selected authorized recordings
@@ -2113,128 +2113,128 @@ Commands:
 
 ```
 
-## mediaagent persona help voice-clone
+## framechord persona help voice-clone
 
 ```text
 Explicitly create an ElevenLabs clone from selected authorized recordings
 
-Usage: mediaagent persona help voice-clone
+Usage: framechord persona help voice-clone
 
 ```
 
-## mediaagent persona help voice-clone-status
+## framechord persona help voice-clone-status
 
 ```text
 Inspect cloned-voice receipts and unresolved creation attempts
 
-Usage: mediaagent persona help voice-clone-status
+Usage: framechord persona help voice-clone-status
 
 ```
 
-## mediaagent persona help voice-design
+## framechord persona help voice-design
 
 ```text
 Generate ElevenLabs voice preview candidates without creating or binding a saved voice
 
-Usage: mediaagent persona help voice-design
+Usage: framechord persona help voice-design
 
 ```
 
-## mediaagent persona help voice-create
+## framechord persona help voice-create
 
 ```text
 Create a provider voice from one selected candidate; canonical binding is explicit
 
-Usage: mediaagent persona help voice-create
+Usage: framechord persona help voice-create
 
 ```
 
-## mediaagent persona help voice-status
+## framechord persona help voice-status
 
 ```text
 Inspect saved voice candidates, creation results, and uncertain operations
 
-Usage: mediaagent persona help voice-status
+Usage: framechord persona help voice-status
 
 ```
 
-## mediaagent persona help add
+## framechord persona help add
 
 ```text
-Usage: mediaagent persona help add
+Usage: framechord persona help add
 
 ```
 
-## mediaagent persona help list
+## framechord persona help list
 
 ```text
-Usage: mediaagent persona help list
+Usage: framechord persona help list
 
 ```
 
-## mediaagent persona help show
+## framechord persona help show
 
 ```text
-Usage: mediaagent persona help show
+Usage: framechord persona help show
 
 ```
 
-## mediaagent persona help bootstrap
+## framechord persona help bootstrap
 
 ```text
 Generate visual candidates; this never promotes references
 
-Usage: mediaagent persona help bootstrap
+Usage: framechord persona help bootstrap
 
 ```
 
-## mediaagent persona help accept-sample
+## framechord persona help accept-sample
 
 ```text
 Accept a selected recording, exact transcript, and granted consent as a portable voice sample
 
-Usage: mediaagent persona help accept-sample
+Usage: framechord persona help accept-sample
 
 ```
 
-## mediaagent persona help accept
+## framechord persona help accept
 
 ```text
 Accept a user-selected image or recording into the canonical profile
 
-Usage: mediaagent persona help accept
+Usage: framechord persona help accept
 
 ```
 
-## mediaagent persona help export
+## framechord persona help export
 
 ```text
-Usage: mediaagent persona help export
+Usage: framechord persona help export
 
 ```
 
-## mediaagent persona help import
+## framechord persona help import
 
 ```text
-Usage: mediaagent persona help import
+Usage: framechord persona help import
 
 ```
 
-## mediaagent persona help help
+## framechord persona help help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent persona help help
+Usage: framechord persona help help
 
 ```
 
-## mediaagent validate
+## framechord validate
 
 ```text
 Validate local YAML and all referenced files; never generate
 
-Usage: mediaagent validate [OPTIONS] --kind <KIND> <PATH>
+Usage: framechord validate [OPTIONS] --kind <KIND> <PATH>
 
 Arguments:
   <PATH>
@@ -2272,12 +2272,12 @@ Options:
 
 ```
 
-## mediaagent generate
+## framechord generate
 
 ```text
 Generate one media job. Example: generate image --prompt 'A forest' --provider openai --model gpt-image-2.5-flare --output forest.png
 
-Usage: mediaagent generate [OPTIONS] [MEDIA]
+Usage: framechord generate [OPTIONS] [MEDIA]
 
 Arguments:
   [MEDIA]
@@ -2409,12 +2409,12 @@ Options:
 
 ```
 
-## mediaagent batch
+## framechord batch
 
 ```text
 Execute independent jobs concurrently using a YAML batch manifest
 
-Usage: mediaagent batch [OPTIONS] --manifest <MANIFEST>
+Usage: framechord batch [OPTIONS] --manifest <MANIFEST>
 
 Options:
       --manifest <MANIFEST>
@@ -2472,12 +2472,12 @@ Options:
 
 ```
 
-## mediaagent runs
+## framechord runs
 
 ```text
 Inspect, wait, cancel, or resume durable runs
 
-Usage: mediaagent runs [OPTIONS] <COMMAND>
+Usage: framechord runs [OPTIONS] <COMMAND>
 
 Commands:
   recover    Stage a manually recovered response for an uncertain job; resume publishes without a new paid request
@@ -2518,12 +2518,12 @@ Options:
 
 ```
 
-## mediaagent runs recover
+## framechord runs recover
 
 ```text
 Stage a manually recovered response for an uncertain job; resume publishes without a new paid request
 
-Usage: mediaagent runs recover [OPTIONS] --job <JOB> --file <FILE> --format <FORMAT> --fingerprint <FINGERPRINT> --evidence <EVIDENCE> <RUN_ID>
+Usage: framechord runs recover [OPTIONS] --job <JOB> --file <FILE> --format <FORMAT> --fingerprint <FINGERPRINT> --evidence <EVIDENCE> <RUN_ID>
 
 Arguments:
   <RUN_ID>
@@ -2573,12 +2573,12 @@ Options:
 
 ```
 
-## mediaagent runs reconcile
+## framechord runs reconcile
 
 ```text
 Retrieve saved Google interactions without a new generation; resume publishes recovered output
 
-Usage: mediaagent runs reconcile [OPTIONS] <RUN_ID>
+Usage: framechord runs reconcile [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
@@ -2613,10 +2613,10 @@ Options:
 
 ```
 
-## mediaagent runs list
+## framechord runs list
 
 ```text
-Usage: mediaagent runs list [OPTIONS]
+Usage: framechord runs list [OPTIONS]
 
 Options:
       --project <PROJECT>
@@ -2647,10 +2647,10 @@ Options:
 
 ```
 
-## mediaagent runs status
+## framechord runs status
 
 ```text
-Usage: mediaagent runs status [OPTIONS] <RUN_ID>
+Usage: framechord runs status [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
@@ -2685,10 +2685,10 @@ Options:
 
 ```
 
-## mediaagent runs wait
+## framechord runs wait
 
 ```text
-Usage: mediaagent runs wait [OPTIONS] <RUN_ID>
+Usage: framechord runs wait [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
@@ -2726,10 +2726,10 @@ Options:
 
 ```
 
-## mediaagent runs cancel
+## framechord runs cancel
 
 ```text
-Usage: mediaagent runs cancel [OPTIONS] <RUN_ID>
+Usage: framechord runs cancel [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
@@ -2764,10 +2764,10 @@ Options:
 
 ```
 
-## mediaagent runs resume
+## framechord runs resume
 
 ```text
-Usage: mediaagent runs resume [OPTIONS] <RUN_ID>
+Usage: framechord runs resume [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
@@ -2808,12 +2808,12 @@ Options:
 
 ```
 
-## mediaagent runs help
+## framechord runs help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent runs help [COMMAND]
+Usage: framechord runs help [COMMAND]
 
 Commands:
   recover    Stage a manually recovered response for an uncertain job; resume publishes without a new paid request
@@ -2827,74 +2827,74 @@ Commands:
 
 ```
 
-## mediaagent runs help recover
+## framechord runs help recover
 
 ```text
 Stage a manually recovered response for an uncertain job; resume publishes without a new paid request
 
-Usage: mediaagent runs help recover
+Usage: framechord runs help recover
 
 ```
 
-## mediaagent runs help reconcile
+## framechord runs help reconcile
 
 ```text
 Retrieve saved Google interactions without a new generation; resume publishes recovered output
 
-Usage: mediaagent runs help reconcile
+Usage: framechord runs help reconcile
 
 ```
 
-## mediaagent runs help list
+## framechord runs help list
 
 ```text
-Usage: mediaagent runs help list
+Usage: framechord runs help list
 
 ```
 
-## mediaagent runs help status
+## framechord runs help status
 
 ```text
-Usage: mediaagent runs help status
+Usage: framechord runs help status
 
 ```
 
-## mediaagent runs help wait
+## framechord runs help wait
 
 ```text
-Usage: mediaagent runs help wait
+Usage: framechord runs help wait
 
 ```
 
-## mediaagent runs help cancel
+## framechord runs help cancel
 
 ```text
-Usage: mediaagent runs help cancel
+Usage: framechord runs help cancel
 
 ```
 
-## mediaagent runs help resume
+## framechord runs help resume
 
 ```text
-Usage: mediaagent runs help resume
+Usage: framechord runs help resume
 
 ```
 
-## mediaagent runs help help
+## framechord runs help help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent runs help help
+Usage: framechord runs help help
 
 ```
 
-## mediaagent resume
+## framechord resume
 
 ```text
 Continue a recorded run, preserving successes; ambiguous retries are explicit
 
-Usage: mediaagent resume [OPTIONS] <RUN_ID>
+Usage: framechord resume [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
@@ -2935,12 +2935,12 @@ Options:
 
 ```
 
-## mediaagent review
+## framechord review
 
 ```text
 Check artifact integrity, request explicit image/audio AI review, or record a human/agent review
 
-Usage: mediaagent review [OPTIONS] <COMMAND>
+Usage: framechord review [OPTIONS] <COMMAND>
 
 Commands:
   report     Export a comparison report and immutable references without making acceptance decisions
@@ -2979,12 +2979,12 @@ Options:
 
 ```
 
-## mediaagent review report
+## framechord review report
 
 ```text
 Export a comparison report and immutable references without making acceptance decisions
 
-Usage: mediaagent review report [OPTIONS] --artifact <ARTIFACT> --output <OUTPUT>
+Usage: framechord review report [OPTIONS] --artifact <ARTIFACT> --output <OUTPUT>
 
 Options:
       --artifact <ARTIFACT>
@@ -3021,12 +3021,12 @@ Options:
 
 ```
 
-## mediaagent review reconcile
+## framechord review reconcile
 
 ```text
 Retrieve uncertain Google audio reviews without submitting another assessment
 
-Usage: mediaagent review reconcile [OPTIONS] --artifact <ARTIFACT>
+Usage: framechord review reconcile [OPTIONS] --artifact <ARTIFACT>
 
 Options:
       --artifact <ARTIFACT>
@@ -3060,12 +3060,12 @@ Options:
 
 ```
 
-## mediaagent review status
+## framechord review status
 
 ```text
 Inspect recorded AI review attempts, provider receipts, and uncertain outcomes
 
-Usage: mediaagent review status [OPTIONS] --artifact <ARTIFACT>
+Usage: framechord review status [OPTIONS] --artifact <ARTIFACT>
 
 Options:
       --artifact <ARTIFACT>
@@ -3099,12 +3099,12 @@ Options:
 
 ```
 
-## mediaagent review check
+## framechord review check
 
 ```text
 Verify an artifact; AI review uses OpenAI/OpenRouter for images and Google for audio
 
-Usage: mediaagent review check [OPTIONS] --artifact <ARTIFACT>
+Usage: framechord review check [OPTIONS] --artifact <ARTIFACT>
 
 Options:
       --artifact <ARTIFACT>
@@ -3150,12 +3150,12 @@ Options:
 
 ```
 
-## mediaagent review record
+## framechord review record
 
 ```text
 Record a schema-validated assessment with human/agent provenance
 
-Usage: mediaagent review record [OPTIONS] --file <FILE>
+Usage: framechord review record [OPTIONS] --file <FILE>
 
 Options:
       --file <FILE>
@@ -3189,12 +3189,12 @@ Options:
 
 ```
 
-## mediaagent review help
+## framechord review help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent review help [COMMAND]
+Usage: framechord review help [COMMAND]
 
 Commands:
   report     Export a comparison report and immutable references without making acceptance decisions
@@ -3206,66 +3206,66 @@ Commands:
 
 ```
 
-## mediaagent review help report
+## framechord review help report
 
 ```text
 Export a comparison report and immutable references without making acceptance decisions
 
-Usage: mediaagent review help report
+Usage: framechord review help report
 
 ```
 
-## mediaagent review help reconcile
+## framechord review help reconcile
 
 ```text
 Retrieve uncertain Google audio reviews without submitting another assessment
 
-Usage: mediaagent review help reconcile
+Usage: framechord review help reconcile
 
 ```
 
-## mediaagent review help status
+## framechord review help status
 
 ```text
 Inspect recorded AI review attempts, provider receipts, and uncertain outcomes
 
-Usage: mediaagent review help status
+Usage: framechord review help status
 
 ```
 
-## mediaagent review help check
+## framechord review help check
 
 ```text
 Verify an artifact; AI review uses OpenAI/OpenRouter for images and Google for audio
 
-Usage: mediaagent review help check
+Usage: framechord review help check
 
 ```
 
-## mediaagent review help record
+## framechord review help record
 
 ```text
 Record a schema-validated assessment with human/agent provenance
 
-Usage: mediaagent review help record
+Usage: framechord review help record
 
 ```
 
-## mediaagent review help help
+## framechord review help help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent review help help
+Usage: framechord review help help
 
 ```
 
-## mediaagent revise
+## framechord revise
 
 ```text
 Create a revision child run with inherited identity and limits
 
-Usage: mediaagent revise [OPTIONS] --artifact <ARTIFACT> --instructions-file <INSTRUCTIONS_FILE>
+Usage: framechord revise [OPTIONS] --artifact <ARTIFACT> --instructions-file <INSTRUCTIONS_FILE>
 
 Options:
       --artifact <ARTIFACT>
@@ -3311,12 +3311,12 @@ Options:
 
 ```
 
-## mediaagent plan
+## framechord plan
 
 ```text
 Explicit text-model planning; saves reviewable files without generating media
 
-Usage: mediaagent plan [OPTIONS] --kind <KIND> --prompt <PROMPT> --output-dir <OUTPUT_DIR>
+Usage: framechord plan [OPTIONS] --kind <KIND> --prompt <PROMPT> --output-dir <OUTPUT_DIR>
 
 Options:
       --kind <KIND>
@@ -3368,12 +3368,12 @@ Options:
 
 ```
 
-## mediaagent skills
+## framechord skills
 
 ```text
 Export a portable skill or install it in agent discovery locations
 
-Usage: mediaagent skills [OPTIONS] <COMMAND>
+Usage: framechord skills [OPTIONS] <COMMAND>
 
 Commands:
   export
@@ -3409,10 +3409,10 @@ Options:
 
 ```
 
-## mediaagent skills export
+## framechord skills export
 
 ```text
-Usage: mediaagent skills export [OPTIONS] <DIRECTORY>
+Usage: framechord skills export [OPTIONS] <DIRECTORY>
 
 Arguments:
   <DIRECTORY>
@@ -3450,10 +3450,10 @@ Options:
 
 ```
 
-## mediaagent skills install
+## framechord skills install
 
 ```text
-Usage: mediaagent skills install [OPTIONS]
+Usage: framechord skills install [OPTIONS]
 
 Options:
       --agents <AGENTS>
@@ -3494,12 +3494,12 @@ Options:
 
 ```
 
-## mediaagent skills help
+## framechord skills help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent skills help [COMMAND]
+Usage: framechord skills help [COMMAND]
 
 Commands:
   export
@@ -3508,35 +3508,35 @@ Commands:
 
 ```
 
-## mediaagent skills help export
+## framechord skills help export
 
 ```text
-Usage: mediaagent skills help export
+Usage: framechord skills help export
 
 ```
 
-## mediaagent skills help install
+## framechord skills help install
 
 ```text
-Usage: mediaagent skills help install
+Usage: framechord skills help install
 
 ```
 
-## mediaagent skills help help
+## framechord skills help help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent skills help help
+Usage: framechord skills help help
 
 ```
 
-## mediaagent help
+## framechord help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent help [COMMAND]
+Usage: framechord help [COMMAND]
 
 Commands:
   install    Install this downloaded binary in your user bin directory, offline and without administrator access
@@ -3566,39 +3566,39 @@ Commands:
 
 ```
 
-## mediaagent help install
+## framechord help install
 
 ```text
 Install this downloaded binary in your user bin directory, offline and without administrator access
 
-Usage: mediaagent help install
+Usage: framechord help install
 
 ```
 
-## mediaagent help update
+## framechord help update
 
 ```text
 Update this executable from a verified public GitHub Release; project files stay untouched
 
-Usage: mediaagent help update
+Usage: framechord help update
 
 ```
 
-## mediaagent help init
+## framechord help init
 
 ```text
 Initialize offline, preserving existing files and credentials
 
-Usage: mediaagent help init
+Usage: framechord help init
 
 ```
 
-## mediaagent help config
+## framechord help config
 
 ```text
 Inspect or explicitly replace validated configuration
 
-Usage: mediaagent help config [COMMAND]
+Usage: framechord help config [COMMAND]
 
 Commands:
   wizard  Terminal-only guided defaults; agents use setup --file instead
@@ -3610,21 +3610,21 @@ Commands:
 
 ```
 
-## mediaagent help config wizard
+## framechord help config wizard
 
 ```text
 Terminal-only guided defaults; agents use setup --file instead
 
-Usage: mediaagent help config wizard
+Usage: framechord help config wizard
 
 ```
 
-## mediaagent help config host
+## framechord help config host
 
 ```text
 Explicit user-scope host concurrency ceilings, independent of agent settings
 
-Usage: mediaagent help config host [COMMAND]
+Usage: framechord help config host [COMMAND]
 
 Commands:
   show
@@ -3632,78 +3632,78 @@ Commands:
 
 ```
 
-## mediaagent help config host show
+## framechord help config host show
 
 ```text
-Usage: mediaagent help config host show
+Usage: framechord help config host show
 
 ```
 
-## mediaagent help config host setup
+## framechord help config host setup
 
 ```text
-Usage: mediaagent help config host setup
+Usage: framechord help config host setup
 
 ```
 
-## mediaagent help config show
+## framechord help config show
 
 ```text
-Usage: mediaagent help config show
+Usage: framechord help config show
 
 ```
 
-## mediaagent help config status
+## framechord help config status
 
 ```text
 Inspect local setup readiness without network calls or revealing credentials
 
-Usage: mediaagent help config status
+Usage: framechord help config status
 
 ```
 
-## mediaagent help config setup
+## framechord help config setup
 
 ```text
 Replace config only after validating the supplied file
 
-Usage: mediaagent help config setup
+Usage: framechord help config setup
 
 ```
 
-## mediaagent help config limits
+## framechord help config limits
 
 ```text
 Inspect finite generation limits
 
-Usage: mediaagent help config limits
+Usage: framechord help config limits
 
 ```
 
-## mediaagent help verify
+## framechord help verify
 
 ```text
 Preview a bounded live verification suite; execution requires the exact approved preview hash
 
-Usage: mediaagent help verify
+Usage: framechord help verify
 
 ```
 
-## mediaagent help usage
+## framechord help usage
 
 ```text
 Report provider-returned usage separately from unknown costs
 
-Usage: mediaagent help usage
+Usage: framechord help usage
 
 ```
 
-## mediaagent help storage
+## framechord help storage
 
 ```text
 Inspect storage or apply a previously reviewed conservative cleanup plan
 
-Usage: mediaagent help storage [COMMAND]
+Usage: framechord help storage [COMMAND]
 
 Commands:
   inspect
@@ -3712,82 +3712,82 @@ Commands:
 
 ```
 
-## mediaagent help storage inspect
+## framechord help storage inspect
 
 ```text
-Usage: mediaagent help storage inspect
+Usage: framechord help storage inspect
 
 ```
 
-## mediaagent help storage plan
+## framechord help storage plan
 
 ```text
 Save a cleanup preview; only unreferenced blobs can be removed
 
-Usage: mediaagent help storage plan
+Usage: framechord help storage plan
 
 ```
 
-## mediaagent help storage clean
+## framechord help storage clean
 
 ```text
 Revalidate and apply a saved cleanup preview; fails if stale or workers active
 
-Usage: mediaagent help storage clean
+Usage: framechord help storage clean
 
 ```
 
-## mediaagent help migrate
+## framechord help migrate
 
 ```text
 Preview migration of a v1 job, config or run; --apply creates a non-overwriting backup
 
-Usage: mediaagent help migrate
+Usage: framechord help migrate
 
 ```
 
-## mediaagent help doctor
+## framechord help doctor
 
 ```text
 Inspect credentials offline, or explicitly check all provider endpoints and keys with --live
 
-Usage: mediaagent help doctor
+Usage: framechord help doctor
 
 ```
 
-## mediaagent help schema
+## framechord help schema
 
 ```text
 Print a JSON Schema for a versioned manifest
 
-Usage: mediaagent help schema
+Usage: framechord help schema
 
 ```
 
-## mediaagent help models
+## framechord help models
 
 ```text
 List implemented provider/model capabilities (not account entitlements)
 
-Usage: mediaagent help models
+Usage: framechord help models
 
 ```
 
-## mediaagent help voices
+## framechord help voices
 
 ```text
 List built-in voices or search bounded pages of provider account voices
 
-Usage: mediaagent help voices
+Usage: framechord help voices
 
 ```
 
-## mediaagent help templates
+## framechord help templates
 
 ```text
 Inspect or export embedded authoring templates
 
-Usage: mediaagent help templates [COMMAND]
+Usage: framechord help templates [COMMAND]
 
 Commands:
   list
@@ -3796,33 +3796,33 @@ Commands:
 
 ```
 
-## mediaagent help templates list
+## framechord help templates list
 
 ```text
-Usage: mediaagent help templates list
+Usage: framechord help templates list
 
 ```
 
-## mediaagent help templates show
+## framechord help templates show
 
 ```text
-Usage: mediaagent help templates show
+Usage: framechord help templates show
 
 ```
 
-## mediaagent help templates export
+## framechord help templates export
 
 ```text
-Usage: mediaagent help templates export
+Usage: framechord help templates export
 
 ```
 
-## mediaagent help persona
+## framechord help persona
 
 ```text
 Create, inspect, bootstrap, accept, or port character definitions
 
-Usage: mediaagent help persona [COMMAND]
+Usage: framechord help persona [COMMAND]
 
 Commands:
   voice-clone         Explicitly create an ElevenLabs clone from selected authorized recordings
@@ -3841,146 +3841,146 @@ Commands:
 
 ```
 
-## mediaagent help persona voice-clone
+## framechord help persona voice-clone
 
 ```text
 Explicitly create an ElevenLabs clone from selected authorized recordings
 
-Usage: mediaagent help persona voice-clone
+Usage: framechord help persona voice-clone
 
 ```
 
-## mediaagent help persona voice-clone-status
+## framechord help persona voice-clone-status
 
 ```text
 Inspect cloned-voice receipts and unresolved creation attempts
 
-Usage: mediaagent help persona voice-clone-status
+Usage: framechord help persona voice-clone-status
 
 ```
 
-## mediaagent help persona voice-design
+## framechord help persona voice-design
 
 ```text
 Generate ElevenLabs voice preview candidates without creating or binding a saved voice
 
-Usage: mediaagent help persona voice-design
+Usage: framechord help persona voice-design
 
 ```
 
-## mediaagent help persona voice-create
+## framechord help persona voice-create
 
 ```text
 Create a provider voice from one selected candidate; canonical binding is explicit
 
-Usage: mediaagent help persona voice-create
+Usage: framechord help persona voice-create
 
 ```
 
-## mediaagent help persona voice-status
+## framechord help persona voice-status
 
 ```text
 Inspect saved voice candidates, creation results, and uncertain operations
 
-Usage: mediaagent help persona voice-status
+Usage: framechord help persona voice-status
 
 ```
 
-## mediaagent help persona add
+## framechord help persona add
 
 ```text
-Usage: mediaagent help persona add
+Usage: framechord help persona add
 
 ```
 
-## mediaagent help persona list
+## framechord help persona list
 
 ```text
-Usage: mediaagent help persona list
+Usage: framechord help persona list
 
 ```
 
-## mediaagent help persona show
+## framechord help persona show
 
 ```text
-Usage: mediaagent help persona show
+Usage: framechord help persona show
 
 ```
 
-## mediaagent help persona bootstrap
+## framechord help persona bootstrap
 
 ```text
 Generate visual candidates; this never promotes references
 
-Usage: mediaagent help persona bootstrap
+Usage: framechord help persona bootstrap
 
 ```
 
-## mediaagent help persona accept-sample
+## framechord help persona accept-sample
 
 ```text
 Accept a selected recording, exact transcript, and granted consent as a portable voice sample
 
-Usage: mediaagent help persona accept-sample
+Usage: framechord help persona accept-sample
 
 ```
 
-## mediaagent help persona accept
+## framechord help persona accept
 
 ```text
 Accept a user-selected image or recording into the canonical profile
 
-Usage: mediaagent help persona accept
+Usage: framechord help persona accept
 
 ```
 
-## mediaagent help persona export
+## framechord help persona export
 
 ```text
-Usage: mediaagent help persona export
+Usage: framechord help persona export
 
 ```
 
-## mediaagent help persona import
+## framechord help persona import
 
 ```text
-Usage: mediaagent help persona import
+Usage: framechord help persona import
 
 ```
 
-## mediaagent help validate
+## framechord help validate
 
 ```text
 Validate local YAML and all referenced files; never generate
 
-Usage: mediaagent help validate
+Usage: framechord help validate
 
 ```
 
-## mediaagent help generate
+## framechord help generate
 
 ```text
 Generate one media job. Example: generate image --prompt 'A forest' --provider openai --model gpt-image-2.5-flare --output forest.png
 
-Usage: mediaagent help generate
+Usage: framechord help generate
 
 ```
 
-## mediaagent help batch
+## framechord help batch
 
 ```text
 Execute independent jobs concurrently using a YAML batch manifest
 
-Usage: mediaagent help batch
+Usage: framechord help batch
 
 ```
 
-## mediaagent help runs
+## framechord help runs
 
 ```text
 Inspect, wait, cancel, or resume durable runs
 
-Usage: mediaagent help runs [COMMAND]
+Usage: framechord help runs [COMMAND]
 
 Commands:
   recover    Stage a manually recovered response for an uncertain job; resume publishes without a new paid request
@@ -3993,74 +3993,74 @@ Commands:
 
 ```
 
-## mediaagent help runs recover
+## framechord help runs recover
 
 ```text
 Stage a manually recovered response for an uncertain job; resume publishes without a new paid request
 
-Usage: mediaagent help runs recover
+Usage: framechord help runs recover
 
 ```
 
-## mediaagent help runs reconcile
+## framechord help runs reconcile
 
 ```text
 Retrieve saved Google interactions without a new generation; resume publishes recovered output
 
-Usage: mediaagent help runs reconcile
+Usage: framechord help runs reconcile
 
 ```
 
-## mediaagent help runs list
+## framechord help runs list
 
 ```text
-Usage: mediaagent help runs list
+Usage: framechord help runs list
 
 ```
 
-## mediaagent help runs status
+## framechord help runs status
 
 ```text
-Usage: mediaagent help runs status
+Usage: framechord help runs status
 
 ```
 
-## mediaagent help runs wait
+## framechord help runs wait
 
 ```text
-Usage: mediaagent help runs wait
+Usage: framechord help runs wait
 
 ```
 
-## mediaagent help runs cancel
+## framechord help runs cancel
 
 ```text
-Usage: mediaagent help runs cancel
+Usage: framechord help runs cancel
 
 ```
 
-## mediaagent help runs resume
+## framechord help runs resume
 
 ```text
-Usage: mediaagent help runs resume
+Usage: framechord help runs resume
 
 ```
 
-## mediaagent help resume
+## framechord help resume
 
 ```text
 Continue a recorded run, preserving successes; ambiguous retries are explicit
 
-Usage: mediaagent help resume
+Usage: framechord help resume
 
 ```
 
-## mediaagent help review
+## framechord help review
 
 ```text
 Check artifact integrity, request explicit image/audio AI review, or record a human/agent review
 
-Usage: mediaagent help review [COMMAND]
+Usage: framechord help review [COMMAND]
 
 Commands:
   report     Export a comparison report and immutable references without making acceptance decisions
@@ -4071,75 +4071,75 @@ Commands:
 
 ```
 
-## mediaagent help review report
+## framechord help review report
 
 ```text
 Export a comparison report and immutable references without making acceptance decisions
 
-Usage: mediaagent help review report
+Usage: framechord help review report
 
 ```
 
-## mediaagent help review reconcile
+## framechord help review reconcile
 
 ```text
 Retrieve uncertain Google audio reviews without submitting another assessment
 
-Usage: mediaagent help review reconcile
+Usage: framechord help review reconcile
 
 ```
 
-## mediaagent help review status
+## framechord help review status
 
 ```text
 Inspect recorded AI review attempts, provider receipts, and uncertain outcomes
 
-Usage: mediaagent help review status
+Usage: framechord help review status
 
 ```
 
-## mediaagent help review check
+## framechord help review check
 
 ```text
 Verify an artifact; AI review uses OpenAI/OpenRouter for images and Google for audio
 
-Usage: mediaagent help review check
+Usage: framechord help review check
 
 ```
 
-## mediaagent help review record
+## framechord help review record
 
 ```text
 Record a schema-validated assessment with human/agent provenance
 
-Usage: mediaagent help review record
+Usage: framechord help review record
 
 ```
 
-## mediaagent help revise
+## framechord help revise
 
 ```text
 Create a revision child run with inherited identity and limits
 
-Usage: mediaagent help revise
+Usage: framechord help revise
 
 ```
 
-## mediaagent help plan
+## framechord help plan
 
 ```text
 Explicit text-model planning; saves reviewable files without generating media
 
-Usage: mediaagent help plan
+Usage: framechord help plan
 
 ```
 
-## mediaagent help skills
+## framechord help skills
 
 ```text
 Export a portable skill or install it in agent discovery locations
 
-Usage: mediaagent help skills [COMMAND]
+Usage: framechord help skills [COMMAND]
 
 Commands:
   export
@@ -4147,25 +4147,25 @@ Commands:
 
 ```
 
-## mediaagent help skills export
+## framechord help skills export
 
 ```text
-Usage: mediaagent help skills export
+Usage: framechord help skills export
 
 ```
 
-## mediaagent help skills install
+## framechord help skills install
 
 ```text
-Usage: mediaagent help skills install
+Usage: framechord help skills install
 
 ```
 
-## mediaagent help help
+## framechord help help
 
 ```text
 Print this message or the help of the given subcommand(s)
 
-Usage: mediaagent help help
+Usage: framechord help help
 
 ```

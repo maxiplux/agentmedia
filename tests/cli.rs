@@ -7,7 +7,7 @@ use std::fs;
 fn windows_executable_reserves_stack_for_configured_initialization() {
     // Inspect the actual linked executable, not an environment variable or
     // build-script string. The configured-init tests below exercise that binary.
-    let exe = fs::read(env!("CARGO_BIN_EXE_mediaagent")).unwrap();
+    let exe = fs::read(env!("CARGO_BIN_EXE_framechord")).unwrap();
     assert_eq!(&exe[..2], b"MZ");
     let pe = u32::from_le_bytes(exe[0x3c..0x40].try_into().unwrap()) as usize;
     assert_eq!(&exe[pe..pe + 4], b"PE\0\0");
@@ -35,7 +35,7 @@ fn init_complete_defaults_is_offline_and_repeatable() {
     )
     .unwrap();
     for _ in 0..2 {
-        let output = cargo_bin_cmd!("mediaagent")
+        let output = cargo_bin_cmd!("framechord")
             .args(["--json", "--non-interactive", "init"])
             .arg(&root)
             .arg("--defaults-file")
@@ -57,18 +57,18 @@ fn init_complete_defaults_is_offline_and_repeatable() {
         );
     }
     assert_eq!(
-        fs::read_dir(root.join("mediaagent/runs")).unwrap().count(),
+        fs::read_dir(root.join("framechord/runs")).unwrap().count(),
         0
     );
     assert_eq!(
         fs::read_to_string(root.join(".env")).unwrap(),
-        mediaagent::credentials::ENV_TEMPLATE
+        framechord::credentials::ENV_TEMPLATE
     );
 }
 
 #[test]
 fn agent_help_and_parse_errors_are_readable() {
-    let output = cargo_bin_cmd!("mediaagent")
+    let output = cargo_bin_cmd!("framechord")
         .args(["generate", "--help"])
         .output()
         .unwrap();
@@ -76,7 +76,7 @@ fn agent_help_and_parse_errors_are_readable() {
     let text = String::from_utf8(output.stdout).unwrap();
     assert!(text.contains("--output-dir"));
     assert!(text.contains("--dry-run"));
-    let out = cargo_bin_cmd!("mediaagent")
+    let out = cargo_bin_cmd!("framechord")
         .args(["--json", "generate", "speech", "--bad-flag"])
         .output()
         .unwrap();
@@ -89,7 +89,7 @@ fn agent_help_and_parse_errors_are_readable() {
 fn quick_mode_dry_run_requires_no_project_and_has_exact_output() {
     let t = tempfile::tempdir().unwrap();
     let dest = t.path().join("result.png");
-    let out = cargo_bin_cmd!("mediaagent")
+    let out = cargo_bin_cmd!("framechord")
         .arg("--project")
         .arg(t.path())
         .args([
@@ -119,14 +119,14 @@ fn quick_mode_dry_run_requires_no_project_and_has_exact_output() {
         result["data"]["inputs"][0]["output"],
         dest.to_str().unwrap()
     );
-    assert!(!t.path().join("mediaagent").exists());
+    assert!(!t.path().join("framechord").exists());
 }
 #[test]
 fn yaml_and_direct_requests_use_the_same_validator() {
     let t = tempfile::tempdir().unwrap();
     fs::write(t.path().join("brief.md"), "A forest").unwrap();
     fs::write(t.path().join("job.yaml"),"schema_version: 1\nid: forest\nmedia: image\nselection:\n  provider: openai\n  model: gpt-image-1\nbrief: brief.md\n").unwrap();
-    let out = cargo_bin_cmd!("mediaagent")
+    let out = cargo_bin_cmd!("framechord")
         .arg("--project")
         .arg(t.path())
         .args(["--json", "validate", "--kind", "job"])
@@ -140,7 +140,7 @@ fn yaml_and_direct_requests_use_the_same_validator() {
 #[test]
 fn json_missing_credentials_does_not_attempt_live_generation() {
     let t = tempfile::tempdir().unwrap();
-    let out = cargo_bin_cmd!("mediaagent")
+    let out = cargo_bin_cmd!("framechord")
         .env_remove("OPENAI_API_KEY")
         .arg("--project")
         .arg(t.path())
@@ -176,7 +176,7 @@ fn job_overrides_preserve_authored_input_and_unmentioned_settings() {
     let original = "schema_version: 1\nid: overridden\nmedia: image\nselection:\n  provider: openai\n  model: gpt-image-1\nbrief: brief.md\nsettings:\n  image_quality: medium\n  size: 1024x1024\n";
     let job = root.path().join("job.yaml");
     fs::write(&job, original).unwrap();
-    let out = cargo_bin_cmd!("mediaagent")
+    let out = cargo_bin_cmd!("framechord")
         .arg("--project")
         .arg(root.path())
         .args(["--json", "generate", "--job"])
@@ -209,7 +209,7 @@ fn job_overrides_preserve_authored_input_and_unmentioned_settings() {
 #[test]
 fn vocal_and_instrumental_options_are_explicit_and_reject_wrong_media() {
     let root = tempfile::tempdir().unwrap();
-    let out = cargo_bin_cmd!("mediaagent")
+    let out = cargo_bin_cmd!("framechord")
         .arg("--project")
         .arg(root.path())
         .args([
@@ -235,7 +235,7 @@ fn vocal_and_instrumental_options_are_explicit_and_reject_wrong_media() {
         response["data"]["inputs"][0]["settings"]["instrumental"],
         false
     );
-    let out = cargo_bin_cmd!("mediaagent")
+    let out = cargo_bin_cmd!("framechord")
         .arg("--project")
         .arg(root.path())
         .args([
@@ -272,7 +272,7 @@ fn referenced_job_worker_startup_is_confirmed_without_lock_contention() {
     let reference = root.path().join("reference.png");
     image.save(&reference).unwrap();
     for _ in 0..2 {
-        let out = cargo_bin_cmd!("mediaagent")
+        let out = cargo_bin_cmd!("framechord")
             .env_remove("OPENAI_API_KEY")
             .arg("--project")
             .arg(root.path())
@@ -315,7 +315,7 @@ fn referenced_job_worker_startup_is_confirmed_without_lock_contention() {
 
 #[test]
 fn voice_design_dry_run_preserves_character_and_creates_no_run() {
-    use mediaagent::{contracts::*, project, storage};
+    use framechord::{contracts::*, project, storage};
     let root = tempfile::tempdir().unwrap();
     let path = project::add_persona(root.path(), "narrator").unwrap();
     let mut character: Character = storage::yaml(&path).unwrap();
@@ -334,7 +334,7 @@ fn voice_design_dry_run_preserves_character_and_creates_no_run() {
     let script = root.path().join("preview.md");
     let words = "Hello, this exact script is for a fictional narrator preview. ".repeat(3);
     fs::write(&script, &words).unwrap();
-    let out = cargo_bin_cmd!("mediaagent")
+    let out = cargo_bin_cmd!("framechord")
         .arg("--project")
         .arg(root.path())
         .args([
@@ -358,14 +358,14 @@ fn voice_design_dry_run_preserves_character_and_creates_no_run() {
     let response: Value = serde_json::from_slice(&out.stdout).unwrap();
     assert_eq!(response["data"]["design"]["text"], words);
     assert_eq!(response["data"]["provider_voice_created"], false);
-    assert!(!root.path().join("mediaagent/runs").exists());
+    assert!(!root.path().join("framechord/runs").exists());
     assert_eq!(fs::read(path).unwrap(), original);
 }
 
 #[test]
 fn catalog_builtin_and_noninteractive_wizard_contracts() {
     let root = tempfile::tempdir().unwrap();
-    let output = cargo_bin_cmd!("mediaagent")
+    let output = cargo_bin_cmd!("framechord")
         .arg("--project")
         .arg(root.path())
         .args(["voices", "--provider", "openai", "--json"])
@@ -378,14 +378,14 @@ fn catalog_builtin_and_noninteractive_wizard_contracts() {
     );
     let data: Value = serde_json::from_slice(&output.stdout).unwrap();
     assert_eq!(data["data"]["built_in_voices"][0], "alloy");
-    let output = cargo_bin_cmd!("mediaagent")
+    let output = cargo_bin_cmd!("framechord")
         .arg("--project")
         .arg(root.path())
         .args(["config", "wizard", "--non-interactive", "--json"])
         .output()
         .unwrap();
     assert_eq!(output.status.code(), Some(2));
-    assert!(!root.path().join("mediaagent/config.yaml").exists());
+    assert!(!root.path().join("framechord/config.yaml").exists());
 }
 
 #[test]
@@ -397,7 +397,7 @@ fn identity_reference_cli_and_yaml_resolve_the_same_effective_contract() {
         .write_to(&mut bytes, image::ImageFormat::Png)
         .unwrap();
     fs::write(&file, bytes.into_inner()).unwrap();
-    let output = cargo_bin_cmd!("mediaagent")
+    let output = cargo_bin_cmd!("framechord")
         .arg("--project")
         .arg(root.path())
         .args([
@@ -429,7 +429,7 @@ fn identity_reference_cli_and_yaml_resolve_the_same_effective_contract() {
         response["data"]["inputs"][0]["settings"]["input_fidelity"],
         "high"
     );
-    assert!(!root.path().join("mediaagent/runs").exists());
+    assert!(!root.path().join("framechord/runs").exists());
 }
 
 #[test]
@@ -438,14 +438,14 @@ fn init_defaults_file_configures_profiles_and_dry_run_without_duplicate_flags() 
     let root = t.path().join("project");
     let config = t.path().join("defaults.yaml");
     fs::write(&config,"schema_version: 1\ndefaults:\n  image: {provider: openai, model: gpt-image-1}\ndefault_settings:\n  image: {format: png, size: 1536x1024, image_quality: high, input_fidelity: high}\nconsistency: {require_known_identity_model: true, inherit_source_settings: true}\n").unwrap();
-    cargo_bin_cmd!("mediaagent")
+    cargo_bin_cmd!("framechord")
         .args(["--json", "--non-interactive", "init"])
         .arg(&root)
         .arg("--defaults-file")
         .arg(&config)
         .assert()
         .success();
-    let out = cargo_bin_cmd!("mediaagent")
+    let out = cargo_bin_cmd!("framechord")
         .arg("--project")
         .arg(&root)
         .args([
@@ -470,13 +470,13 @@ fn init_defaults_file_configures_profiles_and_dry_run_without_duplicate_flags() 
     );
     assert_eq!(value["data"]["inputs"][0]["settings"]["size"], "1536x1024");
     assert!(value["data"]["inputs"][0]["settings"]["input_fidelity"].is_null());
-    let character = mediaagent::validation::character(
-        &root.join("mediaagent/characters/persona/character.yaml"),
+    let character = framechord::validation::character(
+        &root.join("framechord/characters/persona/character.yaml"),
     )
     .unwrap();
     assert_eq!(character.visual.unwrap().selection.model, "gpt-image-1");
     assert!(
-        !root.join("mediaagent/runs").read_dir().unwrap().any(|e| e
+        !root.join("framechord/runs").read_dir().unwrap().any(|e| e
             .unwrap()
             .path()
             .join("run.yaml")
@@ -488,7 +488,7 @@ fn init_interactive_rejects_automation_and_nonterminal_without_partial_writes() 
     let t = tempfile::tempdir().unwrap();
     let root = t.path().join("unwritten");
     for options in [vec!["--json"], vec!["--non-interactive"], vec![]] {
-        let out = cargo_bin_cmd!("mediaagent")
+        let out = cargo_bin_cmd!("framechord")
             .args(options)
             .arg("init")
             .arg(&root)
@@ -509,7 +509,7 @@ fn doctor_missing_keys_and_environment_precedence_need_no_network_or_initializat
     )
     .unwrap();
     for (live, expected) in [(false, 0), (true, 3)] {
-        let mut command = cargo_bin_cmd!("mediaagent");
+        let mut command = cargo_bin_cmd!("framechord");
         command
             .env("OPENAI_API_KEY", "")
             .arg("--project")
@@ -529,9 +529,9 @@ fn doctor_missing_keys_and_environment_precedence_need_no_network_or_initializat
         );
         assert_eq!(result["data"]["credentials"][0]["configured"], false);
         assert!(!String::from_utf8_lossy(&out.stdout).contains("LOCAL_TEST_VALUE"));
-        assert!(!root.path().join("mediaagent").exists());
+        assert!(!root.path().join("framechord").exists());
     }
-    let out = cargo_bin_cmd!("mediaagent")
+    let out = cargo_bin_cmd!("framechord")
         .arg("--project")
         .arg(root.path())
         .env("OPENAI_API_KEY", "bad\nheader")
@@ -544,7 +544,7 @@ fn doctor_missing_keys_and_environment_precedence_need_no_network_or_initializat
         "invalid_configuration"
     );
     assert_eq!(result["data"]["network_checked"], false);
-    cargo_bin_cmd!("mediaagent")
+    cargo_bin_cmd!("framechord")
         .args(["doctor", "--timeout-seconds", "0", "--json"])
         .assert()
         .code(2);

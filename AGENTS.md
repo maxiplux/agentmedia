@@ -1,12 +1,12 @@
-# mediaagent
+# framechord
 
 ## Purpose and current state
 
 Build a local Rust CLI that lets any agent with process access, including Codex and Claude Code, and terminal users generate images, infographics, speech, podcasts, music, and sound effects through reusable skills. Characters are optional; when needed, define visual and voice identity once and reuse it across jobs and projects.
 
-The intended package, binary, and skill name is `mediaagent`. The initialized configuration directory is the visible `mediaagent/` folder, without a leading dot.
+The intended package, binary, and skill name is `framechord`. The initialized configuration directory is the visible `framechord/` folder, without a leading dot. Existing `mediaagent/` projects remain supported in place to preserve paths, receipts and reference hashes; do not move or rewrite their content as part of branding. Refuse ambiguous roots containing both directories.
 
-The repository now contains the Rust 2024 `mediaagent` package, a reusable library and CLI, versioned contracts, offline initialization/validation, embedded skills/templates, portable characters, concurrent durable runs, limits/cache/recovery, native audio assembly, reviews/revisions, and initial adapters for all five providers. Local offline tests verify contracts and mocked execution. Bounded live tests have verified selected image, speech, music, sound-effect, and OpenAI planning paths; media quality remains unverified, and the first paired character scene failed user review for identity drift. Explicit identity-reference roles, original provider/model provenance locks, complete offline init setup, and supported high-fidelity controls are implemented; do not describe visual consistency as accepted. Bounded voice discovery is implemented for Google, Fish, and ElevenLabs. ElevenLabs descriptive voice previews and explicit saved-voice creation/binding are implemented, with live preview testing and mocked creation/binding checks. Durable AI image review records preserve request receipts and explicit retry history. Consent-gated ElevenLabs cloning, portable authorized voice samples, Fish reference synthesis, Google audio review and interaction retrieval, paginated/filterable catalogs, an offline configuration wizard, and explicit host ceilings are implemented. Live audio review and filtered catalogs passed; cloning/reference synthesis use offline fixtures until selected authorized recordings are supplied. Human quality/consistency and public release signing remain unverified. Native CI/package results for each version are tracked in docs/STATUS.md. Local Apple Silicon release packaging has passed isolated offline checks. See `docs/STATUS.md` for exact implementation boundaries. Do not describe planned capabilities or unexecuted live tests as completed.
+The repository now contains the Rust 2024 `framechord` package, a reusable library and CLI, versioned contracts, offline initialization/validation, embedded skills/templates, portable characters, concurrent durable runs, limits/cache/recovery, native audio assembly, reviews/revisions, and initial adapters for all five providers. Local offline tests verify contracts and mocked execution. Bounded live tests have verified selected image, speech, music, sound-effect, and OpenAI planning paths; media quality remains unverified, and the first paired character scene failed user review for identity drift. Explicit identity-reference roles, original provider/model provenance locks, complete offline init setup, and supported high-fidelity controls are implemented; do not describe visual consistency as accepted. Bounded voice discovery is implemented for Google, Fish, and ElevenLabs. ElevenLabs descriptive voice previews and explicit saved-voice creation/binding are implemented, with live preview testing and mocked creation/binding checks. Durable AI image review records preserve request receipts and explicit retry history. Consent-gated ElevenLabs cloning, portable authorized voice samples, Fish reference synthesis, Google audio review and interaction retrieval, paginated/filterable catalogs, an offline configuration wizard, and explicit host ceilings are implemented. Live audio review and filtered catalogs passed; cloning/reference synthesis use offline fixtures until selected authorized recordings are supplied. Human quality/consistency and public release signing remain unverified. Native CI/package results for each version are tracked in docs/STATUS.md. Local Apple Silicon release packaging has passed isolated offline checks. See `docs/STATUS.md` for exact implementation boundaries. Do not describe planned capabilities or unexecuted live tests as completed.
 
 
 Remediation adds v2 jobs/config/runs (v1 readers retained), cast authoring, planner
@@ -61,7 +61,7 @@ Use this intended initialized layout:
 <project>/
   .env                         # Local credentials; ignored by Git
   .env.example                 # Credential variable names; no secrets
-  mediaagent/
+  framechord/
     config.yaml
     templates/
     characters/<character-id>/
@@ -77,8 +77,8 @@ Use this intended initialized layout:
     runs/<run-id>/
       run.yaml
       outputs/
-  .agents/skills/mediaagent/    # Project skill for Codex
-  .claude/skills/mediaagent/    # Project skill for Claude Code
+  .agents/skills/framechord/    # Project skill for Codex
+  .claude/skills/framechord/    # Project skill for Claude Code
 ```
 
 YAML is the canonical structured format for configuration, character definitions, job manifests, and generation records. Version these file contracts. YAML identifies the relevant Markdown files and local media references; Markdown holds readable descriptions, exact speech scripts, lyrics, and generation briefs. Do not replace this workflow with a database or bury all authoring content in one prompt string.
@@ -105,14 +105,14 @@ Import/export must preserve character content and local references without depen
 
 The following command families now have an initial implementation; use `--help` and `docs/STATUS.md` for implemented options and remaining limitations:
 
-- `mediaagent init [path]`: create configuration, templates, an initial persona scaffold, and project-local skills. Allow agent targets to be selected; default to Codex and Claude Code. Perform no network calls or media generation.
-- `mediaagent skills install`: install the bundled skill for selected agents at project or user scope.
-- `mediaagent persona`: create, inspect, bootstrap, accept references, import, and export characters.
-- `mediaagent plan`: use a configured text model to author character descriptions or generation jobs from the shared templates. Produce reviewable files before generation; planning must not implicitly bootstrap voices or generate media.
-- `mediaagent validate`: check configuration, characters, jobs, and references without generation calls.
-- `mediaagent doctor`: inspect key presence offline; explicit `--live` checks selected provider authentication endpoints with bounded read-only requests. Read per-provider status/actions; do not confuse authentication with generation/model/billing readiness.
-- `mediaagent generate` and `mediaagent batch`: execute a job or a collection of jobs using saved defaults and explicit overrides.
-- `mediaagent resume`: continue a recorded run while preserving successful results and handling uncertain provider requests explicitly.
+- `framechord init [path]`: create configuration, templates, an initial persona scaffold, and project-local skills. Allow agent targets to be selected; default to Codex and Claude Code. Perform no network calls or media generation.
+- `framechord skills install`: install the bundled skill for selected agents at project or user scope.
+- `framechord persona`: create, inspect, bootstrap, accept references, import, and export characters.
+- `framechord plan`: use a configured text model to author character descriptions or generation jobs from the shared templates. Produce reviewable files before generation; planning must not implicitly bootstrap voices or generate media.
+- `framechord validate`: check configuration, characters, jobs, and references without generation calls.
+- `framechord doctor`: inspect key presence offline; explicit `--live` checks selected provider authentication endpoints with bounded read-only requests. Read per-provider status/actions; do not confuse authentication with generation/model/billing readiness.
+- `framechord generate` and `framechord batch`: execute a job or a collection of jobs using saved defaults and explicit overrides.
+- `framechord resume`: continue a recorded run while preserving successful results and handling uncertain provider requests explicitly.
 
 Initialization saves explicit provider/model choices per media type. Require valid choices before generation; do not guess a model or use an unrecorded `latest` selection. Job overrides are supported, but provider or voice changes must remain explicit. Standalone planning also uses an explicitly configured text provider/model.
 
@@ -122,12 +122,12 @@ Initialization and skill installation must preserve existing credentials, unrela
 
 ## Skill integration
 
-Maintain one provider-neutral `mediaagent` skill source with YAML frontmatter containing `name` and `description`, followed by concise workflow instructions. Link substantial template/schema guidance through supporting references rather than duplicating it throughout the skill. Normal automatic skill discovery remains enabled.
+Maintain one provider-neutral `framechord` skill source with YAML frontmatter containing `name` and `description`, followed by concise workflow instructions. Link substantial template/schema guidance through supporting references rather than duplicating it throughout the skill. Normal automatic skill discovery remains enabled.
 
 Install the skill in the documented discovery locations:
 
-- Codex: project `.agents/skills/mediaagent/`; user `~/.agents/skills/mediaagent/`.
-- Claude Code: project `.claude/skills/mediaagent/`; user `~/.claude/skills/mediaagent/`.
+- Codex: project `.agents/skills/framechord/`; user `~/.agents/skills/framechord/`.
+- Claude Code: project `.claude/skills/framechord/`; user `~/.claude/skills/framechord/`.
 
 The skill helps the agent inspect configuration and available characters, author YAML and Markdown using templates, validate files, bootstrap references when requested, and call the binary for generation. It must preserve exact requested dialogue/lyrics, reuse selected characters, and report generated artifact paths and incomplete jobs accurately.
 
@@ -151,7 +151,7 @@ Local development and live smoke tests use this repository's `.env`. Never print
 
 Preserve the existing `.env` and `.env.*` ignore rules, with `.env.example` as the secret-free exception. Never populate examples with working credentials. Initializing another project must not copy this development repository's keys. Load credentials only for the provider needed by the operation.
 
-Keep build products, caches, and generated run artifacts out of this development repository's version control. Do not ignore the entire `mediaagent/` directory: configuration, templates, and authored definitions may be versioned. Add only targeted ignore entries when introducing artifacts, and verify them. Use deliberate, small fixtures for tests.
+Keep build products, caches, and generated run artifacts out of this development repository's version control. Do not ignore the entire `framechord/` directory: configuration, templates, and authored definitions may be versioned. Add only targeted ignore entries when introducing artifacts, and verify them. Use deliberate, small fixtures for tests.
 
 ## Development and validation
 

@@ -27,7 +27,7 @@ impl Terminal {
                 pixel_height: 0,
             })
             .unwrap();
-        let mut cmd = CommandBuilder::new(env!("CARGO_BIN_EXE_mediaagent"));
+        let mut cmd = CommandBuilder::new(env!("CARGO_BIN_EXE_framechord"));
         cmd.args(["--color", "never", "init"]);
         cmd.arg(root);
         if let Some(cwd) = cwd {
@@ -136,13 +136,13 @@ impl Terminal {
 fn colliding_executable_offers_another_folder_and_saves_an_unfinished_project_there() {
     let temporary = tempfile::tempdir().unwrap();
     let root = temporary.path();
-    fs::write(root.join("mediaagent"), "preserve executable").unwrap();
+    fs::write(root.join("framechord"), "preserve executable").unwrap();
     let mut p = Terminal::start_in(std::path::Path::new("."), false, Some(root));
     p.wait("Choose where to save your project");
     p.send("\r");
     p.wait("Project folder (relative to the current directory)");
     p.send("project with spaces\r");
-    p.wait("Welcome to MediaAgent");
+    p.wait("Welcome to FrameChord");
     p.send("\r");
     p.wait("Setup checklist");
     p.send("Save unfinished setup and exit\r");
@@ -151,14 +151,14 @@ fn colliding_executable_offers_another_folder_and_saves_an_unfinished_project_th
     p.send("Save\r");
     p.success();
     let project = root.join("project with spaces");
-    assert!(project.join("mediaagent/config.yaml").is_file());
-    assert!(project.join(".agents/skills/mediaagent/SKILL.md").is_file());
-    assert!(project.join(".claude/skills/mediaagent/SKILL.md").is_file());
+    assert!(project.join("framechord/config.yaml").is_file());
+    assert!(project.join(".agents/skills/framechord/SKILL.md").is_file());
+    assert!(project.join(".claude/skills/framechord/SKILL.md").is_file());
     assert_eq!(
-        fs::read_to_string(root.join("mediaagent")).unwrap(),
+        fs::read_to_string(root.join("framechord")).unwrap(),
         "preserve executable"
     );
-    assert!(mediaagent::setup::status(&project).unwrap()["setup_complete"] == false);
+    assert!(framechord::setup::status(&project).unwrap()["setup_complete"] == false);
     assert!(!p.output.contains("local_io"));
 }
 impl Drop for Terminal {
@@ -179,15 +179,15 @@ fn existing_google_key_finishes_default_setup_and_installs_both_project_skills()
     terminal.send("\r"); // Locally ready: Finish is selected without entering a voice ID.
     terminal.wait("Save these reviewed choices?");
     assert_eq!(fs::read_to_string(root.join(".env")).unwrap(), prefix);
-    assert!(!root.join("mediaagent").exists());
+    assert!(!root.join("framechord").exists());
     terminal.send("Save\r");
     terminal.success();
     assert_eq!(
-        mediaagent::setup::status(root).unwrap()["setup_complete"],
+        framechord::setup::status(root).unwrap()["setup_complete"],
         true
     );
-    assert!(root.join(".agents/skills/mediaagent/SKILL.md").is_file());
-    assert!(root.join(".claude/skills/mediaagent/SKILL.md").is_file());
+    assert!(root.join(".agents/skills/framechord/SKILL.md").is_file());
+    assert!(root.join(".claude/skills/framechord/SKILL.md").is_file());
     assert!(
         fs::read_to_string(root.join(".env"))
             .unwrap()
@@ -204,19 +204,19 @@ fn second_welcome_option_selects_openai_explicitly() {
     )
     .unwrap();
     let mut terminal = Terminal::start(t.path(), false);
-    terminal.wait("Welcome to MediaAgent");
+    terminal.wait("Welcome to FrameChord");
     terminal.send("\u{1b}[B\r");
     terminal.wait("Setup checklist");
     terminal.send("\r");
     terminal.wait("Save these reviewed choices?");
     terminal.send("Save\r");
     terminal.success();
-    let config = mediaagent::project::config(t.path()).unwrap();
+    let config = framechord::project::config(t.path()).unwrap();
     assert!(
         config
             .defaults
             .values()
-            .all(|s| s.provider == mediaagent::contracts::Provider::Openai)
+            .all(|s| s.provider == framechord::contracts::Provider::Openai)
     );
     assert!(!terminal.output.contains("fixture-openai-private"));
 }
@@ -225,7 +225,7 @@ fn arrow_setup_completes_with_masked_keys_and_a_voice_after_review() {
     let t = tempfile::tempdir().unwrap();
     let root = t.path().join("terminal project");
     let mut p = Terminal::start(&root, false);
-    p.wait("Welcome to MediaAgent");
+    p.wait("Welcome to FrameChord");
     p.send("\r");
     p.wait("Setup checklist");
     // Exercise an actual arrow selection from Features to API keys.
@@ -246,14 +246,14 @@ fn arrow_setup_completes_with_masked_keys_and_a_voice_after_review() {
     p.wait("Save these reviewed choices?");
     p.send("Save\r");
     p.success();
-    let c = mediaagent::project::config(&root).unwrap();
+    let c = framechord::project::config(&root).unwrap();
     assert_eq!(
-        c.default_settings[&mediaagent::contracts::Media::Speech]
+        c.default_settings[&framechord::contracts::Media::Speech]
             .voice
             .as_deref(),
         Some("fixture-voice")
     );
-    assert!(mediaagent::setup::status(&root).unwrap()["setup_complete"] == true);
+    assert!(framechord::setup::status(&root).unwrap()["setup_complete"] == true);
     assert!(!p.output.contains("fixture-google-hidden"));
     assert!(!p.output.contains("\u{1b}[32m"));
 }
@@ -262,7 +262,7 @@ fn escape_returns_to_checklist_and_discard_writes_nothing() {
     let t = tempfile::tempdir().unwrap();
     let root = t.path().join("discard");
     let mut p = Terminal::start(&root, false);
-    p.wait("Welcome to MediaAgent");
+    p.wait("Welcome to FrameChord");
     p.send("\r");
     p.wait("Setup checklist");
     p.send("Features\r");
@@ -300,16 +300,16 @@ fn numbered_menu_saves_a_draft_and_existing_init_resumes_it() {
     p.wait("Choice [2]");
     p.send("1\r");
     p.success();
-    assert!(root.join("mediaagent/config.yaml").exists());
+    assert!(root.join("framechord/config.yaml").exists());
     assert_eq!(
         fs::read_to_string(root.join(".env")).unwrap(),
-        mediaagent::credentials::ENV_TEMPLATE
+        framechord::credentials::ENV_TEMPLATE
     );
-    let before = fs::read(root.join("mediaagent/config.yaml")).unwrap();
+    let before = fs::read(root.join("framechord/config.yaml")).unwrap();
     drop(p);
     let mut resumed = Terminal::start(&root, true);
     resumed.wait("Setup checklist");
-    assert!(!resumed.output.contains("Welcome to MediaAgent"));
+    assert!(!resumed.output.contains("Welcome to FrameChord"));
     resumed.wait("Choice [1]");
     resumed.send("9\r");
     resumed.wait("Discard all unsaved changes?");
@@ -317,6 +317,6 @@ fn numbered_menu_saves_a_draft_and_existing_init_resumes_it() {
     resumed.send("2\r");
     assert_eq!(
         before,
-        fs::read(root.join("mediaagent/config.yaml")).unwrap()
+        fs::read(root.join("framechord/config.yaml")).unwrap()
     );
 }

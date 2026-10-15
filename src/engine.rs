@@ -18,8 +18,9 @@ use tokio::sync::Semaphore;
 use uuid::Uuid;
 
 pub fn run_path(root: &Path, id: &str) -> Result<PathBuf> {
+    crate::project::check_layout(root)?;
     crate::storage::id(id)?;
-    Ok(root.join("mediaagent/runs").join(id))
+    Ok(crate::project::directory(root).join("runs").join(id))
 }
 pub fn load(root: &Path, id: &str) -> Result<Run> {
     let run: Run = yaml(&run_path(root, id)?.join("run.yaml"))?;
@@ -27,7 +28,8 @@ pub fn load(root: &Path, id: &str) -> Result<Run> {
     Ok(run)
 }
 pub fn list(root: &Path) -> Result<Vec<Run>> {
-    let path = root.join("mediaagent/runs");
+    crate::project::check_layout(root)?;
+    let path = crate::project::directory(root).join("runs");
     let mut runs: Vec<Run> = vec![];
     if path.exists() {
         for entry in fs::read_dir(path)? {
@@ -108,7 +110,7 @@ pub fn submit(root: &Path, inputs: Vec<Effective>, limits: Limits, options: Subm
         options.overwrite,
         &limits,
     ))?);
-    let submit_lock = lock(&root.join("mediaagent/runs/submissions.lock"))?;
+    let submit_lock = lock(&crate::project::directory(root).join("runs/submissions.lock"))?;
     submit_lock.lock_exclusive()?;
     if let Some(key) = &options.request_id {
         crate::storage::id(key)?;
@@ -335,7 +337,7 @@ fn verified(a: &Artifact) -> bool {
     fs::read(&a.path).is_ok_and(|bytes| bytes.len() as u64 == a.bytes && hash(&bytes) == a.sha256)
 }
 fn cached(root: &Path, fingerprint: &str) -> Result<Option<JobRecord>> {
-    let runs = root.join("mediaagent/runs");
+    let runs = crate::project::directory(root).join("runs");
     if !runs.exists() {
         return Ok(None);
     }
@@ -919,7 +921,7 @@ fn confirm_worker_start(root: &Path, id: &str) -> Result<()> {
         3,
     );
     error.corrective_argv = vec![
-        "mediaagent".into(),
+        "framechord".into(),
         "--project".into(),
         root.to_string_lossy().into_owned(),
         "runs".into(),

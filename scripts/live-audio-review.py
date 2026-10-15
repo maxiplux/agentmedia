@@ -9,7 +9,7 @@ import sys
 import tempfile
 
 parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--binary',default='target/debug/mediaagent')
+parser.add_argument('--binary',default='target/debug/framechord')
 parser.add_argument('--project',default='.')
 parser.add_argument('--source-run',required=True)
 parser.add_argument('--model',required=True,choices=['gemini-3.8-flash','gemini-2.5-flash'])
@@ -40,7 +40,7 @@ if len(effective['text'])>100 or any(a['duration_seconds']>10 for a in job['arti
 for artifact in job['artifacts']:
     if hashlib.sha256(pathlib.Path(artifact['path']).read_bytes()).hexdigest()!=artifact['sha256']:
         parser.error('Source artifact is corrupt; no generation submitted')
-with tempfile.TemporaryDirectory(prefix='mediaagent-audio-review-') as temp:
+with tempfile.TemporaryDirectory(prefix='framechord-audio-review-') as temp:
     limits=pathlib.Path(temp)/'limits.yaml'
     limits.write_text('requests: 1\nimages: 1\naudio_seconds: 10\nspeech_chars: 100\nrevisions: 1\nattempts: 1\nconcurrency: 1\nper_provider: 1\n')
     argv=['generate','speech','--provider',effective['selection']['provider'],'--model',effective['selection']['model'],'--text',effective['text'],'--voice',effective['settings']['voice'],'--limits-file',str(limits)]

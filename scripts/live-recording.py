@@ -8,7 +8,7 @@ import sys
 import tempfile
 
 parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--binary',default='target/debug/mediaagent')
+parser.add_argument('--binary',default='target/debug/framechord')
 parser.add_argument('--project',default='.')
 parser.add_argument('--mode',required=True,choices=['synthesis','clone'])
 parser.add_argument('--request',help='Authored voice-clone manifest; bind must be false')
@@ -31,7 +31,7 @@ def call(argv):
 configured=next(c['configured'] for c in call(['doctor'])['credentials'] if c['provider']==provider)
 if not configured:
     print(json.dumps({'status':'skipped','passed':False,'reason':'provider credentials unavailable'}));sys.exit(0)
-with tempfile.TemporaryDirectory(prefix='mediaagent-recording-smoke-') as temp:
+with tempfile.TemporaryDirectory(prefix='framechord-recording-smoke-') as temp:
     limits=pathlib.Path(temp)/'limits.yaml'
     limits.write_text('requests: 1\nimages: 1\naudio_seconds: 10\nspeech_chars: 100\nrevisions: 1\nattempts: 1\nconcurrency: 1\nper_provider: 1\n')
     if args.mode=='clone':

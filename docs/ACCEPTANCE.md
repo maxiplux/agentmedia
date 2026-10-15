@@ -1,5 +1,7 @@
 # Acceptance execution record
 
+FrameChord is the project name from 0.6.0 onward. Earlier evidence below keeps its original MediaAgent commands, release names and artifact paths. Existing `mediaagent/` projects remain supported in place. See [rename and upgrade guidance](../assets/skill/references/renaming.md).
+
 The approved original-character-sheet batch has executed: two successful OpenAI
 requests, one attempt each. Both outputs fail agent visual review and are recorded
 as `needs_revision`; human acceptance remains pending. No new references or voices

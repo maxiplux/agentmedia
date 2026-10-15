@@ -1,0 +1,4 @@
+# Explicit user-scope setup: framechord config host setup --file host-limits.yaml
+schema_version: 1
+concurrency: 4
+per_provider: 2

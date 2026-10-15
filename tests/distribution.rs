@@ -1,6 +1,6 @@
 use assert_cmd::cargo::cargo_bin_cmd;
 use async_trait::async_trait;
-use mediaagent::{
+use framechord::{
     distribution::{self, ReleaseClient, ReleaseTransport},
     error::Result,
     storage,
@@ -20,8 +20,8 @@ impl ReleaseTransport for Mock {
     async fn get(&self, url: &str, _limit: usize) -> Result<Vec<u8>> {
         self.calls.lock().unwrap().push(url.into());
         assert!(
-            url.starts_with("https://api.github.com/repos/maxiplux/agentmedia/releases/")
-                || url.starts_with("https://github.com/maxiplux/agentmedia/releases/download/")
+            url.starts_with("https://api.github.com/repos/maxiplux/framechord/releases/")
+                || url.starts_with("https://github.com/maxiplux/framechord/releases/download/")
         );
         Ok(if url.starts_with("https://api.") {
             self.metadata.clone()
@@ -32,11 +32,11 @@ impl ReleaseTransport for Mock {
 }
 fn fixture(version: &str, bytes: &[u8]) -> Value {
     let asset = format!(
-        "mediaagent-{}{}",
+        "framechord-{}{}",
         distribution::TARGET,
         if cfg!(windows) { ".exe" } else { "" }
     );
-    json!({"tag_name":format!("v{version}"),"draft":false,"prerelease":false,"assets":[{"name":asset,"size":bytes.len(),"browser_download_url":format!("https://github.com/maxiplux/agentmedia/releases/download/v{version}/{asset}"),"digest":format!("sha256:{}",storage::hash(bytes))}]})
+    json!({"tag_name":format!("v{version}"),"draft":false,"prerelease":false,"assets":[{"name":asset,"size":bytes.len(),"browser_download_url":format!("https://github.com/maxiplux/framechord/releases/download/v{version}/{asset}"),"digest":format!("sha256:{}",storage::hash(bytes))}]})
 }
 fn transport(metadata: Value, binary: Vec<u8>) -> Arc<Mock> {
     Arc::new(Mock {
@@ -51,7 +51,7 @@ fn offline_install_is_idempotent_and_does_not_require_home_for_custom_destinatio
     let bin = root.path().join("bin with spaces");
     fs::write(root.path().join(".env"), "UNRELATED=preserve\n").unwrap();
     for _ in 0..2 {
-        let out = cargo_bin_cmd!("mediaagent")
+        let out = cargo_bin_cmd!("framechord")
             .current_dir(root.path())
             .env_remove("HOME")
             .env_remove("LOCALAPPDATA")
@@ -68,9 +68,9 @@ fn offline_install_is_idempotent_and_does_not_require_home_for_custom_destinatio
         assert_eq!(result["data"]["project_files_changed"], false);
     }
     let exe = bin.join(if cfg!(windows) {
-        "mediaagent.exe"
+        "framechord.exe"
     } else {
-        "mediaagent"
+        "framechord"
     });
     assert!(
         std::process::Command::new(exe)
@@ -84,18 +84,18 @@ fn offline_install_is_idempotent_and_does_not_require_home_for_custom_destinatio
         fs::read_to_string(root.path().join(".env")).unwrap(),
         "UNRELATED=preserve\n"
     );
-    assert!(!root.path().join("mediaagent").exists());
+    assert!(!root.path().join("framechord").exists());
 }
 #[test]
 fn install_refuses_unmanaged_files_without_force() {
     let root = tempfile::tempdir().unwrap();
     let exe = root.path().join(if cfg!(windows) {
-        "mediaagent.exe"
+        "framechord.exe"
     } else {
-        "mediaagent"
+        "framechord"
     });
     fs::write(&exe, "unrelated executable").unwrap();
-    cargo_bin_cmd!("mediaagent")
+    cargo_bin_cmd!("framechord")
         .args(["install", "--bin-dir"])
         .arg(root.path())
         .args(["--no-modify-path", "--json"])
@@ -107,27 +107,27 @@ fn install_refuses_unmanaged_files_without_force() {
 fn explicit_force_install_keeps_unmanaged_bytes_without_claiming_their_version() {
     let root = tempfile::tempdir().unwrap();
     let exe = root.path().join(if cfg!(windows) {
-        "mediaagent.exe"
+        "framechord.exe"
     } else {
-        "mediaagent"
+        "framechord"
     });
     fs::write(&exe, "original unmanaged file").unwrap();
-    cargo_bin_cmd!("mediaagent")
+    cargo_bin_cmd!("framechord")
         .args(["install", "--bin-dir"])
         .arg(root.path())
         .args(["--force", "--no-modify-path", "--json"])
         .assert()
         .success();
     let backup = root.path().join(if cfg!(windows) {
-        ".mediaagent-previous.exe"
+        ".framechord-previous.exe"
     } else {
-        ".mediaagent-previous"
+        ".framechord-previous"
     });
     assert_eq!(
         fs::read_to_string(backup).unwrap(),
         "original unmanaged file"
     );
-    let prior: Value = storage::yaml(&root.path().join(".mediaagent-previous.yaml")).unwrap();
+    let prior: Value = storage::yaml(&root.path().join(".framechord-previous.yaml")).unwrap();
     assert_eq!(prior["version"], "unmanaged");
 }
 #[test]
@@ -247,7 +247,7 @@ fn child_case(action: &str) {
     } else {
         "replacement"
     });
-    fs::copy(env!("CARGO_BIN_EXE_mediaagent"), &replacement).unwrap();
+    fs::copy(env!("CARGO_BIN_EXE_framechord"), &replacement).unwrap();
     // Linux debug executables can exceed the production download ceiling.
     // Exercise the real executable with debug sections removed, as release assets do.
     #[cfg(target_os = "linux")]
@@ -265,8 +265,8 @@ fn child_case(action: &str) {
     fs::write(root.path().join(".env"), "PRIVATE_FIXTURE=preserve\n").unwrap();
     let child = std::process::Command::new(&helper)
         .args(["--ignored", "--exact", "update_child_entry", "--nocapture"])
-        .env("MEDIAAGENT_TEST_UPDATE_ACTION", action)
-        .env("MEDIAAGENT_TEST_UPDATE_BINARY", &replacement)
+        .env("FRAMECHORD_TEST_UPDATE_ACTION", action)
+        .env("FRAMECHORD_TEST_UPDATE_BINARY", &replacement)
         .output()
         .unwrap();
     assert!(
@@ -299,8 +299,8 @@ fn child_case(action: &str) {
 #[tokio::test]
 #[ignore = "Only executed in an isolated copy of this test executable by the native update tests"]
 async fn update_child_entry() {
-    let action = std::env::var("MEDIAAGENT_TEST_UPDATE_ACTION").unwrap();
-    let bytes = fs::read(std::env::var("MEDIAAGENT_TEST_UPDATE_BINARY").unwrap()).unwrap();
+    let action = std::env::var("FRAMECHORD_TEST_UPDATE_ACTION").unwrap();
+    let bytes = fs::read(std::env::var("FRAMECHORD_TEST_UPDATE_BINARY").unwrap()).unwrap();
     let current = std::env::current_exe().unwrap();
     let dir = current.parent().unwrap();
     if action == "overlap" {
@@ -319,17 +319,17 @@ async fn update_child_entry() {
             }
         }
         let backup = dir.join(if cfg!(windows) {
-            ".mediaagent-previous.exe"
+            ".framechord-previous.exe"
         } else {
-            ".mediaagent-previous"
+            ".framechord-previous"
         });
         fs::write(&backup, b"preceding accepted backup").unwrap();
-        let prior = dir.join(".mediaagent-previous.yaml");
+        let prior = dir.join(".framechord-previous.yaml");
         fs::write(&prior, b"preceding backup receipt").unwrap();
         let fake = transport(fixture(distribution::VERSION, &bytes), bytes);
         let result = ReleaseClient::with_transport(Arc::new(Overlap {
             inner: fake.clone(),
-            candidate: std::env::var("MEDIAAGENT_TEST_UPDATE_BINARY")
+            candidate: std::env::var("FRAMECHORD_TEST_UPDATE_BINARY")
                 .unwrap()
                 .into(),
         }))
@@ -349,9 +349,9 @@ async fn update_child_entry() {
     if action == "rollback" || action == "unmanaged-rollback" {
         fs::write(
             dir.join(if cfg!(windows) {
-                ".mediaagent-previous.exe"
+                ".framechord-previous.exe"
             } else {
-                ".mediaagent-previous"
+                ".framechord-previous"
             }),
             &bytes,
         )
@@ -360,12 +360,12 @@ async fn update_child_entry() {
         {
             use std::os::unix::fs::PermissionsExt;
             fs::set_permissions(
-                dir.join(".mediaagent-previous"),
+                dir.join(".framechord-previous"),
                 fs::Permissions::from_mode(0o755),
             )
             .unwrap();
         }
-        storage::save(&dir.join(".mediaagent-previous.yaml"),&json!({"schema_version":1,"version":if action=="unmanaged-rollback" {"unmanaged"} else {distribution::VERSION},"sha256":storage::hash(&bytes)})).unwrap();
+        storage::save(&dir.join(".framechord-previous.yaml"),&json!({"schema_version":1,"version":if action=="unmanaged-rollback" {"unmanaged"} else {distribution::VERSION},"sha256":storage::hash(&bytes)})).unwrap();
         distribution::rollback().await.unwrap();
         return;
     }
@@ -387,9 +387,9 @@ async fn update_child_entry() {
         assert_eq!(result.unwrap()["replaced"], true);
         assert!(
             dir.join(if cfg!(windows) {
-                ".mediaagent-previous.exe"
+                ".framechord-previous.exe"
             } else {
-                ".mediaagent-previous"
+                ".framechord-previous"
             })
             .is_file()
         );

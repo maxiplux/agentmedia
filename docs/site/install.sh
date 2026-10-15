@@ -10,12 +10,12 @@ while [ "$#" -gt 0 ]; do
     --version|--bin-dir) [ "$#" -ge 2 ] || { echo "Missing value for $1" >&2; exit 2; }; key=$1; shift; if [ "$key" = --version ]; then version=$1; else bin_dir=$1; fi ;;
     --no-modify-path) modify_path=0 ;;
     --force) force=1 ;;
-    --help) echo 'Usage: install.sh [--version 0.5.1] [--bin-dir PATH] [--no-modify-path] [--force]'; exit 0 ;;
+    --help) echo 'Usage: install.sh [--version 0.6.0] [--bin-dir PATH] [--no-modify-path] [--force]'; exit 0 ;;
     *) echo "Unknown installer option: $1" >&2; exit 2 ;;
   esac
   shift
 done
-command -v curl >/dev/null || { echo 'curl is required to download mediaagent' >&2; exit 1; }
+command -v curl >/dev/null || { echo 'curl is required to download framechord' >&2; exit 1; }
 case "$(uname -s):$(uname -m)" in
   Darwin:arm64) target=aarch64-apple-darwin ;;
   Linux:x86_64) target=x86_64-unknown-linux-gnu ;;
@@ -24,7 +24,7 @@ esac
 umask 077
 temporary=$(mktemp -d)
 trap 'rm -rf "$temporary"' EXIT HUP INT TERM
-base=https://github.com/maxiplux/agentmedia/releases
+base=https://github.com/maxiplux/framechord/releases
 if [ -z "$version" ]; then
   curl --proto '=https' --tlsv1.2 -fsSL "$base/latest/download/version.txt" -o "$temporary/version.txt"
   version=$(cat "$temporary/version.txt")
@@ -33,22 +33,22 @@ version=${version#v}
 case "$version" in ''|*[!0-9.]*) echo 'Invalid stable release version' >&2; exit 1 ;; esac
 # Stable three-component versions only; never evaluate downloaded text as shell code.
 if ! printf '%s\n' "$version" | LC_ALL=C grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then echo 'Invalid stable release version' >&2; exit 1; fi
-asset=mediaagent-$target
+asset=framechord-$target
 url=$base/download/v$version
-curl --proto '=https' --tlsv1.2 -fsSL "$url/$asset" -o "$temporary/mediaagent"
+curl --proto '=https' --tlsv1.2 -fsSL "$url/$asset" -o "$temporary/framechord"
 curl --proto '=https' --tlsv1.2 -fsSL "$url/$asset.sha256" -o "$temporary/checksum"
 expected=$(awk 'NR==1 {print $1}' "$temporary/checksum")
 if ! printf '%s\n' "$expected" | LC_ALL=C grep -Eq '^[a-fA-F0-9]{64}$'; then echo 'Invalid release checksum' >&2; exit 1; fi
 if command -v sha256sum >/dev/null; then
-  actual=$(sha256sum "$temporary/mediaagent" | awk '{print $1}')
+  actual=$(sha256sum "$temporary/framechord" | awk '{print $1}')
 else
-  actual=$(shasum -a 256 "$temporary/mediaagent" | awk '{print $1}')
+  actual=$(shasum -a 256 "$temporary/framechord" | awk '{print $1}')
 fi
 [ "$actual" = "$expected" ] || { echo 'Checksum mismatch; nothing was installed' >&2; exit 1; }
-chmod 755 "$temporary/mediaagent"
-[ "$("$temporary/mediaagent" --version)" = "mediaagent $version" ] || { echo 'Executable version check failed; nothing was installed' >&2; exit 1; }
+chmod 755 "$temporary/framechord"
+[ "$("$temporary/framechord" --version)" = "framechord $version" ] || { echo 'Executable version check failed; nothing was installed' >&2; exit 1; }
 set -- install
 [ -z "$bin_dir" ] || set -- "$@" --bin-dir "$bin_dir"
 [ "$modify_path" = 1 ] || set -- "$@" --no-modify-path
 [ "$force" = 0 ] || set -- "$@" --force
-"$temporary/mediaagent" "$@"
+"$temporary/framechord" "$@"
