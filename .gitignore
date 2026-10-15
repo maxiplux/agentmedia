@@ -21,3 +21,5 @@
 Thumbs.db
 
 /mediaagent/blobs/
+
+/mediaagent/setup.lock

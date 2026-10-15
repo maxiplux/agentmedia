@@ -1,5 +1,6 @@
 //! Explicit read-only authentication probes. Response bodies/account data never leave this module.
 use super::{Transport, WireResponse};
+use crate::contracts::Media;
 use crate::{
     contracts::Provider,
     credentials,
@@ -401,6 +402,20 @@ fn expected(provider: Provider, v: &Value) -> bool {
 impl Client {
     /// One catalog GET per provider, no retries or pagination. A listed model is not a generation test.
     pub async fn models(&self, root: &Path, selected: &[Provider]) -> Result<Value> {
+        self.models_filtered(root, selected, None, false).await
+    }
+    pub async fn models_filtered(
+        &self,
+        root: &Path,
+        selected: &[Provider],
+        media: Option<Media>,
+        popular: bool,
+    ) -> Result<Value> {
+        if popular && selected != [Provider::Openrouter] {
+            return Err(Error::input(
+                "Popularity ranking is scoped to an explicitly selected OpenRouter catalog",
+            ));
+        }
         let selected: BTreeSet<_> = if selected.is_empty() {
             PROVIDERS.into_iter().collect()
         } else {
@@ -408,6 +423,11 @@ impl Client {
         };
         let mut rows = Vec::new();
         for provider in selected {
+            if provider == Provider::Openrouter && matches!(media, Some(Media::Music | Media::Sfx))
+            {
+                rows.push(serde_json::json!({"provider":provider,"status":"catalog_visible","models":[],"generation_tested":false,"action":"No implemented OpenRouter catalog modality for music or sound effects"}));
+                continue;
+            }
             let endpoint = match provider {
                 Provider::Openai => "https://api.openai.com/v1/models",
                 Provider::Google => {
@@ -416,7 +436,7 @@ impl Client {
                 Provider::Openrouter => "https://openrouter.ai/api/v1/models",
                 Provider::Elevenlabs => "https://api.elevenlabs.io/v1/models",
                 Provider::Fish => {
-                    rows.push(serde_json::json!({"provider":provider,"status":"not_implemented","action":"Use the capability registry and explicit voice discovery; generation remains untested"}));
+                    rows.push(serde_json::json!({"provider":provider,"status":"bundled_catalog","verified_at":crate::catalog::VERIFIED_AT,"models":crate::catalog::models().into_iter().filter(|m|m.provider==provider&&media.is_none_or(|v|crate::catalog::target(v)==m.media)).collect::<Vec<_>>(),"action":"Fish has no implemented live TTS-model catalog; these are bundled documentation choices, not account access verification"}));
                     continue;
                 }
             };
@@ -424,7 +444,9 @@ impl Client {
                 let key=credentials::resolve(provider,root)?;
                 let (header,key)=match provider {Provider::Google=>("x-goog-api-key",key),Provider::Elevenlabs=>("xi-api-key",key),_=>("authorization",format!("Bearer {key}"))};
                 let mut key=HeaderValue::from_str(&key).map_err(|_|Error::input("Invalid credential header"))?;key.set_sensitive(true);
-                let req=self.client.get(endpoint).header(header,key).build().map_err(|_|Error::input("Cannot build model catalog request"))?;
+                let mut builder=self.client.get(endpoint).header(header,key);
+                if provider==Provider::Openrouter {builder=builder.query(&[("output_modalities",media.map(crate::catalog::target).map_or("all",|v|match v {Media::Image=>"image",Media::Speech=>"speech",_=>"text"}))]);if popular{builder=builder.query(&[("sort","most-popular")]);}}
+                let req=builder.build().map_err(|_|Error::input("Cannot build model catalog request"))?;
                 let response=tokio::time::timeout(self.timeout,self.transport.send(req)).await.map_err(|_|Error::new("timeout","Catalog lookup timed out",3))??;
                 if response.status!=200 {return Err(Error::new("catalog_unavailable",format!("Catalog HTTP {}; account generation access is inconclusive",response.status),3))}
                 if response.bytes.len()>MAX_BYTES{return Err(Error::new("response_limit","Catalog response exceeded 1 MiB",3))}
@@ -432,19 +454,21 @@ impl Client {
                 let (list,field)=match provider {Provider::Google=>(&value["models"],"name"),Provider::Elevenlabs=>(&value,"model_id"),_=>(&value["data"],"id")};
                 let list=list.as_array().ok_or_else(||Error::input("Invalid catalog shape"))?;
                 let mut models=Vec::new();
-                for item in list {
+                for (rank,item) in list.iter().enumerate() {
                     let id=item[field].as_str().ok_or_else(||Error::input("Invalid model identifier"))?;
                     let id=id.strip_prefix("models/").unwrap_or(id);
                     if id.len()>200 || !id.bytes().all(|b|b.is_ascii_alphanumeric()||b"-_/.:".contains(&b)){return Err(Error::input("Invalid model identifier"))}
                     let shutdown=item["shutdown_date"].as_str().filter(|v|v.len()==10&&v.bytes().all(|b|b.is_ascii_digit()||b==b'-'));
-                    models.push(serde_json::json!({"model":id,"registry_supported":super::registry().iter().any(|c|c.provider==provider&&c.model==id),"shutdown_date":shutdown}));
+                    let known=crate::catalog::models().into_iter().find(|m|m.provider==provider&&m.model==id);
+                    if media.is_some_and(|v|known.as_ref().is_some_and(|m|m.media!=crate::catalog::target(v))) {continue;}
+                    models.push(serde_json::json!({"model":id,"popularity_rank":if popular{Some(rank+1)}else{None},"registry_supported":super::registry().iter().any(|c|c.provider==provider&&c.model==id),"shutdown_date":shutdown,"current":known.as_ref().is_some_and(|m|m.current),"supported":known.as_ref().is_some_and(|m|m.supported),"recommended":known.as_ref().is_some_and(|m|m.current&&m.recommended),"lifecycle":known.as_ref().map_or("unreviewed",|m|m.lifecycle.as_str()),"media":known.as_ref().map(|m|m.media)}));
                 }
                 Ok(serde_json::json!({"provider":provider,"status":"catalog_visible","models":models,"has_more":value.get("nextPageToken").is_some(),"account_generation_access":"unverified","generation_tested":false}))
             }.await;
             rows.push(match response {Ok(v)=>v,Err(e)=>serde_json::json!({"provider":provider,"status":"inconclusive","reason":e.code,"action":"Check credentials/endpoint permissions; do not infer generation readiness"})});
         }
         Ok(
-            serde_json::json!({"catalogs":rows,"generation_performed":false,"scope":"One read-only catalog page per provider; absent models may be unlisted. No registry updates or model substitution."}),
+            serde_json::json!({"catalogs":rows,"generation_performed":false,"ranking_scope":if popular{Some("OpenRouter provider-reported popularity")}else{None},"fetched_at_unix":std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_secs(),"scope":"One bounded read-only catalog page per provider; absent models may be unlisted. Fish uses its bundled documented catalog. No registry updates or model substitution."}),
         )
     }
 }

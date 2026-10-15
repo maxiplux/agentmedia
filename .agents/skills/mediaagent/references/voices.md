@@ -2,7 +2,7 @@
 
 Use `voices --provider PROVIDER` for built-in names and `--account` for a bounded Google/Fish/ElevenLabs catalog. A saved binding belongs to that provider/account. Imported characters need an accessible destination binding; do not choose a replacement silently.
 
-For descriptive ElevenLabs voice design, enable a supported explicit ElevenLabs speech profile in the character YAML. Author `voice.md` as the stable description, 20–1000 characters. Supply a separate exact 100–1000 character preview script, such as `templates/voice-preview.md`. Design uses an explicitly chosen `eleven_multilingual_ttv_v2` or `eleven_ttv_v3` model; the character's speech model is independent and remains pinned.
+For descriptive ElevenLabs voice design, enable a supported explicit ElevenLabs speech profile in the character YAML. Author `voice.md` as the stable description, 20–1000 characters. Supply a separate exact 100–1000 character preview script, such as `templates/voice-preview.md`. Design uses the explicitly chosen current `eleven_ttv_v3` model; the character's speech model is independent and remains pinned.
 
 ```sh
 mediaagent persona voice-design narrator --model eleven_ttv_v3 \

@@ -38,7 +38,7 @@ fn input(name: &str) -> Effective {
         media: Media::Image,
         selection: Selection {
             provider: Provider::Openai,
-            model: "gpt-image-1".into(),
+            model: "gpt-image-2.5-flare".into(),
         },
         prompt: format!("A forest for {name}"),
         text: None,
@@ -1421,7 +1421,7 @@ fn initialization_applies_complete_defaults_before_creating_profiles() {
     cfg.default_settings.insert(
         Media::Image,
         Settings {
-            input_fidelity: Some("high".into()),
+            input_fidelity: None,
             image_quality: Some("high".into()),
             size: Some("1536x1024".into()),
             format: Some("png".into()),
@@ -1541,7 +1541,7 @@ async fn original_receipt_pins_model_settings_and_survives_character_export() {
     assert_eq!(e.selection, original.selection);
     assert_eq!(e.settings.size, original.settings.size);
     assert_eq!(e.settings.image_quality, original.settings.image_quality);
-    assert_eq!(e.settings.input_fidelity.as_deref(), Some("high"));
+    assert_eq!(e.settings.input_fidelity, None);
     assert_eq!(
         e.references[0].origin.as_ref().unwrap().artifact.as_deref(),
         Some(artifact.id.as_str())
@@ -1593,7 +1593,7 @@ async fn receipt_lookup_detects_ambiguous_copies_rejected_sources_and_tampering(
     let root = t.path();
     let a = input("first");
     let mut b = input("second");
-    b.selection.model = "gpt-image-2".into();
+    b.selection.model = "gpt-image-2.5-sunburst".into();
     let run = engine::submit(root, vec![a, b], Limits::default(), Submit::default()).unwrap();
     let done = engine::work(root, &run.id, Arc::new(Fake::new()), false)
         .await
@@ -1607,7 +1607,7 @@ async fn receipt_lookup_detects_ambiguous_copies_rejected_sources_and_tampering(
             .unwrap()
             .selection
             .model,
-        "gpt-image-1"
+        "gpt-image-2.5-flare"
     );
     let copy = root.join("copied.png");
     fs::copy(&artifact.path, &copy).unwrap();

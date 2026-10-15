@@ -17,7 +17,39 @@ live testing still needs selected recordings and actual speaker authorization.
 Human character consistency and media quality checks remain separate. See
 [implementation status](docs/STATUS.md) for exact boundaries.
 
+## Guided setup and current models
+
+Run `mediaagent init` for a looping, offline terminal setup. Use arrows, Enter and
+search to choose options, and Escape to return. New projects default to OpenAI
+GPT Image 2.5 Flare for images/infographics, Fish s2.1-pro for speech/podcasts, and
+OpenAI GPT-6 Luna for planning. Music and effects are optional. Supply your own Fish
+voice ID and provider keys; missing keys can be entered without echo and are saved
+only after review to the ignored project `.env`.
+
+Finish requires every enabled feature to be locally ready. Save unfinished setup
+and run `init` again to resume. Existing character identities are preserved.
+`config status --json` reports missing steps without network calls or secrets.
+
+```sh
+mediaagent init
+mediaagent init ./project --preset recommended --json --non-interactive
+mediaagent --project ./project config status --json
+mediaagent models --media image --recommended
+mediaagent models --provider fish --media speech
+mediaagent models --all
+```
+
+`--preset empty` creates an empty scaffold; `--defaults-file FILE` uses that exact
+configuration. Only reviewed current stable model families can submit new provider
+requests. Superseded/preview models remain readable in old projects, but cannot
+create new generations or retries. A pinned old character needs a new character
+version and human-accepted references; models are never silently substituted.
+See [setup and model policy](assets/skill/references/setup.md) for the complete
+human and agent workflow, optional live model discovery and credential handling.
+
 ## Build and use
+
+Download Windows, macOS and Linux binaries from the [Native packages workflow](https://github.com/maxiplux/agentmedia/actions/workflows/package.yml). Open a successful run and its Artifacts section; see [download and installation steps](docs/PACKAGING.md).
 
 ```sh
 cargo build --locked
@@ -30,7 +62,7 @@ Install the executable separately when wanted: `cargo install --path . --locked`
 Quick mode needs no initialization. Choose an explicit model and output:
 
 ```sh
-mediaagent generate image --provider openai --model gpt-image-1 \
+mediaagent generate image --provider openai --model gpt-image-2.5-flare \
   --prompt 'A teal leaf on a cream background' --output leaf.png --dry-run --json
 ```
 
@@ -39,7 +71,7 @@ Remove `--dry-run` for an authorized generation request. Put credentials in the 
 ```sh
 mediaagent generate speech --provider openai --model gpt-4o-mini-tts \
   --voice alloy --text-file article.txt --output narration.wav
-mediaagent generate music --provider elevenlabs --model music_v1 \
+mediaagent generate music --provider elevenlabs --model music_v2_5 \
   --brief-file music.md --duration-seconds 10 --instrumental --output intro.mp3
 mediaagent generate sfx --provider elevenlabs --model eleven_text_to_sound_v2 \
   --brief-file sfx.md --duration-seconds 3 --output bell.mp3
@@ -59,7 +91,7 @@ caveats and limits: authentication alone does not prove model or billing readine
 ## Project workflow
 
 ```sh
-mediaagent init /path/to/project --interactive
+mediaagent init /path/to/project
 # Agents: export/edit project-config.yaml, then initialize without prompts:
 # mediaagent init /path/to/project --defaults-file project-config.yaml --json --non-interactive
 mediaagent --project /path/to/project config show --json
@@ -100,14 +132,14 @@ mediaagent revise --artifact ARTIFACT_ID --instructions-file revision.md --async
 For the same characters in another scene, use selected identity references:
 
 ```sh
-mediaagent generate image --provider openai --model gpt-image-1 \
+mediaagent generate image --provider openai --model gpt-image-2.5-flare \
   --identity-reference mira.png --identity-reference kito.png \
   --brief-file forest.md --output forest.png --dry-run --json
 ```
 
-Identity references record high input fidelity automatically for supported OpenAI
-models; low-only editing is rejected for identity-sensitive work. This is separate
-from output quality and cannot guarantee likeness. Compare faces/body proportions
+Current GPT Image 2.5 models omit input fidelity. Historical supported models
+recorded high input fidelity for identity references and rejected low-only editing.
+Output quality controls cannot guarantee likeness. Compare faces/body proportions
 with the original references and record drift as `needs_revision`. See the
 [continuity workflow](assets/skill/references/consistency.md).
 
@@ -136,7 +168,7 @@ For Fish synthesis without a saved voice, use `--voice-sample`,
 character. `persona accept-sample` copies the recording, transcript, permission,
 and evidence into its portable folder. See the [voice workflow](assets/skill/references/voices.md).
 
-Generation success and semantic quality are separate. Local artifact integrity is checked automatically. Explicit `review check --ai --provider ... --model ...` supports image review using OpenAI/OpenRouter multimodal text models; Google audio review supports `gemini-3.8-flash` or `gemini-2.5-flash` against exact scripts, briefs, and accepted voice recordings. Inline requests must fit 20 MiB; review individual clips for larger jobs. Completed AI reviews are saved with provider receipts and reused on identical commands; unknown review outcomes require explicit `--retry-unknown`. `review reconcile --artifact ID` retrieves uncertain Google audio assessments without resubmission. Human or agent assessments require provenance. Revisions create child runs, preserve originals, and inherit budgets. `--source-job` enables explicit updated scripts/copy; `--turn` targets a podcast turn and reuses unchanged clips.
+Generation success and semantic quality are separate. Local artifact integrity is checked automatically. Explicit `review check --ai --provider ... --model ...` supports image review using OpenAI/OpenRouter multimodal text models; Google audio review supports `gemini-3.8-flash` against exact scripts, briefs, and accepted voice recordings. Inline requests must fit 20 MiB; review individual clips for larger jobs. Completed AI reviews are saved with provider receipts and reused on identical commands; unknown review outcomes require explicit `--retry-unknown`. `review reconcile --artifact ID` retrieves uncertain Google audio assessments without resubmission. Human or agent assessments require provenance. Revisions create child runs, preserve originals, and inherit budgets. `--source-job` enables explicit updated scripts/copy; `--turn` targets a podcast turn and reuses unchanged clips.
 
 ## Agent integration and limits
 
@@ -158,7 +190,7 @@ cargo test --locked
 
 Normal tests mock providers and run offline even if credentials exist. The CI matrix checks macOS, Linux, and Windows; only local macOS has been executed during this implementation.
 
-`python3 scripts/live-smoke.py --provider openai --model gpt-image-1 --media image` reports skipped without generating. Add `--live` to explicitly enable at most one request using this project's credentials and strict limits. Speech also requires `--voice`. Google music smoke tests request the 30-second `lyria-3-clip-preview` preset; the returned duration is measured separately and can differ. Skipped credentials or unavailable account capabilities are never represented as passed live tests.
+`python3 scripts/live-smoke.py --provider openai --model gpt-image-2.5-flare --media image` reports skipped without generating. Add `--live` to explicitly enable at most one request using this project's credentials and strict limits. Speech also requires `--voice`. Google music smoke tests request the 30-second `lyria-3-clip-preview` preset; the returned duration is measured separately and can differ. Skipped credentials or unavailable account capabilities are never represented as passed live tests.
 
 `python3 scripts/live-voice-design.py --model eleven_ttv_v3 --speech-model eleven_flash_v2_5 --live` makes one bounded request for up to three fictional narrator previews. It snapshots its temporary character inside the ignored run, preserves `.env`, and never creates or binds a provider voice. Omit `--live` to report skipped.
 

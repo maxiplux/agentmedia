@@ -18,7 +18,7 @@ references:
   - path: clearing-layout.png
     role: layout
 settings:
-  input_fidelity: high
+  format: png
 ```
 
 Bare reference paths and `--reference` retain their generic content role for
@@ -26,14 +26,14 @@ compatibility. They are insufficient to express an identity requirement. Identit
 references are ordered before other roles, with filenames included in the compiled
 reference guide. Keep character-to-reference associations explicit in the brief.
 
-For OpenAI `gpt-image-1` and `gpt-image-1.5`, resolving an identity reference records
-`input_fidelity: high`; explicitly requesting low is rejected. This controls input
-preservation separately from output `image_quality`. The mini model's low-only
-editing is rejected for identity references. `gpt-image-2` processes inputs at high
-fidelity without that parameter, so omit `input_fidelity` for that model. Keep the
-selected provider/model pinned; do not switch models to repair identity silently.
-Other supported adapters retain identity roles and prompt constraints without
-claiming a provider fidelity control that is not implemented.
+Current OpenAI GPT Image 2.5 Flare and Sunburst process identity references without
+an `input_fidelity` parameter. Omit that field; choose output `image_quality`
+separately. Historical GPT Image 1/1.5 records may contain `input_fidelity: high`,
+but those older models cannot submit new requests under the current-stable policy.
+Keep the original provider/model pinned. If a character uses a retired model,
+create a new character version and explicitly accept new references on a current
+model; never relabel an older reference's origin. Other supported adapters retain
+identity roles and prompt constraints without claiming exact visual preservation.
 
 Preserve the selected reference's facial geometry, eye shape/spacing, nose,
 hair silhouette, head/body ratio, limbs, material, and characteristic details.
@@ -66,7 +66,7 @@ references:
   - path: selected-original.png
     role: identity
     origin:
-      selection: {provider: openai, model: gpt-image-1}
+      selection: {provider: openai, model: gpt-image-2.5-flare}
       sha256: REPLACE_WITH_ACTUAL_SHA256_OF_SELECTED_FILE
       settings: {format: png, image_quality: high, size: 1024x1024}
 ```

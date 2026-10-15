@@ -3,16 +3,16 @@
 # Select from `mediaagent models --json`; adjust before initialization.
 schema_version: 2
 defaults:
-  image: {provider: openai, model: gpt-image-1.5}
-  infographic: {provider: openai, model: gpt-image-1.5}
+  image: {provider: openai, model: gpt-image-2.5-flare}
+  infographic: {provider: openai, model: gpt-image-2.5-flare}
   speech: {provider: openai, model: gpt-4o-mini-tts}
   podcast: {provider: openai, model: gpt-4o-mini-tts}
-  music: {provider: elevenlabs, model: music_v1}
+  music: {provider: elevenlabs, model: music_v2_5}
   sfx: {provider: elevenlabs, model: eleven_text_to_sound_v2}
-  text: {provider: openai, model: gpt-4.1-mini}
+  text: {provider: openai, model: gpt-6-luna}
 default_settings:
-  image: {format: png, size: 1024x1024, image_quality: high, input_fidelity: high}
-  infographic: {format: png, size: 1024x1536, image_quality: high, input_fidelity: high}
+  image: {format: png, size: 1024x1024, image_quality: high}
+  infographic: {format: png, size: 1024x1536, image_quality: high}
   speech: {format: wav, voice: coral}
   podcast: {format: wav, voice: coral}
   music: {format: mp3, duration_seconds: 10, instrumental: true}

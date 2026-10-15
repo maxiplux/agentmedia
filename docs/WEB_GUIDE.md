@@ -21,7 +21,7 @@ The HTML contains:
 
 - Compiled Tailwind CSS 4.3.3 with the guide's component styles in a `<style>` tag.
 - Embedded JavaScript for search, navigation and copy buttons.
-- Sixteen workflow/reference sections, including eight practical scenarios, and 62 expandable command help pages.
+- Sixteen workflow/reference sections, including eight practical scenarios, and 63 expandable command help pages.
 - Four download links carrying the same embedded ZIP of 35 example files.
 
 Example downloads extract into `examples/` in your target project. They retain
@@ -44,8 +44,10 @@ https://tailwindcss.com/docs/installation/tailwind-cli
 Verified after bundling: no external scripts, styles, images or file links;
 unique element IDs and valid internal anchors; embedded ZIP integrity and all 35
 files; browser command search and copying; a mobile layout without page overflow.
-The original 15 offline CLI example checks remain applicable because the commands
-and example contents are unchanged. No provider calls were made for this work.
+The 0.3.0 guide and extracted examples pass 22 offline initialization, dry-run and
+validation checks. No provider calls were made for this work. Earlier mobile
+layout checks apply to the base layout; the updated setup and command sections
+were rechecked in a desktop browser.
 
 The scenario section covers article narration, a podcast asset package, a data
 infographic, a visual/audio lesson, recurring characters, app visuals and sounds,
@@ -53,3 +55,5 @@ a vocal jingle, and bilingual narration. Each has input/output descriptions,
 commands, authoring files, an agent prompt and review criteria. The four new batch
 manifests passed eight offline validation and dry-run checks. Browser checks
 confirmed expandable walkthroughs, command copying and mobile layout.
+
+Version 0.3.0 updates initialization to a resumable keyboard-driven checklist, optional masked credential entry, OpenAI/Fish defaults, local readiness and a reviewed current-stable model policy. Its 63 command pages and 35 downloadable examples match the updated executable and templates. New-model execution uses mocked requests; this documentation update makes no paid provider requests.

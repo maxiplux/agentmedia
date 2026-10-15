@@ -48,10 +48,10 @@ impl Transport for Mock {
         assert!(request.body().is_none());
         let url = request.url();
         assert!(url.scheme() == "https");
-        assert!(
-            url.query()
-                .is_none_or(|q| q == "pageSize=1" || q == "pageSize=100")
-        );
+        assert!(url.query().is_none_or(|q| q == "pageSize=1"
+            || q == "pageSize=100"
+            || q == "output_modalities=all"
+            || q == "output_modalities=image&sort=most-popular"));
         let header = match url.host_str().unwrap() {
             "generativelanguage.googleapis.com" => "x-goog-api-key",
             "api.elevenlabs.io" => "xi-api-key",
@@ -354,4 +354,50 @@ async fn model_discovery_is_read_only_bounded_and_does_not_claim_entitlement() {
         .unwrap();
     assert_eq!(fake.calls.load(Ordering::SeqCst), 1);
     assert!(!report.to_string().contains("PRIVATE"));
+}
+
+#[tokio::test]
+async fn model_popularity_is_provider_scoped_and_discovery_does_not_enable_unknown_models() {
+    let root = tempfile::tempdir().unwrap();
+    fs::write(root.path().join(".env"), "OPENROUTER_API_KEY=fixture\n").unwrap();
+    let fake = Arc::new(Mock::new(
+        200,
+        Some(
+            json!({"data":[{"id":"openai/gpt-image-2.5-flare"},{"id":"provider/unreviewed-image"}]}),
+        ),
+    ));
+    let report = health::Client::with_transport(2, fake.clone())
+        .unwrap()
+        .models_filtered(
+            root.path(),
+            &[Provider::Openrouter],
+            Some(mediaagent::contracts::Media::Image),
+            true,
+        )
+        .await
+        .unwrap();
+    assert_eq!(fake.calls.load(Ordering::SeqCst), 1);
+    assert!(fake.seen.lock().unwrap()[0].contains("output_modalities=image&sort=most-popular"));
+    assert_eq!(report["catalogs"][0]["models"][0]["current"], true);
+    assert_eq!(report["catalogs"][0]["models"][1]["current"], false);
+    assert_eq!(report["catalogs"][0]["models"][1]["supported"], false);
+    assert_eq!(report["generation_performed"], false);
+    let before = fake.calls.load(Ordering::SeqCst);
+    for media in [
+        mediaagent::contracts::Media::Music,
+        mediaagent::contracts::Media::Sfx,
+    ] {
+        let unsupported = health::Client::with_transport(2, fake.clone())
+            .unwrap()
+            .models_filtered(root.path(), &[Provider::Openrouter], Some(media), false)
+            .await
+            .unwrap();
+        assert!(
+            unsupported["catalogs"][0]["models"]
+                .as_array()
+                .unwrap()
+                .is_empty()
+        );
+    }
+    assert_eq!(fake.calls.load(Ordering::SeqCst), before);
 }

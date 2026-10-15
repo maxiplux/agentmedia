@@ -60,7 +60,7 @@ pub fn init_with_config(
     create(&root.join(".env"), b"")?;
     create(
         &root.join("mediaagent/.gitignore"),
-        b"runs/\ncache/\nblobs/\n",
+        b"runs/\ncache/\nblobs/\nsetup.lock\n",
     )?;
     // Preserve existing ignore rules; add only missing credential/artifact protection.
     let ignore = root.join(".gitignore");
@@ -73,6 +73,7 @@ pub fn init_with_config(
         "/mediaagent/runs/",
         "/mediaagent/cache/",
         "/mediaagent/blobs/",
+        "/mediaagent/setup.lock",
     ] {
         if !original.lines().any(|l| l == rule) {
             if !updated.ends_with('\n') && !updated.is_empty() {
@@ -119,7 +120,7 @@ pub fn install_with(root: &Path, agents: &[String], overwrite: bool) -> Result<V
     }
     Ok(existing)
 }
-fn check_agents(agents: &[String]) -> Result<()> {
+pub fn check_agents(agents: &[String]) -> Result<()> {
     if agents.iter().any(|a| a != "codex" && a != "claude") {
         return Err(Error::input(
             "Agent target must be codex or claude; use skills export for other agents",
@@ -136,6 +137,14 @@ pub fn add_persona(root: &Path, name: &str) -> Result<PathBuf> {
             "Character ID already exists; inspect or import with a different ID",
         ));
     }
+    fs::create_dir_all(dir.parent().unwrap())?;
+    fs::create_dir(&dir).map_err(|error| {
+        if error.kind() == std::io::ErrorKind::AlreadyExists {
+            Error::input("Character ID already exists; choose another ID")
+        } else {
+            Error::io(error)
+        }
+    })?;
     fs::create_dir_all(dir.join("references/images"))?;
     fs::create_dir_all(dir.join("references/audio"))?;
     for filename in ["persona.md", "visual.md", "voice.md"] {

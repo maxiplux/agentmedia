@@ -13,6 +13,5 @@ settings:
   format: png
   size: 1536x1024
   image_quality: medium
-  input_fidelity: high
 # Both profiles must have accepted references and compatible original models/settings.
 # selection may be omitted; the common pinned character model is resolved.

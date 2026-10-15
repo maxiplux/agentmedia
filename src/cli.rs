@@ -30,6 +30,17 @@ pub enum Color {
     Always,
     Never,
 }
+#[derive(Debug, Clone, Copy, ValueEnum)]
+pub enum Preset {
+    Recommended,
+    Empty,
+}
+#[derive(Debug, Clone, Copy, ValueEnum, PartialEq, Eq)]
+pub enum ModelSort {
+    Recommended,
+    Name,
+    Popular,
+}
 #[derive(Debug, Parser)]
 #[command(
     name = "mediaagent",
@@ -50,7 +61,7 @@ pub struct Cli {
     /// Terminal progress mode; redirected auto progress uses plain stage updates
     #[arg(long, global = true, value_enum, default_value = "auto")]
     pub progress: Progress,
-    /// Progress colors; auto honors NO_COLOR
+    /// Terminal colors; auto honors NO_COLOR
     #[arg(long, global = true, value_enum, default_value = "auto")]
     pub color: Color,
     #[command(subcommand)]
@@ -67,6 +78,9 @@ pub enum Command {
         /// Complete configuration YAML: provider/models, settings, locales, consistency, and limits
         #[arg(long)]
         defaults_file: Option<PathBuf>,
+        /// New-project preset; existing files are preserved (default: recommended)
+        #[arg(long, value_enum, conflicts_with = "defaults_file")]
+        preset: Option<Preset>,
         /// Configure explicit provider/model, generation settings, limits, and identity policy offline
         #[arg(long, conflicts_with = "defaults_file")]
         interactive: bool,
@@ -125,6 +139,21 @@ pub enum Command {
         live: bool,
         #[arg(long, value_enum, value_delimiter = ',')]
         provider: Vec<Provider>,
+        /// Filter by generation purpose (infographic uses image; podcast uses speech)
+        #[arg(long, value_enum)]
+        media: Option<Media>,
+        /// Search model names, IDs and descriptions
+        #[arg(long)]
+        search: Option<String>,
+        /// Show only recommended current supported models
+        #[arg(long)]
+        recommended: bool,
+        /// Include nonselectable historical and unsupported provider catalog entries
+        #[arg(long)]
+        all: bool,
+        /// Popularity requires --live --provider openrouter; no rankings are invented
+        #[arg(long, value_enum, default_value = "recommended")]
+        sort: ModelSort,
     },
     /// List built-in voices or search bounded pages of provider account voices
     Voices {
@@ -190,7 +219,7 @@ pub enum Command {
         kind: String,
         path: PathBuf,
     },
-    /// Generate one media job. Example: generate image --prompt 'A forest' --provider openai --model gpt-image-1 --output forest.png
+    /// Generate one media job. Example: generate image --prompt 'A forest' --provider openai --model gpt-image-2.5-flare --output forest.png
     Generate {
         #[arg(value_enum, required_unless_present = "job")]
         media: Option<Media>,
@@ -297,6 +326,8 @@ pub enum ConfigAction {
         action: HostAction,
     },
     Show,
+    /// Inspect local setup readiness without network calls or revealing credentials
+    Status,
     /// Replace config only after validating the supplied file
     Setup {
         #[arg(long)]
@@ -366,6 +397,7 @@ pub enum PersonaAction {
     /// Generate ElevenLabs voice preview candidates without creating or binding a saved voice
     VoiceDesign {
         id: String,
+        /// Use eleven_ttv_v3 for new previews; the historical v2 value remains readable but cannot submit
         #[arg(long,value_parser=clap::builder::PossibleValuesParser::new(crate::voices::DESIGN_MODELS.iter().copied()))]
         model: String,
         /// Exact 100–1000 character preview script
@@ -538,7 +570,7 @@ pub struct Input {
     /// Preserve referenced character identities; repeat for multiple selected characters
     #[arg(long)]
     pub identity_reference: Vec<PathBuf>,
-    /// OpenAI image-edit input preservation; identity references require high on supported models
+    /// Historical image-edit fidelity field; omit for current GPT Image 2.5 models
     #[arg(long,value_parser=["high","low"])]
     pub input_fidelity: Option<String>,
 
@@ -551,8 +583,8 @@ pub struct Input {
     /// Versioned permission record and referenced evidence for --voice-sample
     #[arg(long, requires = "voice_sample")]
     pub consent_file: Option<PathBuf>,
-    /// OpenAI image quality: low, medium, high, or auto
-    #[arg(long,value_parser=["low","medium","high","auto"])]
+    /// OpenAI image quality: low/medium/high/auto; current 2.5 models also support xhigh/max
+    #[arg(long,value_parser=["low","medium","high","auto","xhigh","max"])]
     pub image_quality: Option<String>,
     #[arg(long, value_enum, requires = "model")]
     pub provider: Option<Provider>,
@@ -694,6 +726,61 @@ pub fn command_reference() -> String {
         + "\n"
 }
 pub fn human_result(data: &Value) -> String {
+    if data["policy"] == "current_stable_only"
+        && let Some(models) = data["models"].as_array()
+    {
+        let mut out = format!(
+            "Models — current stable policy (verified {})\n",
+            crate::catalog::VERIFIED_AT
+        );
+        for m in models {
+            out += &format!(
+                "{} / {} / {}{}{}\n  {}\n",
+                m["provider"].as_str().unwrap_or(""),
+                m["media"].as_str().unwrap_or("unverified purpose"),
+                m["model"].as_str().unwrap_or(""),
+                if m["recommended"] == true {
+                    " [recommended]"
+                } else {
+                    ""
+                },
+                if m["current"] != true || m["supported"] != true {
+                    " [unavailable for generation]"
+                } else {
+                    ""
+                },
+                m["description"].as_str().unwrap_or("")
+            );
+        }
+        out += "Catalog visibility does not verify account access. Use --json for structured metadata.\n";
+        return out;
+    }
+
+    if let Some(complete) = data.get("setup_complete").and_then(Value::as_bool) {
+        let mut out = format!(
+            "{}\n",
+            if complete {
+                "Setup locally ready. Provider access has not been verified."
+            } else {
+                if data.get("project").is_some() {
+                    "Setup saved but unfinished. Run mediaagent init to continue."
+                } else {
+                    "Setup incomplete. Run mediaagent init to continue."
+                }
+            }
+        );
+        if let Some(project) = data.get("project") {
+            out += &format!("Project: {}\n", project.as_str().unwrap_or(""));
+        }
+        if let Some(steps) = data["pending_steps"].as_array() {
+            for step in steps {
+                out += &format!("  - {}\n", step.as_str().unwrap_or(""));
+            }
+        }
+        out += "Inspect readiness: mediaagent config status --json\n";
+        return out;
+    }
+
     if data.get("live_requested").is_some()
         && let Ok(report) = serde_json::from_value::<providers::health::Report>(data.clone())
     {
@@ -856,38 +943,52 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
             agents,
             defaults_file,
             interactive,
+            preset,
         } => {
+            project::check_agents(agents)?;
             if *interactive && (cli.json || cli.non_interactive) {
                 return Err(Error::input(
-                    "init --interactive requires a terminal; automation uses init --defaults-file config.yaml --json",
+                    "init --interactive requires a terminal; automation uses init --preset recommended --json --non-interactive",
                 ));
             }
             let exists = path.join("mediaagent/config.yaml").exists();
             let terminal = *interactive
-                || (!exists
-                    && defaults_file.is_none()
+                || (defaults_file.is_none()
                     && !cli.json
                     && !cli.non_interactive
-                    && std::io::stdin().is_terminal());
-            if terminal && exists {
-                return Err(Error::input(
-                    "Project configuration already exists; use config wizard to update it explicitly",
+                    && std::io::stdin().is_terminal()
+                    && std::io::stderr().is_terminal());
+            if terminal {
+                let initial = if exists {
+                    project::config(path)?
+                } else if matches!(preset, Some(Preset::Empty)) {
+                    Config::default()
+                } else {
+                    crate::setup::recommended()
+                };
+                return Ok((
+                    crate::setup::run(path, initial, agents.clone(), cli.color)?,
+                    0,
                 ));
             }
-            let configured = if terminal {
-                let mut initial = Config::default();
-                initial.consistency.require_known_identity_model = true;
-                Some(crate::setup::configure(initial)?)
+            let configured = if let Some(file) = defaults_file {
+                Some(yaml::<Config>(file)?)
+            } else if exists {
+                None
             } else {
-                defaults_file
-                    .as_ref()
-                    .map(|p| yaml::<Config>(p))
-                    .transpose()?
+                Some(if matches!(preset, Some(Preset::Empty)) {
+                    let mut c = Config::default();
+                    c.consistency.require_known_identity_model = true;
+                    c
+                } else {
+                    crate::setup::recommended()
+                })
             };
-            Ok((
-                project::init_with_config(path, agents, configured.as_ref())?,
-                0,
-            ))
+            let mut result = project::init_with_config(path, agents, configured.as_ref())?;
+            for (k, v) in crate::setup::status(path)?.as_object().unwrap() {
+                result[k] = v.clone();
+            }
+            Ok((result, 0))
         }
         Command::Config { action } => match action {
             ConfigAction::Wizard => {
@@ -896,7 +997,7 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                         "Use config setup --file with --json or --non-interactive; wizard is for interactive terminals",
                     ));
                 }
-                Ok((json!(crate::setup::wizard(&root)?), 0))
+                Ok((json!(crate::setup::wizard(&root, cli.color)?), 0))
             }
             ConfigAction::Host { action } => match action {
                 HostAction::Show => Ok((
@@ -910,6 +1011,7 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                     Ok((json!({"path":path,"limits":limits}), 0))
                 }
             },
+            ConfigAction::Status => Ok((crate::setup::status(&root)?, 0)),
             ConfigAction::Show => Ok((json!(project::config(&root)?), 0)),
             ConfigAction::Limits => Ok((json!(project::config(&root)?.limits), 0)),
             ConfigAction::Setup { file } => {
@@ -977,26 +1079,68 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
             Ok((json!(report), exit))
         }
         Command::Schema { kind } => Ok((schema(kind)?, 0)),
-        Command::Models { live, provider } if *live => {
-            let result = providers::health::Client::new(10)?
-                .models(&root, provider)
-                .await?;
-            let exit = if result["catalogs"]
-                .as_array()
-                .unwrap()
-                .iter()
-                .any(|r| r["status"] != "catalog_visible")
+        Command::Models {
+            live,
+            provider,
+            media,
+            search,
+            recommended,
+            all,
+            sort,
+        } => {
+            if *sort == ModelSort::Popular
+                && (!live || provider.as_slice() != [Provider::Openrouter])
             {
-                3
-            } else {
-                0
+                return Err(Error::input(
+                    "Popularity is available only with models --live --provider openrouter --sort popular; other providers use documented recommendations",
+                ));
+            }
+            let filter = crate::catalog::Filter {
+                providers: provider,
+                media: *media,
+                search: search.as_deref(),
+                recommended: *recommended,
+                all: *all,
+                sort_name: *sort == ModelSort::Name,
             };
-            Ok((result, exit))
+            if *live {
+                let mut result = providers::health::Client::new(10)?
+                    .models_filtered(&root, provider, *media, *sort == ModelSort::Popular)
+                    .await?;
+                for row in result["catalogs"].as_array_mut().unwrap() {
+                    if let Some(models) = row["models"].as_array_mut() {
+                        models.retain(|m| {
+                            search.as_ref().is_none_or(|q| {
+                                m["model"]
+                                    .as_str()
+                                    .unwrap_or("")
+                                    .to_lowercase()
+                                    .contains(&q.to_lowercase())
+                            }) && (!*recommended || m["recommended"] == true)
+                                && (*all || (m["current"] == true && m["supported"] == true))
+                        });
+                        if *sort == ModelSort::Name {
+                            models
+                                .sort_by_key(|m| m["model"].as_str().unwrap_or("").to_lowercase());
+                        }
+                    }
+                }
+                let exit =
+                    if result["catalogs"].as_array().unwrap().iter().any(|r| {
+                        r["status"] != "catalog_visible" && r["status"] != "bundled_catalog"
+                    }) {
+                        3
+                    } else {
+                        0
+                    };
+                if exit == 0 {
+                    save(&root.join("mediaagent/cache/models.yaml"), &result)?;
+                }
+                Ok((result, exit))
+            } else {
+                Ok((crate::catalog::listing(&root, &filter), 0))
+            }
         }
-        Command::Models { provider, .. } => Ok((
-            json!({"models":providers::capabilities().into_iter().filter(|c|provider.is_empty()||provider.iter().any(|p|serde_json::to_value(p).ok().as_ref()==c.get("provider"))).collect::<Vec<_>>(),"voice_design_models":crate::voices::DESIGN_MODELS.iter().map(|model|json!({"provider":"elevenlabs","model":model,"preview_candidates":true,"explicit_voice_creation":true,"recorded_voice_cloning":true})).collect::<Vec<_>>(),"text_providers":["openai","google","openrouter"],"image_review_providers":["openai","openrouter"],"audio_review_models":["gemini-3.8-flash","gemini-2.5-flash"],"audio_review_provider":"google","account_access_verified":false}),
-            0,
-        )),
         Command::Voices {
             provider,
             account,
@@ -1911,7 +2055,7 @@ async fn review(root: &Path, action: &ReviewAction) -> Result<(Value, u8)> {
                         .contains(&selection.model.as_str()))
             {
                 return Err(Error::input(
-                    "Audio review requires Google gemini-3.8-flash or gemini-2.5-flash",
+                    "Audio review requires a supported Google text/audio reviewer; current requests use gemini-3.8-flash",
                 ));
             }
             let mut source = job.input.clone();

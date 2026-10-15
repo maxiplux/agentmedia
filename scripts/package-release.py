@@ -44,8 +44,8 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
         if not response['ok']:
             raise RuntimeError('Offline binary verification failed')
         return response
-    cli(['init', str(project)])
-    cli(['init', str(project)])
+    cli(['init', str(project), '--preset', 'empty'])
+    cli(['init', str(project), '--preset', 'empty'])
     assert (project / '.env').read_text() == preserved
     checks.append('offline_repeat_initialization_preserves_env')
     for agent in ['.agents', '.claude']:
@@ -55,11 +55,20 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
         assert (skill / 'references/schemas/operation.json').is_file()
         assert (skill / 'references/schemas/voice_design.json').is_file()
     checks.append('embedded_codex_and_claude_skills_without_checkout')
+    recommended_project = isolated / 'recommended-project'
+    recommended = cli(['init', str(recommended_project), '--preset', 'recommended'])['data']
+    assert recommended['configuration']['defaults']['image']['model'] == 'gpt-image-2.5-flare'
+    assert recommended['configuration']['defaults']['speech']['provider'] == 'fish'
+    assert recommended['setup_complete'] is False and recommended['pending_steps']
+    readiness = cli(['--project', str(recommended_project), 'config', 'status'])['data']
+    assert readiness['setup_complete'] is False and readiness['account_access_verified'] is False
+    assert (project / '.agents/skills/mediaagent/references/setup.md').is_file()
+    checks.append('recommended_init_and_resumable_setup_readiness')
     exported = isolated / 'portable-skill'
     cli(['--project', str(project), 'skills', 'export', str(exported)])
     assert (exported / 'templates/voice-preview.md').is_file()
     checks.append('portable_skill_export_without_checkout')
-    out = cli(['--project', str(project), 'generate', 'image', '--provider', 'openai', '--model', 'gpt-image-1', '--prompt', 'An offline dry-run leaf', '--output', str(isolated / 'leaf.png'), '--dry-run'])
+    out = cli(['--project', str(project), 'generate', 'image', '--provider', 'openai', '--model', 'gpt-image-2.5-flare', '--prompt', 'An offline dry-run leaf', '--output', str(isolated / 'leaf.png'), '--dry-run'])
     assert out['data']['dry_run'] and not (isolated / 'leaf.png').exists()
     assert not list((project / 'mediaagent/runs').glob('*/run.yaml'))
     checks.append('offline_direct_generation_dry_run')
@@ -90,7 +99,7 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
     jobs = project / 'acceptance jobs'
     jobs.mkdir()
     (jobs / 'brief.md').write_text('One clear leaf on a plain background.')
-    (jobs / 'job.yaml').write_text('schema_version: 2\nid: package-check\nmedia: image\nselection: {provider: openai, model: gpt-image-1}\nbrief: brief.md\n')
+    (jobs / 'job.yaml').write_text('schema_version: 2\nid: package-check\nmedia: image\nselection: {provider: openai, model: gpt-image-2.5-flare}\nbrief: brief.md\n')
     (jobs / 'suite.yaml').write_text('schema_version: 1\nid: package-check\ndescription: Isolated offline preview\njobs: [job.yaml]\nlimits: {requests: 1, images: 1, audio_seconds: 60, speech_chars: 1000, revisions: 1, attempts: 1, concurrency: 1, per_provider: 1}\ncriteria: [Human content acceptance]\n')
     preview = cli(['--project', str(project), 'verify', '--suite', str(jobs / 'suite.yaml')])['data']
     assert preview['estimated_reservation']['requests'] == 1

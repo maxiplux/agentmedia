@@ -1,6 +1,7 @@
 pub mod assets;
 pub mod audio;
 pub mod blobs;
+pub mod catalog;
 pub mod cli;
 pub mod contracts;
 pub mod credentials;

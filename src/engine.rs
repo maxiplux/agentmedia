@@ -730,6 +730,11 @@ pub async fn work(
                 continue;
             }
             if !(raw.exists() && raw.with_extension("yaml").exists()) {
+                if let Err(error) = crate::catalog::require_input(&run.jobs[i].input) {
+                    run.jobs[i].state = State::Blocked;
+                    run.jobs[i].error = Some(error.to_string());
+                    continue;
+                }
                 if let Err(e) = reserve(
                     root,
                     &run.budget_group,

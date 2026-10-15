@@ -14,9 +14,9 @@ Implemented: Rust package/library/CLI, versioned contracts and schemas, offline 
 
 See [live evidence](LIVE_TESTS.md) for exact models, runs, decoded durations, one earlier rejected placeholder voice request, and untested paths. Live tests prove selected API/file handling, not human-perceived quality, exact script pronunciation, character consistency, or all model variants. No saved provider voice was created or cloned, and no candidates were accepted automatically. The descriptive preview test returned three candidates; provider-side creation/binding/verification refresh has offline coverage, with creation/binding untested live.
 
-Ordinary tests use mocked adapters/transports and small local fixtures. They verify contracts, concurrency, limits, identity resolution, authoring validation, audio assembly, cache, revisions, and recovery without paid calls even when credentials exist. The baseline had 100 passing offline tests on macOS; remediation adds independent contract/recovery/storage tests. See the remediation evidence below for the current count. A local Apple Silicon release archive passed eight isolated offline checks, including initialization and embedded skill export without the checkout. See [packaging](PACKAGING.md). CI matrices are configured for Linux/macOS/Windows; Linux and Windows execution remain unverified here.
+Ordinary tests use mocked adapters/transports and small local fixtures. They verify contracts, concurrency, limits, identity resolution, authoring validation, audio assembly, cache, revisions, and recovery without paid calls even when credentials exist. The baseline had 100 passing offline tests on macOS; remediation adds independent contract/recovery/storage tests. See the remediation evidence below for the current count. Historical local packages passed their isolated offline checks, including initialization and embedded skill export without the checkout; current 0.3.0 evidence is below. See [packaging](PACKAGING.md). Native CI covers Linux, macOS and Windows. See the 0.3.0 verification notes below for current results.
 
-Verification still requiring external inputs: selected authorized speaker recordings for live cloning/reference synthesis, human listening and repeated character scenes, and native Linux/Windows execution. These do not become passed merely because implementation or mock tests succeeded.
+Verification still requiring external inputs: selected authorized speaker recordings for live cloning/reference synthesis, human listening and repeated character scenes. These do not become passed merely because implementation or mock tests succeeded.
 
 Provider boundaries: voice preview design and saved-voice creation/cloning are implemented for ElevenLabs; other providers can reuse their accessible bindings. Fish supports stateless synthesis from authorized recordings with exact transcripts. Google supports audio review with a 20 MiB inline request ceiling; larger jobs can review individual clips. Google Interactions has retrieval by saved ID; the other adapter endpoints do not expose an implemented media-result retrieval path, so uncertain calls require account reconciliation before explicit retry. Provider professional/biometric verification must be completed by the speaker through the provider's supported account flow. No placeholder verification submission or video adapter is advertised. Public publishing, signing, and notarization are outside the requested local implementation.
 
@@ -87,7 +87,7 @@ remain unexecuted. Repeated scenes correctly remain blocked until references
 are selected; saved-voice reuse remains blocked until explicit creation/binding.
 Cloning/reference synthesis still needs authorized recordings and consent evidence.
 
-Fresh Codex/Claude automatic-discovery sessions and Windows execution remain pending.
+Fresh Codex/Claude automatic-discovery sessions remain pending. Windows native execution is covered by the current CI evidence below.
 Generic process-caller and isolated package tests are separate from those gates.
 See [acceptance](ACCEPTANCE.md) and [remediation workflows](REMEDIATION.md).
 
@@ -104,5 +104,12 @@ Final Linux x86-64 verification also passes 119 offline tests, formatting, stric
 Clippy and 12 isolated package checks, executing under Docker Desktop emulation.
 The verified source manifest matches the current Rust, test, asset and packaging
 sources. Mac and Linux 0.2.0 archives/checksums are under `target/package-dist/`;
-`target/remediation-verification.json` records their exact hashes. Windows remains
-pending a Windows runner. Neither archive is publicly published or signed.
+`target/remediation-verification.json` records their exact hashes. Windows was pending in that historical local snapshot; current native results follow. Neither historical local archive was publicly published or signed.
+
+## Guided setup and current stable models (0.3.0)
+
+The terminal initializer now loops through a searchable, colored checklist, supports explicit draft saving/resumption and masks missing project credential entry. Its default preset selects OpenAI GPT Image 2.5 Flare for images/infographics, Fish s2.1-pro for speech/podcasts and OpenAI GPT-6 Luna for planning. Optional features remain disabled until selected. `config status --json` shares the same local readiness checks; initialization remains offline.
+
+Only reviewed current stable model families may submit new provider requests, including retries and side operations. Historical configuration, model locks, receipts, cached results and response recovery remain readable. Existing retired-model identities need an explicit new character version with human-accepted references. The bundled catalog has dated official-source metadata; live discovery is bounded and cannot authorize execution. GPT Image 2.5 request translation has mocked coverage, including exact model IDs/snapshots, references and supported size/quality settings; paid live acceptance was not performed for this change.
+
+Local macOS formatting, strict Clippy and 140 offline tests pass, including real terminal navigation, masked credentials, draft/resume, cancellation and current-model policy tests. All 140 offline tests, formatting and strict Clippy also pass on native Windows, Linux and macOS runners: [Rust checks](https://github.com/maxiplux/agentmedia/actions/runs/38670199603). Each platform archive passes 13 isolated offline workflows: [native packages and downloadable artifacts](https://github.com/maxiplux/agentmedia/actions/runs/38670199579). Downloaded archive/executable hashes were verified, including the Windows executable’s 8 MiB stack reserve. These runs tested code revision `3395a58`; subsequent changes only update documentation. No claim of human identity/quality acceptance is added.
