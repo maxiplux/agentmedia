@@ -198,7 +198,7 @@ fn google_and_openai_presets_are_ready_with_one_key_and_preserve_existing_identi
         assert_eq!(report["data"]["setup_complete"], true);
         assert_eq!(
             report["data"]["skills"],
-            json!({"codex":true,"claude":true})
+            json!({"codex":true,"claude":true,"cursor":true,"gemini":true,"opencode":true,"copilot":true})
         );
         let config = project::config(&root).unwrap();
         assert_eq!(config.defaults.len(), features);
@@ -785,4 +785,106 @@ fn live_bundled_catalog_hides_historical_models_unless_all_is_explicit() {
             );
         }
     }
+}
+
+#[test]
+fn status_reports_shared_discovery_for_every_known_agent() {
+    let t = tempfile::tempdir().unwrap();
+    let root = t.path();
+    project::init(root, &["codex".into()]).unwrap();
+    let status = setup::status(root).unwrap();
+    assert_eq!(
+        status["skills"],
+        json!({"codex":true,"claude":false,"cursor":true,"gemini":true,"opencode":true,"copilot":true})
+    );
+    let targets = status["skill_targets"].as_array().unwrap();
+    assert_eq!(targets.len(), 6);
+    let cursor = targets.iter().find(|t| t["agent"] == "cursor").unwrap();
+    assert_eq!(cursor["label"], "Cursor");
+    assert_eq!(cursor["native_installed"], false);
+    assert_eq!(
+        cursor["native_path"],
+        json!(root.join(".cursor/skills/framechord"))
+    );
+    assert_eq!(
+        cursor["discovered_via"],
+        json!([root.join(".agents/skills/framechord")])
+    );
+    assert!(cursor["source"].as_str().unwrap().starts_with("https://"));
+    let shared = status["skills_shared_by"][".agents/skills"]
+        .as_array()
+        .unwrap();
+    assert!(shared.iter().any(|a| a == "copilot"), "{shared:?}");
+    assert!(shared.iter().any(|a| a == "codex"));
+    assert!(!shared.iter().any(|a| a == "claude"));
+}
+
+#[test]
+fn none_agent_target_must_be_given_alone() {
+    for agents in [["none", "none"], ["none", "codex"], ["claude", "none"]] {
+        let agents: Vec<String> = agents.iter().map(|a| a.to_string()).collect();
+        let error = project::normalize_agents(&agents)
+            .err()
+            .unwrap_or_else(|| panic!("{agents:?} was accepted"));
+        assert_eq!(error.code, "invalid_input", "{agents:?}");
+        assert!(
+            error.message.contains("none must be given alone"),
+            "{agents:?}: {}",
+            error.message
+        );
+        assert!(
+            !error.message.contains("must be one of"),
+            "{agents:?}: {}",
+            error.message
+        );
+    }
+    assert!(
+        project::normalize_agents(&["none".into()])
+            .unwrap()
+            .is_empty()
+    );
+    let unknown = project::normalize_agents(&["nonsense".into()])
+        .err()
+        .expect("unknown agent is rejected");
+    assert!(
+        unknown.message.contains("must be one of"),
+        "{}",
+        unknown.message
+    );
+}
+
+#[test]
+fn status_flags_duplicate_discovery_and_the_human_output_warns_once() {
+    let t = tempfile::tempdir().unwrap();
+    let root = t.path();
+    project::init(root, &["codex".into()]).unwrap();
+    let status = setup::status(root).unwrap();
+    for target in status["skill_targets"].as_array().unwrap() {
+        assert_eq!(target["duplicate_discovery"], false, "{}", target["agent"]);
+    }
+    assert!(!framechord::cli::human_result(&status).contains("Warning"));
+
+    project::install(root, &["cursor".into()]).unwrap();
+    let status = setup::status(root).unwrap();
+    let targets = status["skill_targets"].as_array().unwrap();
+    let cursor = targets.iter().find(|t| t["agent"] == "cursor").unwrap();
+    assert_eq!(cursor["duplicate_discovery"], true);
+    assert_eq!(cursor["native_installed"], true);
+    assert_eq!(cursor["discovered_via"].as_array().unwrap().len(), 2);
+    let codex = targets.iter().find(|t| t["agent"] == "codex").unwrap();
+    assert_eq!(codex["duplicate_discovery"], false);
+    let copilot = targets.iter().find(|t| t["agent"] == "copilot").unwrap();
+    assert_eq!(copilot["duplicate_discovery"], false);
+
+    let human = framechord::cli::human_result(&status);
+    let warnings: Vec<&str> = human.lines().filter(|l| l.contains("Warning")).collect();
+    assert_eq!(warnings.len(), 1, "{human}");
+    assert!(
+        warnings[0].contains("Cursor")
+            && warnings[0].contains(".cursor/skills")
+            && warnings[0].contains(".agents/skills")
+            && warnings[0].contains("keep one"),
+        "{}",
+        warnings[0]
+    );
 }

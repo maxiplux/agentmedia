@@ -1,0 +1,8 @@
+schema_version: 2
+id: garden-narration
+media: speech
+selection: {provider: openai, model: gpt-4o-mini-tts}
+brief: narration.md
+text_file: article.txt
+settings: {format: wav, voice: alloy}
+locale: en-US

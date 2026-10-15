@@ -1,0 +1,6 @@
+schema_version: 2
+id: garden-empty-state
+media: image
+selection: {provider: openai, model: gpt-image-2.5-flare}
+brief: empty-state.md
+settings: {format: png, size: 1024x1024, image_quality: medium}

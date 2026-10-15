@@ -287,3 +287,37 @@ The standard public acceptance script also passes locally for 0.6.2 using normal
 DNS and HTTPS (no address override): public installer, read-only update check,
 verified reinstall, offline rollback and project-file preservation. Its isolated
 environment excludes media-provider keys and makes zero provider calls.
+
+## Cost estimates, agent targets and site generator (0.7.0, unreleased)
+
+October 15, 2026. Three implementation changes back the new cost and integration
+documentation; no 0.7.0 release has been published yet, so the public installers still
+deliver 0.6.2 until the release workflow runs.
+
+- `usage --json` now reports labelled list-price estimates beside provider-reported
+  units: `cost_estimate`, `cost_status` (`estimated`, `provider_reported`,
+  `cached_no_charge`, `not_estimable`; operations and local podcast assembly jobs
+  `not_estimated`), `cost_note`,
+  `estimated_total_usd` and an `estimate_summary`. Rates come from the bundled
+  `assets/pricing.json`, verified against the official Google, OpenAI and ElevenLabs
+  pricing pages on October 15, 2026, or from an explicit validated `--price-table`.
+  Provider-returned `cost` is never replaced and `currency_total` stays null.
+  `models --json` carries the matching `pricing` entries. See [cost](COST.md).
+- Skill install targets `cursor`, `gemini`, `opencode`, `copilot` and `none` join
+  `codex` and `claude`, with discovery paths verified against each vendor's
+  documentation on the same date. `config status --json` reports `skills`,
+  `skill_targets` and `skills_shared_by`; the wizard gained a per-agent toggle menu.
+  See [integration](INTEGRATION.md).
+- `scripts/build-site.py` regenerates the guide's command pages, model catalog,
+  example archives and version stamps from the binary, `assets/models.json` and the
+  checked-in `docs/site/examples/`; `--check` runs in the Linux CI job. The guide gained
+  hand-written cost and integration sections and a Google-default hero.
+
+Local validation on macOS Apple Silicon: formatting, strict Clippy, 189 passing
+offline Rust tests (one ignored platform test), 8 generator unit tests,
+`build-site.py --check` clean against the regenerated 0.7.0 guide (65 command pages,
+18 sections), and `package-release.py --offline` with 18 isolated native checks
+including the new native-target and estimate assertions. The guide was opened locally
+in a browser at desktop and phone widths with no console errors or horizontal overflow.
+No provider calls were made; native CI and public release results for 0.7.0 follow its
+publication.

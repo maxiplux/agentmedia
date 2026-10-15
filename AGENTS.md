@@ -22,14 +22,15 @@ require actual human acceptance. See docs/REMEDIATION.md and docs/ACCEPTANCE.md.
 The terminal initializer is a resumable checklist with arrow/search menus and
 masked optional key entry. New CLI projects use Google defaults for supported image, speech, music and text features,
 with OpenAI as an explicit alternative; standalone effects remain optional with ElevenLabs.
-Init preserves/appends project .env key names and installs Codex/Claude project skills.
+Init preserves/appends project .env key names and installs Codex/Claude project skills
+by default; `cursor`, `gemini`, `opencode`, `copilot` and `none` are explicit targets.
 `--preset empty` preserves empty-scaffold behavior. Initialization stays offline.
 Only reviewed current stable model families may submit new provider requests,
 including retries, planning, reviews and voice design. Historical contracts,
 receipts, cached successes and response recovery remain readable. Never silently
 upgrade a pinned character: create a new version and explicitly accept new
 references. Maintain dated official-source metadata in `assets/models.json` and
-review it each release. Discovery cannot authorize unimplemented or retired models.
+`assets/pricing.json` and review both each release. Discovery cannot authorize unimplemented or retired models.
 
 ## First-version scope
 
@@ -87,7 +88,7 @@ Include templates for character identity, visual appearance, voice, image briefs
 
 Resolve referenced paths relative to their containing manifest and keep exported character dependencies inside the bundle. Validate YAML, required content, reference existence, and capability compatibility before paid calls. Treat Markdown and YAML as data; do not execute embedded commands while parsing them.
 
-Persist effective generation inputs and results, including character and reference hashes, provider, model, settings, output paths, status, and usage/cost information when available. Do not invent usage or cost numbers when a provider does not return them.
+Persist effective generation inputs and results, including character and reference hashes, provider, model, settings, output paths, status, and usage/cost information when available. Do not invent usage or cost numbers when a provider does not return them. Labelled list-price estimates computed by `usage` from the dated bundled price table are a separate read-only view: they never replace provider-reported cost, never become a currency total, and leave unpriceable work unknown.
 
 ## Character identity and reuse
 
@@ -105,7 +106,7 @@ Import/export must preserve character content and local references without depen
 
 The following command families now have an initial implementation; use `--help` and `docs/STATUS.md` for implemented options and remaining limitations:
 
-- `framechord init [path]`: create configuration, templates, an initial persona scaffold, and project-local skills. Allow agent targets to be selected; default to Codex and Claude Code. Perform no network calls or media generation.
+- `framechord init [path]`: create configuration, templates, an initial persona scaffold, and project-local skills. Allow agent targets to be selected (codex, claude, cursor, gemini, opencode, copilot, none); default to Codex and Claude Code, whose directories Cursor, Gemini CLI, OpenCode and Copilot also read. Perform no network calls or media generation.
 - `framechord skills install`: install the bundled skill for selected agents at project or user scope.
 - `framechord persona`: create, inspect, bootstrap, accept references, import, and export characters.
 - `framechord plan`: use a configured text model to author character descriptions or generation jobs from the shared templates. Produce reviewable files before generation; planning must not implicitly bootstrap voices or generate media.
@@ -128,6 +129,12 @@ Install the skill in the documented discovery locations:
 
 - Codex: project `.agents/skills/framechord/`; user `~/.agents/skills/framechord/`.
 - Claude Code: project `.claude/skills/framechord/`; user `~/.claude/skills/framechord/`.
+- Cursor: project `.cursor/skills/framechord/`; user `~/.cursor/skills/framechord/` (also reads the Codex and Claude directories).
+- Gemini CLI: project `.gemini/skills/framechord/`; user `~/.gemini/skills/framechord/` (also reads `.agents/skills/`).
+- OpenCode: project `.opencode/skills/framechord/`; user `~/.config/opencode/skills/framechord/` (also reads the Codex and Claude directories).
+- GitHub Copilot: project `.github/skills/framechord/`; user `~/.copilot/skills/framechord/` (also reads the Codex and Claude directories).
+
+Native directories are explicit choices; the default pair already reaches every agent above. Verify these paths against each vendor's documentation when they change.
 
 The skill helps the agent inspect configuration and available characters, author YAML and Markdown using templates, validate files, bootstrap references when requested, and call the binary for generation. It must preserve exact requested dialogue/lyrics, reuse selected characters, and report generated artifact paths and incomplete jobs accurately.
 
@@ -197,5 +204,10 @@ For documentation-only changes, verify accuracy, naming, links, and agreement wi
 - ElevenLabs: <https://elevenlabs.io/docs/overview/capabilities/voices> and <https://elevenlabs.io/docs/overview/capabilities/music>
 - Codex skills: <https://learn.chatgpt.com/docs/build-skills>
 - Claude Code skills: <https://code.claude.com/docs/en/skills>
+- Cursor skills: <https://cursor.com/docs/skills>
+- Gemini CLI skills: <https://geminicli.com/docs/cli/tutorials/skills-getting-started/>
+- OpenCode skills: <https://opencode.ai/docs/skills/>
+- GitHub Copilot agent skills: <https://docs.github.com/en/copilot/concepts/agents/about-agent-skills>
+- Pricing pages for the bundled price table: <https://ai.google.dev/gemini-api/docs/pricing>, <https://developers.openai.com/api/docs/pricing>, <https://elevenlabs.io/pricing/api>
 
 Google audio understanding is distinct from speech generation. Use the correct API for the requested modality, and consult the current provider reference before implementing an adapter.

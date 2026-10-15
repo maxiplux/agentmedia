@@ -1,10 +1,8 @@
 # FrameChord and older MediaAgent projects
 
 FrameChord 0.6.1 renames the executable, Rust package and skill to `framechord`.
-The GitHub repository is `maxiplux/framechord`. The owned domain is
-`framechord.com`; domain registration and a working DNS/HTTPS deployment are
-separate steps. The documentation remains reachable through its published
-GitHub Pages address while custom-domain setup is pending.
+The GitHub repository is `maxiplux/framechord`. The documentation and installers
+are published at `https://framechord.com/`; the GitHub Pages address redirects there.
 
 ## Install the renamed executable
 

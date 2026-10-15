@@ -68,7 +68,23 @@ pub fn migrate(root: &Path, path: &Path, kind: &str, apply: bool) -> Result<Valu
     )
 }
 pub fn usage(root: &Path) -> Result<Value> {
+    usage_with(root, &crate::pricing::bundled(), None)
+}
+/// Provider-reported units stay raw; labelled list-price estimates are a separate,
+/// read-only view and never become a currency total.
+pub fn usage_with(
+    root: &Path,
+    table: &crate::pricing::Table,
+    table_path: Option<&Path>,
+) -> Result<Value> {
     let mut rows = Vec::new();
+    let mut estimated_jobs = 0u32;
+    let mut partial_jobs = 0u32;
+    let mut not_estimable_jobs = 0u32;
+    let mut cached_jobs = 0u32;
+    let mut provider_reported_jobs = 0u32;
+    let mut not_estimated_jobs = 0u32;
+    let mut estimated_total = 0.0f64;
     let mut groups = std::collections::BTreeSet::new();
     let mut budgets = Vec::new();
     for run in engine::list(root)? {
@@ -79,7 +95,21 @@ pub fn usage(root: &Path) -> Result<Value> {
             }
         }
         for job in run.jobs {
-            rows.push(json!({"run":run.id,"job":job.input.id,"selection":job.input.selection,"state":job.state,"attempts":job.attempts,"cached":job.cached,"provider_reported_usage":job.usage,"cost_estimate":null,"cost_status":"not estimated","note":"Provider usage is raw reported units; missing cost is unknown, not zero."}));
+            let (cost_estimate, cost_status, cost_note) = crate::pricing::job_fields(table, &job);
+            match cost_status {
+                "estimated" => {
+                    estimated_jobs += 1;
+                    if cost_estimate["partial"] == true {
+                        partial_jobs += 1;
+                    }
+                    estimated_total += cost_estimate["usd"].as_f64().unwrap_or(0.0);
+                }
+                "provider_reported" => provider_reported_jobs += 1,
+                "cached_no_charge" => cached_jobs += 1,
+                "not_estimated" => not_estimated_jobs += 1,
+                _ => not_estimable_jobs += 1,
+            }
+            rows.push(json!({"run":run.id,"job":job.input.id,"selection":job.input.selection,"state":job.state,"attempts":job.attempts,"cached":job.cached,"provider_reported_usage":job.usage,"cost_estimate":cost_estimate,"cost_status":cost_status,"cost_note":cost_note,"note":"Provider usage is raw reported units; missing cost is unknown, not zero."}));
         }
     }
     let mut files = Vec::new();
@@ -97,7 +127,7 @@ pub fn usage(root: &Path) -> Result<Value> {
                 .parent()
                 .is_some_and(|p| p.file_name().is_some_and(|n| n == "operations"));
         if operation && let Ok(op) = yaml::<Operation>(path) {
-            operations.push(json!({"id":op.id,"selection":op.selection,"state":op.state,"attempts":op.attempts,"provider_reported_usage":op.usage,"history":op.history.iter().map(|a|json!({"attempt":a.attempt,"state":a.state,"provider_reported_usage":a.usage})).collect::<Vec<_>>(),"cost_estimate":null}));
+            operations.push(json!({"id":op.id,"selection":op.selection,"state":op.state,"attempts":op.attempts,"provider_reported_usage":op.usage,"history":op.history.iter().map(|a|json!({"attempt":a.attempt,"state":a.state,"provider_reported_usage":a.usage})).collect::<Vec<_>>(),"cost_estimate":null,"cost_status":"not_estimated","cost_note":"Operation pricing is outside the bundled price table."}));
         }
         if name == "budget.yaml" {
             let group = path
@@ -112,8 +142,15 @@ pub fn usage(root: &Path) -> Result<Value> {
             }
         }
     }
+    let table_source = match table_path {
+        Some(path) => absolute(path)?.display().to_string(),
+        None => crate::pricing::BUNDLED_SOURCE.to_owned(),
+    };
     Ok(
-        json!({"jobs":rows,"operations":operations,"budget_groups":budgets,"currency_total":null,"currency_total_status":"unavailable; no uniform cost across providers"}),
+        json!({"jobs":rows,"operations":operations,"budget_groups":budgets,"currency_total":null,"currency_total_status":"unavailable; no uniform cost across providers",
+            "estimated_total_usd":if estimated_jobs>0{json!(crate::pricing::round6(estimated_total))}else{Value::Null},
+            "estimate_summary":{"estimated_jobs":estimated_jobs,"partial_jobs":partial_jobs,"not_estimable_jobs":not_estimable_jobs,"cached_jobs":cached_jobs,"provider_reported_jobs":provider_reported_jobs,"not_estimated_jobs":not_estimated_jobs,"table_verified_at":table.verified_at,"table_source":table_source,
+                "disclaimer":"List-price estimates from a dated bundled table; not provider invoices. Free tiers, discounts, taxes, failed attempts and operations are excluded."}}),
     )
 }
 fn walk(dir: &Path, files: &mut Vec<PathBuf>) -> Result<()> {

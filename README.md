@@ -1,8 +1,13 @@
 # FrameChord
 
-Formerly MediaAgent. The first FrameChord release is 0.6.1. Existing projects stay supported in place; see [upgrade guidance](assets/skill/references/renaming.md). The documentation domain is **[framechord.com](https://framechord.com/)**; [DNS and hosting details](docs/DOMAIN.md) are documented separately.
+A local Rust CLI that lets coding agents, and the people working with them, generate the media a software project needs: images, infographics with exact copy, narration, podcasts, music and sound effects. It runs where the agent runs, keeps inputs and receipts as files in the repository, and bills nothing itself. Characters are optional: save a visual identity and a provider voice binding when you need reuse.
 
-A local Rust CLI for any agent with process access, and for terminal users. Generate images, raster infographics, exact narration, podcasts, music, and sound effects. Characters are optional: save visual identity and a provider voice binding when you need reuse.
+## Why FrameChord
+
+- **Provider list prices per asset, no subscription.** A 1K illustration on the default Google model is $0.0336, ten seconds of narration $0.00225, a music bed $0.08 (official rates read on 2026-10-15). A month of 40 images, 30 minutes of narration, 4 beds and 20 effects costs about $2 to $4 at list price, against $19 to $20 a month for a Higgsfield or Magnific plan. See [what it costs](docs/COST.md), including when a subscription tool is the better choice.
+- **It runs where your agent runs.** Codex, Claude Code, Cursor, Gemini CLI, OpenCode and GitHub Copilot discover the installed skill; any other process calls the binary with `--json`. See [using it in your project](docs/INTEGRATION.md).
+- **Files, not a service.** YAML and Markdown inputs, durable run records, exact receipts and labelled `usage` estimates live in the repository; credentials stay in `.env` or the process environment.
+- **Honest limits.** No video, no upscaling, and character likeness still needs human review.
 
 Open the [web guide](https://framechord.com/) for copyable examples for every media
 workflow, agent prompts, downloadable YAML/Markdown inputs, and a searchable command
@@ -62,6 +67,18 @@ Credential names are `GEMINI_API_KEY`, `OPENAI_API_KEY`, `FISH_API_KEY`,
 intend to use. Process environment values take precedence over the project's
 `.env`; unrelated ancestor projects are never searched for credentials.
 
+## Use it in your own project
+
+Run `framechord init` at the root of an existing repository, or `init ./apps/site`
+inside a monorepo. Commit `framechord/config.yaml`, the templates, characters and
+jobs; `init` appends ignore rules for `.env`, runs, cache, blobs and the lock file to
+the root `.gitignore` and leaves every other line alone. Call the binary from any
+script with `--json --non-interactive`: the result is a JSON envelope on stdout,
+progress goes to stderr, and the exit code says what happened (0 success, 2 invalid
+input, 4 partial batch, 6 limit reached, 7 outcome unknown). The
+[integration guide](docs/INTEGRATION.md) has the full exit-code table, Python and
+Node examples, and the discovery paths of every supported coding agent.
+
 ## Guided setup and current models
 
 Run `framechord init` for a looping, offline terminal setup. Use arrows, Enter and
@@ -73,7 +90,10 @@ welcome option (`--preset openai`), with built-in `coral` for speech; music and
 effects are disabled in that preset. Standalone sound effects remain an optional
 ElevenLabs feature. Provider changes are always explicit.
 
-Init installs Codex and Claude Code skills inside the project by default. It reads
+Init installs Codex and Claude Code skills inside the project by default; those two
+directories are also read by Cursor, Gemini CLI, OpenCode and GitHub Copilot.
+`--agents cursor,gemini,opencode,copilot` installs native directories instead and
+`--agents none` installs no skill. It reads
 the chosen project's `.env`, creates it if absent, and appends missing API key
 variable names with empty values. Existing keys, comments and unrelated content
 are preserved. Optional masked key entry saves only on review. Shell credentials
@@ -301,9 +321,10 @@ framechord generate sfx --provider elevenlabs --model eleven_text_to_sound_v2 \
 
 ### Ask an agent to author the files
 
-After `init`, Codex and Claude Code discover the project-local FrameChord skill.
-Other agents can use `framechord skills export agent-kit` and run the same binary.
-For example, ask your agent:
+After `init`, Codex, Claude Code, Cursor, Gemini CLI, OpenCode and GitHub Copilot
+discover the project-local FrameChord skill. Other agents can use
+`framechord skills export DIRECTORY` and run the same binary; see the
+[integration guide](docs/INTEGRATION.md). For example, ask your agent:
 
 > Use FrameChord to prepare a two-speaker podcast from article.txt, an infographic
 > with the article's exact figures, and a 60-second instrumental intro. Use the
@@ -459,22 +480,31 @@ Generation success and semantic quality are separate. Local artifact integrity i
 
 ## Agent integration and limits
 
-`init` installs project-local skills in `.agents/skills/framechord/` and `.claude/skills/framechord/`. `skills export DIRECTORY` creates a portable package for other agents. `skills install --scope user --agents codex,claude` is a separate explicit user installation. No global agent settings or permissions are rewritten. Existing bundled files are preserved by default; `skills install --overwrite` or `templates export DIRECTORY --overwrite` explicitly refreshes bundled files, including modified ones, while preserving unrelated files.
+`init` installs project-local skills in `.agents/skills/framechord/` and `.claude/skills/framechord/`, directories that Cursor, Gemini CLI, OpenCode and GitHub Copilot also read. `--agents cursor,gemini,opencode,copilot` selects native directories (`.cursor/skills`, `.gemini/skills`, `.opencode/skills`, `.github/skills`), `--agents none` writes no skill, and `config status --json` reports `skills`, `skill_targets` and `skills_shared_by`. `skills export DIRECTORY` creates a portable package for other agents. `skills install --scope user --agents codex,claude` is a separate explicit user installation. No global agent settings or permissions are rewritten. Existing bundled files are preserved by default; `skills install --overwrite` or `templates export DIRECTORY --overwrite` explicitly refreshes bundled files, including modified ones, while preserving unrelated files.
 
 The exported skill includes all current commands/flags generated from the same CLI definitions, schemas, templates, authoring examples, lifecycle, review, progress, and limit guidance. Use `--json --non-interactive` for process callers. JSON stays on stdout; progress and diagnostics use stderr. Result views show reference metadata/hashes, while complete embedded bytes stay in run YAML. Interactive terminals get a colored job-count bar and a spinner for unknown provider completion. `--progress auto|plain|off`, `--color auto|always|never`, and `NO_COLOR` control presentation.
 
-Default budgets per run lineage: 20 creation requests, 8 images, 1,800 reserved audio seconds, 60,000 speech characters, 3 revisions, 3 attempts per job. Default host concurrency: 4 globally, 2 per provider; per-run limits can be configured up to 32/16, while shared host ceilings also apply. `config host show` reads ceilings; explicit `config host setup --file host-limits.yaml` changes only framechord user configuration. `--limits-file` supplies explicit per-run limits. Speech duration is an estimate; overrun artifacts are retained and further requests stop when the budget is exhausted. These are volume controls, not a dollar cap.
+Default budgets per run lineage: 20 creation requests, 8 images, 1,800 reserved audio seconds, 60,000 speech characters, 3 revisions, 3 attempts per job. Default host concurrency: 4 globally, 2 per provider; per-run limits can be configured up to 32/16, while shared host ceilings also apply. `config host show` reads ceilings; explicit `config host setup --file host-limits.yaml` changes only framechord user configuration. `--limits-file` supplies explicit per-run limits. Speech duration is an estimate; overrun artifacts are retained and further requests stop when the budget is exhausted. These are volume controls, not a dollar cap. `framechord usage --json` reports provider-returned units beside labelled list-price estimates from the dated bundled table (`--price-table FILE` overrides it); estimates never replace a provider-reported cost, `currency_total` stays null, and unpriceable work is reported as not estimable. See [what it costs](docs/COST.md).
 
 Requests do not silently switch providers. Matching fingerprints reuse only verified local artifacts; `--fresh` bypasses reuse. `--request-id` provides submission idempotency. Safe rejected jobs can be resumed, with provider retry guidance honored. Use `runs reconcile RUN_ID` to retrieve uncertain Google interactions by saved ID, then resume local publication. Unknown submissions without retrievable results require explicit `--retry-unknown`; they may already have been charged. Successful jobs remain intact when a batch fails.
 
 ## More documentation
 
+- [What it costs, with dated provider rates and plan comparisons](docs/COST.md)
+- [Using FrameChord in your own project and from other agents](docs/INTEGRATION.md)
 - [Installation, update and rollback](docs/INSTALLATION.md)
-- [Complete generated command reference](.agents/skills/framechord/references/commands.md)
+- [Every command and flag](https://framechord.com/#commands), also exported by `framechord skills export DIRECTORY` as `references/commands.md`
 - [Authoring templates and file rules](assets/skill/references/authoring.md)
 - [Character continuity](assets/skill/references/consistency.md) and [voice workflows](assets/skill/references/voices.md)
 - [Contracts, JSON results and lifecycle](docs/CONTRACTS.md)
 - [Implementation and native release status](docs/STATUS.md), [live evidence](docs/LIVE_TESTS.md), and [acceptance boundaries](docs/ACCEPTANCE.md)
+
+## Project history
+
+FrameChord was MediaAgent before 0.6.1, its first release under the new name. Existing `mediaagent/` projects stay supported
+in place; see [upgrade guidance](assets/skill/references/renaming.md). The documentation
+domain is [framechord.com](https://framechord.com/); [DNS and hosting details](docs/DOMAIN.md)
+are documented separately.
 
 ## Verification
 

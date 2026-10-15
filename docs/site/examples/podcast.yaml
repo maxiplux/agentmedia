@@ -1,0 +1,18 @@
+schema_version: 2
+id: garden-podcast
+media: podcast
+brief: podcast.md
+locale: en-US
+turns:
+  - id: host-intro
+    text_file: host.txt
+    selection: {provider: openai, model: gpt-4o-mini-tts}
+    settings: {voice: alloy, format: wav}
+  - id: guest-answer
+    text_file: guest.txt
+    selection: {provider: openai, model: gpt-4o-mini-tts}
+    settings: {voice: nova, format: wav}
+assembly:
+  pause_ms: 250
+  turn_gain_db: {host-intro: -1}
+  loudness_lufs: -19

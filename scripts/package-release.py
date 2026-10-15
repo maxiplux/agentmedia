@@ -68,6 +68,11 @@ with tempfile.TemporaryDirectory(prefix='framechord-package-') as temporary:
         assert (skill / 'references/schemas/operation.json').is_file()
         assert (skill / 'references/schemas/voice_design.json').is_file()
     checks.append('embedded_codex_and_claude_skills_without_checkout')
+    cli(['--project', str(project), 'skills', 'install', '--agents', 'copilot,gemini'])
+    assert (project / '.github/skills/framechord/SKILL.md').is_file()
+    assert (project / '.gemini/skills/framechord/SKILL.md').is_file()
+    assert not (project / '.cursor').exists()
+    checks.append('native_agent_targets_without_checkout')
     recommended_project = isolated / 'recommended-project'
     recommended = cli(['init', str(recommended_project), '--preset', 'recommended'])['data']
     assert recommended['configuration']['defaults']['image']['model'] == 'gemini-nano-banana-2.1'
@@ -141,6 +146,7 @@ with tempfile.TemporaryDirectory(prefix='framechord-package-') as temporary:
     checks.append('migration_preview_preserves_authored_files')
     report = cli(['--project', str(project), 'usage'])['data']
     assert report['currency_total'] is None
+    assert report['estimate_summary']['estimated_jobs'] == 0 and report['estimated_total_usd'] is None
     cleanup = isolated / 'cleanup.yaml'
     cli(['--project', str(project), 'storage', 'plan', '--output', str(cleanup)])
     assert cleanup.exists()

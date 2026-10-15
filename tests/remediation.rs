@@ -460,6 +460,10 @@ fn usage_keeps_voice_operations_and_unknown_costs_separate() {
     assert_eq!(report["operations"].as_array().unwrap().len(), 1);
     assert_eq!(report["budget_groups"].as_array().unwrap().len(), 1);
     assert!(report["currency_total"].is_null());
+    assert!(report["estimated_total_usd"].is_null());
+    assert_eq!(report["estimate_summary"]["estimated_jobs"], 0);
+    assert_eq!(report["operations"][0]["cost_status"], "not_estimated");
+    assert!(report["operations"][0]["cost_estimate"].is_null());
 }
 #[cfg(unix)]
 #[test]

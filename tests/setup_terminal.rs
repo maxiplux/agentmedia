@@ -320,3 +320,77 @@ fn numbered_menu_saves_a_draft_and_existing_init_resumes_it() {
         fs::read(root.join("framechord/config.yaml")).unwrap()
     );
 }
+
+#[test]
+fn agent_menu_toggles_a_native_target() {
+    let t = tempfile::tempdir().unwrap();
+    let root = t.path();
+    fs::write(root.join(".env"), "GEMINI_API_KEY=fixture-google-private\n").unwrap();
+    let mut terminal = Terminal::start(root, false);
+    terminal.wait("Recommended setup — Google");
+    terminal.send("\r");
+    terminal.wait("Setup checklist");
+    terminal.send("Agent skills\r");
+    terminal.wait("Install project-local skills");
+    terminal.send("Choose agents individually\r");
+    terminal.wait("Toggle agents");
+    terminal.send("GitHub Copilot\r");
+    terminal.wait("[x] GitHub Copilot");
+    terminal.send("Done\r");
+    terminal.wait("Setup checklist");
+    terminal.send("\r");
+    terminal.wait("Save these reviewed choices?");
+    terminal.send("Save\r");
+    terminal.success();
+    assert!(root.join(".github/skills/framechord/SKILL.md").is_file());
+    assert!(root.join(".agents/skills/framechord/SKILL.md").is_file());
+    assert!(root.join(".claude/skills/framechord/SKILL.md").is_file());
+    assert_eq!(
+        framechord::setup::status(root).unwrap()["skills"]["copilot"],
+        true
+    );
+    assert!(!terminal.output.contains("fixture-google-private"));
+}
+
+#[test]
+fn numbered_agent_menu_preselects_the_current_choice() {
+    // The toggle list highlights the first agent that is currently selected (or Done when
+    // none is), so the numbered prompt's default follows the choice instead of row 1.
+    let t = tempfile::tempdir().unwrap();
+    let root = t.path().join("plain-agents");
+    let mut p = Terminal::start(&root, true);
+    p.wait("Choice [1]");
+    p.send("1\r");
+    p.wait("Setup checklist");
+    p.wait("Choice [1]");
+    p.send("4\r");
+    p.wait("Install project-local skills");
+    p.wait("Choice [1]");
+    p.send("4\r");
+    p.wait("Toggle agents");
+    p.wait("[x] Codex");
+    p.wait("Choice [1]");
+    p.send("1\r");
+    p.wait("Toggle agents");
+    p.wait("[ ] Codex");
+    p.wait("Choice [2]");
+    p.send("2\r");
+    p.wait("Toggle agents");
+    p.wait("[ ] Claude Code");
+    p.wait("Choice [7]");
+    p.send("6\r");
+    p.wait("Toggle agents");
+    p.wait("[x] GitHub Copilot");
+    p.wait("Choice [6]");
+    p.send("7\r");
+    p.wait("Setup checklist");
+    p.wait("Choice [1]");
+    p.send("8\r");
+    p.wait("Save these reviewed choices?");
+    p.wait("Choice [2]");
+    p.send("1\r");
+    p.success();
+    assert!(root.join(".github/skills/framechord/SKILL.md").is_file());
+    assert!(!root.join(".agents").exists());
+    assert!(!root.join(".claude").exists());
+}
