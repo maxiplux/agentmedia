@@ -89,7 +89,7 @@ caveats and limits: authentication alone does not prove model or billing readine
 ## Project workflow
 
 ```sh
-mediaagent init /path/to/project --interactive
+mediaagent init /path/to/project
 # Agents: export/edit project-config.yaml, then initialize without prompts:
 # mediaagent init /path/to/project --defaults-file project-config.yaml --json --non-interactive
 mediaagent --project /path/to/project config show --json
@@ -135,9 +135,9 @@ mediaagent generate image --provider openai --model gpt-image-2.5-flare \
   --brief-file forest.md --output forest.png --dry-run --json
 ```
 
-Identity references record high input fidelity automatically for supported OpenAI
-models; low-only editing is rejected for identity-sensitive work. This is separate
-from output quality and cannot guarantee likeness. Compare faces/body proportions
+Current GPT Image 2.5 models omit input fidelity. Historical supported models
+recorded high input fidelity for identity references and rejected low-only editing.
+Output quality controls cannot guarantee likeness. Compare faces/body proportions
 with the original references and record drift as `needs_revision`. See the
 [continuity workflow](assets/skill/references/consistency.md).
 
@@ -166,7 +166,7 @@ For Fish synthesis without a saved voice, use `--voice-sample`,
 character. `persona accept-sample` copies the recording, transcript, permission,
 and evidence into its portable folder. See the [voice workflow](assets/skill/references/voices.md).
 
-Generation success and semantic quality are separate. Local artifact integrity is checked automatically. Explicit `review check --ai --provider ... --model ...` supports image review using OpenAI/OpenRouter multimodal text models; Google audio review supports `gemini-3.8-flash` or `gemini-2.5-flash` against exact scripts, briefs, and accepted voice recordings. Inline requests must fit 20 MiB; review individual clips for larger jobs. Completed AI reviews are saved with provider receipts and reused on identical commands; unknown review outcomes require explicit `--retry-unknown`. `review reconcile --artifact ID` retrieves uncertain Google audio assessments without resubmission. Human or agent assessments require provenance. Revisions create child runs, preserve originals, and inherit budgets. `--source-job` enables explicit updated scripts/copy; `--turn` targets a podcast turn and reuses unchanged clips.
+Generation success and semantic quality are separate. Local artifact integrity is checked automatically. Explicit `review check --ai --provider ... --model ...` supports image review using OpenAI/OpenRouter multimodal text models; Google audio review supports `gemini-3.8-flash` against exact scripts, briefs, and accepted voice recordings. Inline requests must fit 20 MiB; review individual clips for larger jobs. Completed AI reviews are saved with provider receipts and reused on identical commands; unknown review outcomes require explicit `--retry-unknown`. `review reconcile --artifact ID` retrieves uncertain Google audio assessments without resubmission. Human or agent assessments require provenance. Revisions create child runs, preserve originals, and inherit budgets. `--source-job` enables explicit updated scripts/copy; `--turn` targets a podcast turn and reuses unchanged clips.
 
 ## Agent integration and limits
 

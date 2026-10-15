@@ -399,7 +399,7 @@ pub fn validate(e: &Effective) -> Result<()> {
         && !valid_image_size(&e.selection.model, size)
     {
         return Err(Error::input(
-            "Supported image sizes: 1024x1024, 1024x1536, 1536x1024, auto",
+            "Unsupported image size: GPT Image 2.5 accepts auto or WxH with both sides divisible by 16 and at most 3840, aspect ratio at most 3:1, and 655360–8294400 pixels (for example 2048x2048); other supported image models accept 1024x1024, 1024x1536, 1536x1024, or auto",
         ));
     }
     let final_format = if media == Media::Speech {
