@@ -261,3 +261,29 @@ tests. Ten README generation/validation examples pass offline with isolated
 Google defaults, explicit OpenAI narration and ElevenLabs effects; no provider
 calls are made. All 65 website command pages match the generated reference.
 The publisher and acceptance diagnostic regressions also pass offline.
+
+FrameChord [0.6.2](https://github.com/maxiplux/framechord/releases/tag/v0.6.2)
+is publicly published from `751ae425255a6bd74a2fba4cfd1d14904e23cbd4`. The
+[release workflow](https://github.com/maxiplux/framechord/actions/runs/38739260296)
+passes native format/Clippy/tests, 17 isolated package checks per target, verified
+publication and public installer/update/reinstallation/offline rollback on Windows
+x86-64, Linux x86-64 and macOS Apple Silicon. Both the
+[master checks](https://github.com/maxiplux/framechord/actions/runs/38739257958) and
+[tag checks](https://github.com/maxiplux/framechord/actions/runs/38739260073) pass.
+All 16 public assets match the manifest commit and GitHub's stored sizes/digests;
+no Intel Mac asset is included. The same real public-download legacy transition
+to 0.6.2 passes locally, preserving exact configuration, persona, dotenv, modified
+old skill, old executable and installation receipt, while installing the new
+skills and verifying FrameChord update/offline rollback. No paid provider calls
+were made.
+
+The [Pages deployment](https://github.com/maxiplux/framechord/actions/runs/38739258045)
+passes. The custom-domain guide and both installers match merged source over
+verified HTTPS, `www` redirects to the apex, and the local DNS cache has now
+refreshed successfully. Fresh public acceptance runners also followed the hosted
+installer path successfully on all three supported platforms.
+
+The standard public acceptance script also passes locally for 0.6.2 using normal
+DNS and HTTPS (no address override): public installer, read-only update check,
+verified reinstall, offline rollback and project-file preservation. Its isolated
+environment excludes media-provider keys and makes zero provider calls.

@@ -6,8 +6,8 @@ The complete deliverable is `docs/site/index.html`. Open it in a browser or serv
 that one file. No other assets, CDN, build step or internet access are required to
 render the guide.
 
-The FrameChord guide is published at <https://maxiplux.github.io/framechord/>.
-The owned custom domain is `framechord.com`; see [domain setup](DOMAIN.md).
+The FrameChord guide is published at <https://framechord.com/>. The GitHub Pages
+address redirects there; see [domain setup](DOMAIN.md).
 The `Publish documentation` GitHub Actions workflow publishes only `docs/site/`
 to GitHub Pages after changes to that folder or the workflow on `master`. It can
 also be started manually:
@@ -82,3 +82,14 @@ to refresh than the accepted authoritative records. README workflows now cover
 every supported media type, exact input files, character reuse, agent operation,
 parallel batches and review/recovery; ten generation/validation examples pass
 offline, without paid calls.
+
+The 0.6.2 guide and both installers match the merged source byte-for-byte over
+valid HTTPS at the custom domain. The `www` host redirects to the apex. This local
+check used an independently verified public GitHub Pages address to bypass the
+network resolver's cached earlier NXDOMAIN, without disabling TLS verification.
+Fresh-runner public acceptance results are tracked in STATUS.md.
+
+After propagation, the local resolver also returns all four expected apex
+addresses. Public release 0.6.2 installation, update and offline rollback pass on
+all three supported native platforms, including the Pages-to-custom-domain
+installer redirect. See [release evidence](STATUS.md#authenticated-release-metadata-062).

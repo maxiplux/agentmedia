@@ -123,8 +123,10 @@ Windows PowerShell:
 irm https://framechord.com/install.ps1 | iex
 ```
 
-Already downloaded a 0.6.1+ binary? Run `./framechord install` (Windows:
-`./framechord.exe install`). Installation uses a user bin directory, verifies
+Already downloaded a 0.6.1+ archive? Extract it, then run `./framechord install`
+(Windows: `./framechord.exe install`). If you downloaded a raw executable with a
+target suffix, run that exact filename followed by `install`; installation gives
+it the standard `framechord` name. Installation uses a user bin directory, verifies
 release bytes, and needs no administrator or Rust installation. Open a new terminal,
 then run `framechord init` inside your project folder, or `framechord init ./my-project` to create another project.
 
@@ -341,7 +343,7 @@ framechord --project /path/to/project config setup --file defaults.yaml
 # Terminal-only offline assistance: framechord config wizard
 framechord templates export authoring
 framechord validate --kind job authoring/job.yaml --json
-framechord generate --job authoring/job.yaml --image-quality low --dry-run --json
+framechord generate --job authoring/job.yaml --dry-run --json
 framechord batch --manifest batch.yaml --output-dir exports --async --json
 framechord runs status RUN_ID --json
 framechord runs wait RUN_ID

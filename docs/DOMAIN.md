@@ -4,8 +4,8 @@ The user selected FrameChord and owns `framechord.com`. The custom domain's DNS
 and HTTPS deployment must be verified independently of repository publication.
 The domain is bound to GitHub Pages, its certificate covers the apex and `www`,
 and Enforce HTTPS is enabled. The five Cloudflare web records use DNS-only mode.
-Public DNS resolves to the expected GitHub endpoints; local resolver caches can
-still retain earlier negative answers during propagation.
+Public DNS and the local resolver now resolve to the expected GitHub endpoints.
+Earlier negative-cache propagation was observed and has cleared locally.
 
 At the domain's DNS provider, configure these records for GitHub Pages:
 
