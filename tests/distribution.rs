@@ -152,7 +152,7 @@ fn path_setup_preserves_content_and_quotes_literal_paths_without_duplicate_entri
     {
         let result = std::process::Command::new("sh")
             .arg("-c")
-            .arg(". \"$1\"; printf '%s' \"$PATH\"")
+            .arg(". \"$1\"; first=\"$PATH\"; . \"$1\"; test \"$first\" = \"$PATH\" || exit 1; printf '%s' \"$PATH\"")
             .arg("test")
             .arg(&profile)
             .output()
@@ -186,14 +186,15 @@ async fn check_is_read_only_and_reports_current_newer_and_unavailable_targets() 
 #[tokio::test]
 async fn untrusted_release_metadata_is_rejected_before_binary_download() {
     let base = fixture(distribution::VERSION, b"fixture");
-    for mutate in 0..5 {
+    for mutate in 0..6 {
         let mut m = base.clone();
         match mutate {
             0 => m["draft"] = json!(true),
             1 => m["prerelease"] = json!(true),
             2 => m["tag_name"] = json!("../../bad"),
             3 => m["assets"][0]["browser_download_url"] = json!("https://elsewhere.invalid/asset"),
-            _ => m["assets"][0]["digest"] = json!(""),
+            4 => m["assets"][0]["digest"] = json!(""),
+            _ => m["assets"][0]["size"] = json!(128 * 1024 * 1024 + 1),
         };
         let fake = transport(m, vec![]);
         assert!(
@@ -237,15 +238,31 @@ fn child_case(action: &str) {
         "test-helper"
     });
     fs::copy(std::env::current_exe().unwrap(), &helper).unwrap();
+    let replacement = root.path().join(if cfg!(windows) {
+        "replacement.exe"
+    } else {
+        "replacement"
+    });
+    fs::copy(env!("CARGO_BIN_EXE_mediaagent"), &replacement).unwrap();
+    // Linux debug executables can exceed the production download ceiling.
+    // Exercise the real executable with debug sections removed, as release assets do.
+    #[cfg(target_os = "linux")]
+    for path in [&helper, &replacement] {
+        assert!(
+            std::process::Command::new("strip")
+                .arg("-S")
+                .arg(path)
+                .status()
+                .unwrap()
+                .success()
+        );
+    }
     let original = fs::read(&helper).unwrap();
     fs::write(root.path().join(".env"), "PRIVATE_FIXTURE=preserve\n").unwrap();
     let child = std::process::Command::new(&helper)
         .args(["--ignored", "--exact", "update_child_entry", "--nocapture"])
         .env("MEDIAAGENT_TEST_UPDATE_ACTION", action)
-        .env(
-            "MEDIAAGENT_TEST_UPDATE_BINARY",
-            env!("CARGO_BIN_EXE_mediaagent"),
-        )
+        .env("MEDIAAGENT_TEST_UPDATE_BINARY", &replacement)
         .output()
         .unwrap();
     assert!(
@@ -255,10 +272,7 @@ fn child_case(action: &str) {
         String::from_utf8_lossy(&child.stderr)
     );
     if matches!(action, "success" | "rollback" | "unmanaged-rollback") {
-        assert_eq!(
-            fs::read(&helper).unwrap(),
-            fs::read(env!("CARGO_BIN_EXE_mediaagent")).unwrap()
-        );
+        assert_eq!(fs::read(&helper).unwrap(), fs::read(&replacement).unwrap());
         assert!(
             std::process::Command::new(&helper)
                 .arg("--version")

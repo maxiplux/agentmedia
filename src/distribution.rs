@@ -125,7 +125,9 @@ pub fn configure_unix_path(bin: &Path, profile: &Path) -> Result<bool> {
         ));
     }
     let quoted = path.replace('\'', "'\\''");
-    let entry = format!("export PATH='{quoted}':\"$PATH\"");
+    let entry = format!(
+        "case \":$PATH:\" in *:'{quoted}':*) ;; *) export PATH='{quoted}':\"$PATH\" ;; esac"
+    );
     let original = match fs::read_to_string(profile) {
         Ok(s) => s,
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => String::new(),
@@ -167,9 +169,6 @@ fn configure_path(bin: &Path) -> Result<Value> {
     };
     #[cfg(windows)]
     let bin = ordinary.as_path();
-    if std::env::var_os("PATH").is_some_and(|p| std::env::split_paths(&p).any(|p| p == bin)) {
-        return Ok(json!({"configured":true,"changed":false,"scope":"existing_path"}));
-    }
     if cfg!(windows) {
         let code = r#"$ErrorActionPreference='Stop'; $b=$env:MEDIAAGENT_INSTALL_BIN; $p=[Environment]::GetEnvironmentVariable('Path','User'); if(-not (($p -split ';') | Where-Object { $_.TrimEnd('\') -ieq $b.TrimEnd('\') })) { [Environment]::SetEnvironmentVariable('Path', ($b+';'+$p), 'User') }"#;
         let status = std::process::Command::new("powershell.exe")
