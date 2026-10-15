@@ -61,3 +61,5 @@ Version 0.3.0 updates initialization to a resumable keyboard-driven checklist, o
 Version 0.3.1 documents the executable/configuration folder name conflict, early destination selection, full-path display and `--project` precedence. The command reference is regenerated from the corrected CLI. The example archive remains unchanged.
 
 Version 0.4.0 adds public installer links, the install/update/rollback workflow and two generated command pages. The guide remains a standalone HTML document; the installer scripts are separate downloads used only when explicitly installing software.
+
+The 0.4.0 public guide and both installer downloads were fetched from GitHub Pages and matched byte-for-byte with the merged source on October 15, 2026. Public native installation, self-update and offline rollback passed on all four supported release targets; see [the recorded results](STATUS.md#user-installation-and-updates-040).
