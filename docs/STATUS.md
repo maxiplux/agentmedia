@@ -14,7 +14,7 @@ Implemented: Rust package/library/CLI, versioned contracts and schemas, offline 
 
 See [live evidence](LIVE_TESTS.md) for exact models, runs, decoded durations, one earlier rejected placeholder voice request, and untested paths. Live tests prove selected API/file handling, not human-perceived quality, exact script pronunciation, character consistency, or all model variants. No saved provider voice was created or cloned, and no candidates were accepted automatically. The descriptive preview test returned three candidates; provider-side creation/binding/verification refresh has offline coverage, with creation/binding untested live.
 
-Ordinary tests use mocked adapters/transports and small local fixtures. They verify contracts, concurrency, limits, identity resolution, authoring validation, audio assembly, cache, revisions, and recovery without paid calls even when credentials exist. The baseline had 100 passing offline tests on macOS; remediation adds independent contract/recovery/storage tests. See the remediation evidence below for the current count. Historical local packages passed their isolated offline checks, including initialization and embedded skill export without the checkout; current 0.4.0 release evidence is below. See [packaging](PACKAGING.md). Native CI covers Linux, macOS and Windows. See the 0.4.0 installation and release notes below for current results.
+Ordinary tests use mocked adapters/transports and small local fixtures. They verify contracts, concurrency, limits, identity resolution, authoring validation, audio assembly, cache, revisions, and recovery without paid calls even when credentials exist. The baseline had 100 passing offline tests on macOS; remediation adds independent contract/recovery/storage tests. See the remediation evidence below for the current count. Historical local packages passed their isolated offline checks, including initialization and embedded skill export without the checkout; historical 0.4.0 and current 0.5.1 release evidence is below. See [packaging](PACKAGING.md). Native CI covers Linux, macOS and Windows. See the installation and release notes below for exact versioned results.
 
 Verification still requiring external inputs: selected authorized speaker recordings for live cloning/reference synthesis, human listening and repeated character scenes. These do not become passed merely because implementation or mock tests succeeded.
 
@@ -160,3 +160,31 @@ exit failures, structured failures and timeouts. The three-target publisher's
 offline integrity/idempotency regression and native bootstrap checks pass locally.
 The shell installer also rejects Intel Macs before downloading. No media-provider
 requests are made by these checks.
+
+
+[Independent public acceptance for 0.5.1](https://github.com/maxiplux/agentmedia/actions/runs/38722360350)
+passes on Windows x86-64, Linux x86-64 and Apple Silicon macOS from tooling commit
+`6342d7198d6511e83a6e0fd4b59ef42813a89ef5`. Each job verifies a public
+installation, read-only update check, checksum-verified forced reinstallation,
+offline rollback and preservation of project fixtures. The original failed job's
+underlying diagnostic cannot be recovered because its harness discarded captured
+output; successful independent checks do not establish the original cause. The
+new harness records failures without hiding or automatically retrying them.
+All 20 immutable 0.5.1 release assets agree with the original manifest and
+GitHub's stored hashes/sizes. The hosted guide and both installer scripts match
+current master; the hosted shell installer supports Apple Silicon and Linux
+x86-64. Future releases publish only the three supported native targets.
+
+
+[Three-platform Rust checks](https://github.com/maxiplux/agentmedia/actions/runs/38722356648)
+pass formatting, strict all-target/all-feature Clippy and 165 offline Rust tests
+on Windows x86-64, Linux x86-64 and Apple Silicon macOS for the platform-tooling
+commit. The independent public acceptance and hosted documentation deployment
+are also green. These software checks do not imply media-quality acceptance.
+
+
+[Three-platform native packages](https://github.com/maxiplux/agentmedia/actions/runs/38722363095)
+also pass on all three supported platforms, with 16 isolated checks per package.
+The downloaded packages from the exact clean tooling commit pass the publisher's
+dry run as a complete 16-asset, three-target release set. This validates future
+publication without changing the immutable 0.5.1 release or creating another tag.
