@@ -804,11 +804,11 @@ fn status_reports_shared_discovery_for_every_known_agent() {
     assert_eq!(cursor["native_installed"], false);
     assert_eq!(
         cursor["native_path"],
-        json!(root.join(".cursor/skills/framechord"))
+        json!(root.join(".cursor/skills").join("framechord"))
     );
     assert_eq!(
         cursor["discovered_via"],
-        json!([root.join(".agents/skills/framechord")])
+        json!([root.join(".agents/skills").join("framechord")])
     );
     assert!(cursor["source"].as_str().unwrap().starts_with("https://"));
     let shared = status["skills_shared_by"][".agents/skills"]
