@@ -55,6 +55,7 @@ struct Fake {
     calls: AtomicUsize,
     active: AtomicUsize,
     max: AtomicUsize,
+    rendezvous: Option<tokio::sync::Barrier>,
 }
 impl Fake {
     fn new() -> Self {
@@ -62,6 +63,7 @@ impl Fake {
             calls: AtomicUsize::new(0),
             active: AtomicUsize::new(0),
             max: AtomicUsize::new(0),
+            rendezvous: None,
         }
     }
 }
@@ -71,6 +73,12 @@ impl Adapter for Fake {
         self.calls.fetch_add(1, Ordering::SeqCst);
         let active = self.active.fetch_add(1, Ordering::SeqCst) + 1;
         self.max.fetch_max(active, Ordering::SeqCst);
+        if let Some(barrier) = &self.rendezvous {
+            // Require overlapping requests without relying on filesystem speed.
+            tokio::time::timeout(Duration::from_secs(10), barrier.wait())
+                .await
+                .expect("the engine must execute two independent requests concurrently");
+        }
         tokio::time::sleep(Duration::from_millis(30)).await;
         self.active.fetch_sub(1, Ordering::SeqCst);
         if e.id == "unknown" {
@@ -358,7 +366,10 @@ async fn actual_parallel_execution_respects_limits_and_isolates_outputs() {
         Submit::default(),
     )
     .unwrap();
-    let fake = Arc::new(Fake::new());
+    let fake = Arc::new(Fake {
+        rendezvous: Some(tokio::sync::Barrier::new(2)),
+        ..Fake::new()
+    });
     let result = engine::work(t.path(), &run.id, fake.clone(), false)
         .await
         .unwrap();
@@ -1003,10 +1014,9 @@ fn explicit_bundle_updates_replace_only_bundled_files() {
     assets::skill(root.path()).unwrap();
     assert_eq!(fs::read_to_string(&skill).unwrap(), "Local customization");
     assets::skill_with(root.path(), true).unwrap();
-    assert!(
-        fs::read_to_string(skill)
-            .unwrap()
-            .starts_with("---\nname: mediaagent")
+    assert_eq!(
+        fs::read_to_string(skill).unwrap(),
+        include_str!("../assets/skill/SKILL.md")
     );
     assert_eq!(
         fs::read_to_string(root.path().join("personal-notes.md")).unwrap(),
