@@ -49,6 +49,8 @@ human and agent workflow, optional live model discovery and credential handling.
 
 ## Build and use
 
+Download Windows, macOS and Linux binaries from the [Native packages workflow](https://github.com/maxiplux/agentmedia/actions/workflows/package.yml). Open a successful run and its Artifacts section; see [download and installation steps](docs/PACKAGING.md).
+
 ```sh
 cargo build --locked
 ./target/debug/mediaagent --help

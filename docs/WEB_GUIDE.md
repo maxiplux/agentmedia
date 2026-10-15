@@ -44,8 +44,10 @@ https://tailwindcss.com/docs/installation/tailwind-cli
 Verified after bundling: no external scripts, styles, images or file links;
 unique element IDs and valid internal anchors; embedded ZIP integrity and all 35
 files; browser command search and copying; a mobile layout without page overflow.
-The original 15 offline CLI example checks remain applicable because the commands
-and example contents are unchanged. No provider calls were made for this work.
+The 0.3.0 guide and extracted examples pass 22 offline initialization, dry-run and
+validation checks. No provider calls were made for this work. Earlier mobile
+layout checks apply to the base layout; the updated setup and command sections
+were rechecked in a desktop browser.
 
 The scenario section covers article narration, a podcast asset package, a data
 infographic, a visual/audio lesson, recurring characters, app visuals and sounds,
