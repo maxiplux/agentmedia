@@ -3,20 +3,21 @@
 # Select from `mediaagent models --json`; adjust before initialization.
 schema_version: 2
 defaults:
-  image: {provider: openai, model: gpt-image-2.5-flare}
-  infographic: {provider: openai, model: gpt-image-2.5-flare}
-  speech: {provider: openai, model: gpt-4o-mini-tts}
-  podcast: {provider: openai, model: gpt-4o-mini-tts}
-  music: {provider: elevenlabs, model: music_v2_5}
-  sfx: {provider: elevenlabs, model: eleven_text_to_sound_v2}
-  text: {provider: openai, model: gpt-6-luna}
+  image: {provider: google, model: gemini-nano-banana-2.1}
+  infographic: {provider: google, model: gemini-nano-banana-2.1}
+  speech: {provider: google, model: gemini-3.8-flash-tts}
+  podcast: {provider: google, model: gemini-3.8-flash-tts}
+  music: {provider: google, model: lyria-3.5}
+  # Optional sound effects require ELEVENLABS_API_KEY:
+  # sfx: {provider: elevenlabs, model: eleven_text_to_sound_v2}
+  text: {provider: google, model: gemini-3.8-flash}
 default_settings:
-  image: {format: png, size: 1024x1024, image_quality: high}
-  infographic: {format: png, size: 1024x1536, image_quality: high}
-  speech: {format: wav, voice: coral}
-  podcast: {format: wav, voice: coral}
-  music: {format: mp3, duration_seconds: 10, instrumental: true}
-  sfx: {format: mp3, duration_seconds: 3}
+  image: {format: png}
+  infographic: {format: png}
+  speech: {format: wav, voice: Kore}
+  podcast: {format: wav, voice: Kore}
+  music: {format: mp3, duration_seconds: 60, instrumental: true}
+  # sfx: {format: mp3, duration_seconds: 3}
 default_locales:
   speech: en-US
   podcast: en-US

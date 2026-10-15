@@ -20,11 +20,21 @@ Human character consistency and media quality checks remain separate. See
 ## Guided setup and current models
 
 Run `mediaagent init` for a looping, offline terminal setup. Use arrows, Enter and
-search to choose options, and Escape to return. New projects default to OpenAI
-GPT Image 2.5 Flare for images/infographics, Fish s2.1-pro for speech/podcasts, and
-OpenAI GPT-6 Luna for planning. Music and effects are optional. Supply your own Fish
-voice ID and provider keys; missing keys can be entered without echo and are saved
-only after review to the ignored project `.env`.
+search to choose options, and Escape to return. New projects default to Google:
+Nano Banana 2.1 for images/infographics, Gemini 3.8 Flash TTS with built-in `Kore`
+for speech/podcasts, Lyria 3.5 for music, and Gemini 3.8 Flash for planning.
+Set `GEMINI_API_KEY` to make these defaults locally ready. OpenAI is the second
+welcome option (`--preset openai`), with built-in `coral` for speech; music and
+effects are disabled in that preset. Standalone sound effects remain an optional
+ElevenLabs feature. Provider changes are always explicit.
+
+Init installs Codex and Claude Code skills inside the project by default. It reads
+the chosen project's `.env`, creates it if absent, and appends missing API key
+variable names with empty values. Existing keys, comments and unrelated content
+are preserved. Optional masked key entry saves only on review. Shell credentials
+take precedence and are never copied into `.env`. With no destination, setup uses
+the directory where the command is called; `init PATH` or `--project PATH` selects
+another project and its own `.env`.
 
 Finish requires every enabled feature to be locally ready. Save unfinished setup
 and run `init` again to resume. Existing character identities are preserved.
@@ -33,9 +43,10 @@ and run `init` again to resume. Existing character identities are preserved.
 ```sh
 mediaagent init
 mediaagent init ./project --preset recommended --json --non-interactive
+mediaagent init ./openai-project --preset openai --json --non-interactive
 mediaagent --project ./project config status --json
 mediaagent models --media image --recommended
-mediaagent models --provider fish --media speech
+mediaagent models --provider google --media speech
 mediaagent models --all
 ```
 

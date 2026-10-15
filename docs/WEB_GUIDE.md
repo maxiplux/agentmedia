@@ -63,3 +63,5 @@ Version 0.3.1 documents the executable/configuration folder name conflict, early
 Version 0.4.0 adds public installer links, the install/update/rollback workflow and two generated command pages. The guide remains a standalone HTML document; the installer scripts are separate downloads used only when explicitly installing software.
 
 The 0.4.0 public guide and both installer downloads were fetched from GitHub Pages and matched byte-for-byte with the merged source on October 15, 2026. Public native installation, self-update and offline rollback passed on all four supported release targets; see [the recorded results](STATUS.md#user-installation-and-updates-040).
+
+Version 0.5.0 updates the setup walkthrough and generated command help for Google-first defaults, the explicit OpenAI preset, built-in speech voices, target-project dotenv creation/update and default installation of Codex/Claude project skills. Examples that name other providers remain explicit provider choices and require their corresponding credentials.

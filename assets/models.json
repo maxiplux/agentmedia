@@ -674,5 +674,12 @@
       "lifecycle": "stable",
       "source": "https://openrouter.ai/docs/api/api-reference/models/list-all-models-and-their-properties"
     }
+  ],
+  "setup_defaults_reviewed_at": "2026-10-15",
+  "setup_default_sources": [
+    "https://ai.google.dev/gemini-api/docs/models",
+    "https://ai.google.dev/gemini-api/docs/speech-generation",
+    "https://ai.google.dev/gemini-api/docs/music-generation",
+    "https://developers.openai.com/api/docs/models"
   ]
 }

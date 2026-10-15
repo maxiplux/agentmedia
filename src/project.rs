@@ -5,6 +5,7 @@ use crate::{
     storage::*,
     validation,
 };
+use fs4::fs_std::FileExt;
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -51,6 +52,23 @@ pub fn init_with_config(
     agents: &[String],
     configured: Option<&Config>,
 ) -> Result<serde_json::Value> {
+    // Reject invalid destinations/input without creating the setup lock directory.
+    check_agents(agents)?;
+    check_init_destination(root)?;
+    if let Some(configured) = configured {
+        validation::config(configured)?;
+    }
+    crate::credentials::render_missing(root, &Default::default())?;
+    let guard = lock(&root.join("mediaagent/setup.lock"))?;
+    guard.lock_exclusive()?;
+    init_locked(root, agents, configured)
+}
+/// Caller holds setup.lock; re-read dotenv and configuration after acquiring it.
+pub(crate) fn init_locked(
+    root: &Path,
+    agents: &[String],
+    configured: Option<&Config>,
+) -> Result<serde_json::Value> {
     check_agents(agents)?;
     check_init_destination(root)?;
     if let Some(configured) = configured {
@@ -72,6 +90,8 @@ pub fn init_with_config(
         initial.consistency.require_known_identity_model = true;
     }
     validation::config(&initial)?;
+    // Check dotenv syntax before creating configuration or installing skills.
+    let env_content = crate::credentials::render_missing(root, &Default::default())?;
     fs::create_dir_all(root)?;
     let root = fs::canonicalize(root)?;
     let cfg =
@@ -80,8 +100,13 @@ pub fn init_with_config(
     if !create(&root.join("mediaagent/config.yaml"), cfg.as_bytes())? {
         existing.push("mediaagent/config.yaml".into());
     }
-    create(&root.join(".env.example"),b"OPENAI_API_KEY=\nGEMINI_API_KEY=\nFISH_API_KEY=\nOPENROUTER_API_KEY=\nELEVENLABS_API_KEY=\n")?;
-    create(&root.join(".env"), b"")?;
+    create(
+        &root.join(".env.example"),
+        crate::credentials::ENV_TEMPLATE.as_bytes(),
+    )?;
+    if let Some(content) = env_content {
+        atomic(&root.join(".env"), content.as_bytes(), true)?;
+    }
     create(
         &root.join("mediaagent/.gitignore"),
         b"runs/\ncache/\nblobs/\nsetup.lock\n",
@@ -121,7 +146,7 @@ pub fn init_with_config(
     let config = config(&root)?;
     let configured_media = config.defaults.keys().collect::<Vec<_>>();
     Ok(
-        serde_json::json!({"project":root,"existing_preserved":existing,"generation":false,"configured_media":configured_media,"configuration":config,"setup_required":configured_media.is_empty(),"next_steps":if configured_media.is_empty(){vec!["mediaagent config wizard","mediaagent config setup --file config.yaml"]}else{vec![]}}),
+        serde_json::json!({"project":root,"credentials_file":root.join(".env"),"credential_variables":crate::credentials::PROVIDERS.iter().map(|p|p.key()).collect::<Vec<_>>(),"existing_preserved":existing,"generation":false,"configured_media":configured_media,"configuration":config,"setup_required":configured_media.is_empty(),"next_steps":if configured_media.is_empty(){vec!["mediaagent config wizard","mediaagent config setup --file config.yaml"]}else{vec![]}}),
     )
 }
 pub fn install(root: &Path, agents: &[String]) -> Result<Vec<String>> {

@@ -68,14 +68,56 @@ pub fn save_host(path: &Path, limits: &HostLimits) -> Result<()> {
 }
 
 pub fn recommended() -> Config {
+    preset(Provider::Google)
+}
+pub fn openai() -> Config {
+    preset(Provider::Openai)
+}
+fn preset(provider: Provider) -> Config {
     let mut config = Config::default();
     config.consistency.require_known_identity_model = true;
-    for (media, provider, model) in [
-        (Media::Image, Provider::Openai, "gpt-image-2.5-flare"),
-        (Media::Infographic, Provider::Openai, "gpt-image-2.5-flare"),
-        (Media::Speech, Provider::Fish, "s2.1-pro"),
-        (Media::Podcast, Provider::Fish, "s2.1-pro"),
-        (Media::Text, Provider::Openai, "gpt-6-luna"),
+    let google = provider == Provider::Google;
+    for (media, model) in [
+        (
+            Media::Image,
+            if google {
+                "gemini-nano-banana-2.1"
+            } else {
+                "gpt-image-2.5-flare"
+            },
+        ),
+        (
+            Media::Infographic,
+            if google {
+                "gemini-nano-banana-2.1"
+            } else {
+                "gpt-image-2.5-flare"
+            },
+        ),
+        (
+            Media::Speech,
+            if google {
+                "gemini-3.8-flash-tts"
+            } else {
+                "gpt-4o-mini-tts"
+            },
+        ),
+        (
+            Media::Podcast,
+            if google {
+                "gemini-3.8-flash-tts"
+            } else {
+                "gpt-4o-mini-tts"
+            },
+        ),
+        (
+            Media::Text,
+            if google {
+                "gemini-3.8-flash"
+            } else {
+                "gpt-6-luna"
+            },
+        ),
     ] {
         config.defaults.insert(
             media,
@@ -87,6 +129,18 @@ pub fn recommended() -> Config {
         config
             .default_settings
             .insert(media, defaults(media, provider));
+    }
+    if google {
+        config.defaults.insert(
+            Media::Music,
+            Selection {
+                provider,
+                model: "lyria-3.5".into(),
+            },
+        );
+        config
+            .default_settings
+            .insert(Media::Music, defaults(Media::Music, provider));
     }
     config.default_settings.remove(&Media::Text);
     config
@@ -110,6 +164,11 @@ fn defaults(media: Media, provider: Provider) -> Settings {
         }
         Media::Speech => {
             settings.format = Some("wav".into());
+            settings.voice = match provider {
+                Provider::Google => Some("Kore".into()),
+                Provider::Openai => Some("coral".into()),
+                _ => None,
+            };
         }
         Media::Music | Media::Sfx => {
             settings.format = Some("mp3".into());
@@ -235,7 +294,7 @@ impl Session {
             }
         }
         let existing = root.join("mediaagent/config.yaml").exists();
-        let mut result = project::init_with_config(
+        let mut result = project::init_locked(
             root,
             &self.agents,
             if existing { None } else { Some(&self.config) },
@@ -482,7 +541,7 @@ fn feature(ui: &Ui, session: &mut Session, root: &Path) -> Result<()> {
         let model: catalog::Model = serde_json::from_value(row.clone())?;
         set_model(session, media, model);
     } else {
-        let rows = catalog::models()
+        let mut rows = catalog::models()
             .into_iter()
             .filter(|m| {
                 m.media == catalog::target(media)
@@ -491,6 +550,7 @@ fn feature(ui: &Ui, session: &mut Session, root: &Path) -> Result<()> {
                     && (action == 1 || m.recommended)
             })
             .collect::<Vec<_>>();
+        rows.sort_by_key(|m| (catalog::provider_preference(m.provider), !m.recommended));
         let items = rows
             .iter()
             .map(|m| format!("{:?} / {} — {}", m.provider, m.model, m.description))
@@ -818,12 +878,20 @@ pub fn run(
         let Some(choice) = ui.choose(
             "Welcome to MediaAgent — offline setup",
             &options(&[
-                "Recommended setup — OpenAI + Fish",
+                "Recommended setup — Google",
+                "OpenAI setup — images, speech and planning",
                 "Customize setup",
                 "Empty project",
             ]),
             if session.config.defaults.is_empty() {
-                2
+                3
+            } else if session
+                .config
+                .defaults
+                .get(&Media::Image)
+                .is_some_and(|s| s.provider == Provider::Openai)
+            {
+                1
             } else {
                 0
             },
@@ -838,7 +906,10 @@ pub fn run(
         if choice == 0 {
             session.config = recommended();
         }
-        if choice == 2 {
+        if choice == 1 {
+            session.config = openai();
+        }
+        if choice == 3 {
             session.config = Config::default();
             session.config.consistency.require_known_identity_model = true;
         }

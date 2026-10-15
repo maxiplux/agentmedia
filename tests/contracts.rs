@@ -117,7 +117,10 @@ fn offline_init_preserves_credentials_user_content_and_skills() {
     project::init(root, &["codex".into(), "claude".into()]).unwrap();
     assert_eq!(
         fs::read_to_string(root.join(".env")).unwrap(),
-        "PRIVATE_TEST_VALUE=keep-me\n"
+        format!(
+            "PRIVATE_TEST_VALUE=keep-me\n{}",
+            mediaagent::credentials::ENV_TEMPLATE
+        )
     );
     assert_eq!(
         fs::read_to_string(visual).unwrap(),
@@ -1466,7 +1469,10 @@ fn initialization_applies_complete_defaults_before_creating_profiles() {
     assert!(project::init_with_config(&root, &[], Some(&cfg)).is_err());
     assert_eq!(
         fs::read_to_string(root.join(".env")).unwrap(),
-        "TEST_PRIVATE=preserve\n"
+        format!(
+            "TEST_PRIVATE=preserve\n{}",
+            mediaagent::credentials::ENV_TEMPLATE
+        )
     );
     assert_eq!(project::config(&root).unwrap().limits.concurrency, 3);
 }

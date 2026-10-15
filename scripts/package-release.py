@@ -59,7 +59,7 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
     checks.append('initialization_rejects_executable_config_path_collision')
     cli(['init', str(project), '--preset', 'empty'])
     cli(['init', str(project), '--preset', 'empty'])
-    assert (project / '.env').read_text() == preserved
+    assert (project / '.env').read_text() == preserved + 'GEMINI_API_KEY=\nOPENAI_API_KEY=\nFISH_API_KEY=\nOPENROUTER_API_KEY=\nELEVENLABS_API_KEY=\n'
     checks.append('offline_repeat_initialization_preserves_env')
     for agent in ['.agents', '.claude']:
         skill = project / agent / 'skills/mediaagent'
@@ -70,8 +70,10 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
     checks.append('embedded_codex_and_claude_skills_without_checkout')
     recommended_project = isolated / 'recommended-project'
     recommended = cli(['init', str(recommended_project), '--preset', 'recommended'])['data']
-    assert recommended['configuration']['defaults']['image']['model'] == 'gpt-image-2.5-flare'
-    assert recommended['configuration']['defaults']['speech']['provider'] == 'fish'
+    assert recommended['configuration']['defaults']['image']['model'] == 'gemini-nano-banana-2.1'
+    assert recommended['configuration']['defaults']['speech']['provider'] == 'google'
+    assert recommended['configuration']['default_settings']['speech']['voice'] == 'Kore'
+    assert recommended['configuration']['defaults']['music']['model'] == 'lyria-3.5'
     assert recommended['setup_complete'] is False and recommended['pending_steps']
     readiness = cli(['--project', str(recommended_project), 'config', 'status'])['data']
     assert readiness['setup_complete'] is False and readiness['account_access_verified'] is False
@@ -141,7 +143,7 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
         assert installation['project_files_changed'] is False and installation['network_requested'] is False
     installed = installed_bin / executable
     assert subprocess.run([str(installed), '--version'], capture_output=True, text=True, check=True).stdout.strip() == f'mediaagent {version}'
-    assert (project / '.env').read_text() == preserved
+    assert (project / '.env').read_text() == preserved + 'GEMINI_API_KEY=\nOPENAI_API_KEY=\nFISH_API_KEY=\nOPENROUTER_API_KEY=\nELEVENLABS_API_KEY=\n'
     checks.append('offline_user_install_repeat_and_version_without_project_changes')
     subprocess.run([sys.executable, str(root / 'scripts/test-installers.py'), '--binary', str(copied), '--target', host], env=smoke_environment, check=True)
     checks.append('native_bootstrap_download_install_repeat_and_checksum_rejection_offline')

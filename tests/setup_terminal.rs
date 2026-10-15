@@ -167,6 +167,60 @@ impl Drop for Terminal {
     }
 }
 #[test]
+fn existing_google_key_finishes_default_setup_and_installs_both_project_skills() {
+    let t = tempfile::tempdir().unwrap();
+    let root = t.path();
+    let prefix = "# Existing credentials\nGEMINI_API_KEY=fixture-google-private\n";
+    fs::write(root.join(".env"), prefix).unwrap();
+    let mut terminal = Terminal::start(root, false);
+    terminal.wait("Recommended setup — Google");
+    terminal.send("\r");
+    terminal.wait("Setup checklist");
+    terminal.send("\r"); // Locally ready: Finish is selected without entering a voice ID.
+    terminal.wait("Save these reviewed choices?");
+    assert_eq!(fs::read_to_string(root.join(".env")).unwrap(), prefix);
+    assert!(!root.join("mediaagent").exists());
+    terminal.send("Save\r");
+    terminal.success();
+    assert_eq!(
+        mediaagent::setup::status(root).unwrap()["setup_complete"],
+        true
+    );
+    assert!(root.join(".agents/skills/mediaagent/SKILL.md").is_file());
+    assert!(root.join(".claude/skills/mediaagent/SKILL.md").is_file());
+    assert!(
+        fs::read_to_string(root.join(".env"))
+            .unwrap()
+            .starts_with(prefix)
+    );
+    assert!(!terminal.output.contains("fixture-google-private"));
+}
+#[test]
+fn second_welcome_option_selects_openai_explicitly() {
+    let t = tempfile::tempdir().unwrap();
+    fs::write(
+        t.path().join(".env"),
+        "OPENAI_API_KEY=fixture-openai-private\n",
+    )
+    .unwrap();
+    let mut terminal = Terminal::start(t.path(), false);
+    terminal.wait("Welcome to MediaAgent");
+    terminal.send("\u{1b}[B\r");
+    terminal.wait("Setup checklist");
+    terminal.send("\r");
+    terminal.wait("Save these reviewed choices?");
+    terminal.send("Save\r");
+    terminal.success();
+    let config = mediaagent::project::config(t.path()).unwrap();
+    assert!(
+        config
+            .defaults
+            .values()
+            .all(|s| s.provider == mediaagent::contracts::Provider::Openai)
+    );
+    assert!(!terminal.output.contains("fixture-openai-private"));
+}
+#[test]
 fn arrow_setup_completes_with_masked_keys_and_a_voice_after_review() {
     let t = tempfile::tempdir().unwrap();
     let root = t.path().join("terminal project");
@@ -178,20 +232,14 @@ fn arrow_setup_completes_with_masked_keys_and_a_voice_after_review() {
     p.send("\u{1b}[B\r");
     p.wait("Project credentials");
     p.send("\r");
-    p.wait("OPENAI_API_KEY (hidden");
-    p.send("fixture-openai-hidden\r");
-    p.wait("Setup checklist");
-    p.send("API keys\r");
-    p.wait("Project credentials");
-    p.send("FISH_API_KEY\r");
-    p.wait("FISH_API_KEY (hidden");
-    p.send("fixture-fish-hidden\r");
+    p.wait("GEMINI_API_KEY (hidden");
+    p.send("fixture-google-hidden\r");
     p.wait("Setup checklist");
     p.send("Voices\r");
     p.wait("Voice bindings");
     p.send("\r");
     p.wait("Voice ID (blank clears)");
-    p.send("fixture-voice\r");
+    p.send("\u{7f}\u{7f}\u{7f}\u{7f}fixture-voice\r");
     p.wait("Setup checklist");
     assert!(!root.exists(), "navigating setup must not write files");
     p.send("Review and finish\r");
@@ -206,8 +254,7 @@ fn arrow_setup_completes_with_masked_keys_and_a_voice_after_review() {
         Some("fixture-voice")
     );
     assert!(mediaagent::setup::status(&root).unwrap()["setup_complete"] == true);
-    assert!(!p.output.contains("fixture-openai-hidden"));
-    assert!(!p.output.contains("fixture-fish-hidden"));
+    assert!(!p.output.contains("fixture-google-hidden"));
     assert!(!p.output.contains("\u{1b}[32m"));
 }
 #[test]
@@ -254,7 +301,10 @@ fn numbered_menu_saves_a_draft_and_existing_init_resumes_it() {
     p.send("1\r");
     p.success();
     assert!(root.join("mediaagent/config.yaml").exists());
-    assert_eq!(fs::read_to_string(root.join(".env")).unwrap(), "");
+    assert_eq!(
+        fs::read_to_string(root.join(".env")).unwrap(),
+        mediaagent::credentials::ENV_TEMPLATE
+    );
     let before = fs::read(root.join("mediaagent/config.yaml")).unwrap();
     drop(p);
     let mut resumed = Terminal::start(&root, true);

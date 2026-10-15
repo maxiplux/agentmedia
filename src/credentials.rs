@@ -4,6 +4,16 @@ use crate::{
 };
 use std::path::Path;
 
+pub const PROVIDERS: [Provider; 5] = [
+    Provider::Google,
+    Provider::Openai,
+    Provider::Fish,
+    Provider::Openrouter,
+    Provider::Elevenlabs,
+];
+pub const ENV_TEMPLATE: &str =
+    "GEMINI_API_KEY=\nOPENAI_API_KEY=\nFISH_API_KEY=\nOPENROUTER_API_KEY=\nELEVENLABS_API_KEY=\n";
+
 pub fn resolve(provider: Provider, root: &Path) -> Result<String> {
     resolve_with(provider.key(), root, |key| std::env::var(key).ok())
 }
@@ -44,7 +54,8 @@ fn nonempty(key: &str, value: String) -> Result<String> {
     }
 }
 
-/// Append missing keys or fill empty entries; preserve every unrelated byte.
+/// Fill explicitly supplied missing keys and append absent credential names with empty values.
+/// Preserve existing values, comments and unrelated entries, without copying process keys.
 /// This never changes a populated key or overrides process-environment precedence.
 pub fn render_missing(
     root: &Path,
@@ -157,6 +168,21 @@ pub fn render_missing(
             return Err(Error::input(
                 "Credential did not round-trip; project .env was not changed",
             ));
+        }
+    }
+    let newline = if original.contains("\r\n") {
+        "\r\n"
+    } else {
+        "\n"
+    };
+    for provider in PROVIDERS {
+        if !parsed.iter().any(|(name, _)| name == provider.key()) {
+            if !updated.is_empty() && !updated.ends_with('\n') {
+                updated.push_str(newline);
+            }
+            updated.push_str(provider.key());
+            updated.push('=');
+            updated.push_str(newline);
         }
     }
     Ok(if updated != original {

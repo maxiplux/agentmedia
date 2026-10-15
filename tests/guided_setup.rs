@@ -124,11 +124,11 @@ fn recommended_init_and_status_are_noninteractive_offline_and_resumable() {
     let v: Value = serde_json::from_slice(&result).unwrap();
     assert_eq!(
         v["data"]["configuration"]["defaults"]["image"]["model"],
-        "gpt-image-2.5-flare"
+        "gemini-nano-banana-2.1"
     );
     assert_eq!(
         v["data"]["configuration"]["defaults"]["speech"]["provider"],
-        "fish"
+        "google"
     );
     assert_eq!(v["data"]["setup_complete"], false);
     assert!(
@@ -136,9 +136,12 @@ fn recommended_init_and_status_are_noninteractive_offline_and_resumable() {
             .as_array()
             .unwrap()
             .iter()
-            .any(|v| v.as_str().unwrap().contains("voice"))
+            .any(|v| v.as_str().unwrap().contains("GEMINI_API_KEY"))
     );
-    assert!(fs::read(root.join(".env")).unwrap().is_empty());
+    assert_eq!(
+        fs::read_to_string(root.join(".env")).unwrap(),
+        credentials::ENV_TEMPLATE
+    );
     let before = fs::read(root.join("mediaagent/config.yaml")).unwrap();
     cargo_bin_cmd!("mediaagent")
         .args(["--non-interactive", "init"])
@@ -165,15 +168,213 @@ fn recommended_init_and_status_are_noninteractive_offline_and_resumable() {
     );
 }
 #[test]
+fn google_and_openai_presets_are_ready_with_one_key_and_preserve_existing_identity() {
+    let temporary = tempfile::tempdir().unwrap();
+    for (preset, provider, key, voice, features) in [
+        ("recommended", Provider::Google, "GEMINI_API_KEY", "Kore", 6),
+        ("google", Provider::Google, "GEMINI_API_KEY", "Kore", 6),
+        ("openai", Provider::Openai, "OPENAI_API_KEY", "coral", 5),
+    ] {
+        let root = temporary.path().join(preset);
+        fs::create_dir(&root).unwrap();
+        fs::write(
+            root.join(".env"),
+            format!("# Keep my key\n{key}=fixture-private\n"),
+        )
+        .unwrap();
+        let output = cargo_bin_cmd!("mediaagent")
+            .arg("--project")
+            .arg(&root)
+            .args(["init", "--preset", preset, "--json", "--non-interactive"])
+            .env_remove("GEMINI_API_KEY")
+            .env_remove("OPENAI_API_KEY")
+            .assert()
+            .success()
+            .get_output()
+            .stdout
+            .clone();
+        assert!(!String::from_utf8_lossy(&output).contains("fixture-private"));
+        let report: Value = serde_json::from_slice(&output).unwrap();
+        assert_eq!(report["data"]["setup_complete"], true);
+        assert_eq!(
+            report["data"]["skills"],
+            json!({"codex":true,"claude":true})
+        );
+        let config = project::config(&root).unwrap();
+        assert_eq!(config.defaults.len(), features);
+        assert!(config.defaults.values().all(|s| s.provider == provider));
+        assert!(!config.defaults.contains_key(&Media::Sfx));
+        for media in [Media::Speech, Media::Podcast] {
+            assert_eq!(
+                config.default_settings[&media].voice.as_deref(),
+                Some(voice)
+            );
+        }
+        let character_path = project::character_path(&root, "persona").unwrap();
+        let character: Character = storage::yaml(&character_path).unwrap();
+        assert_eq!(
+            character.visual.as_ref().unwrap().selection.provider,
+            provider
+        );
+        assert_eq!(
+            character.voice.as_ref().unwrap().binding.as_deref(),
+            Some(voice)
+        );
+        let original = fs::read(&character_path).unwrap();
+        let env = fs::read(root.join(".env")).unwrap();
+        cargo_bin_cmd!("mediaagent")
+            .arg("--project")
+            .arg(&root)
+            .args([
+                "init",
+                "--preset",
+                if provider == Provider::Google {
+                    "openai"
+                } else {
+                    "google"
+                },
+                "--json",
+                "--non-interactive",
+            ])
+            .assert()
+            .success();
+        assert_eq!(fs::read(character_path).unwrap(), original);
+        assert_eq!(fs::read(root.join(".env")).unwrap(), env);
+        assert_eq!(project::config(&root).unwrap().defaults, config.defaults);
+    }
+}
+#[test]
+fn init_updates_only_target_env_and_never_copies_process_or_ancestor_credentials() {
+    let temporary = tempfile::tempdir().unwrap();
+    fs::write(
+        temporary.path().join(".env"),
+        "GEMINI_API_KEY=ancestor-private\n",
+    )
+    .unwrap();
+    let root = temporary.path().join("called here");
+    fs::create_dir(&root).unwrap();
+    let prefix = "# Preserve comments\r\nOTHER=value\r\nexport GEMINI_API_KEY='project-private'\r\nOPENAI_API_KEY=\r\n";
+    fs::write(root.join(".env"), prefix).unwrap();
+    for _ in 0..2 {
+        let output = cargo_bin_cmd!("mediaagent")
+            .current_dir(&root)
+            .env_remove("GEMINI_API_KEY")
+            .env("OPENAI_API_KEY", "process-private")
+            .args(["init", "--json", "--non-interactive"])
+            .assert()
+            .success()
+            .get_output()
+            .stdout
+            .clone();
+        let serialized = String::from_utf8_lossy(&output);
+        for private in ["ancestor-private", "project-private", "process-private"] {
+            assert!(!serialized.contains(private));
+        }
+        let saved = fs::read_to_string(root.join(".env")).unwrap();
+        assert_eq!(
+            saved,
+            format!("{prefix}FISH_API_KEY=\r\nOPENROUTER_API_KEY=\r\nELEVENLABS_API_KEY=\r\n")
+        );
+        assert_eq!(
+            credentials::resolve_with("OPENAI_API_KEY", &root, |_| Some("process-private".into()))
+                .unwrap(),
+            "process-private"
+        );
+    }
+    let target = root.join("different target");
+    cargo_bin_cmd!("mediaagent")
+        .current_dir(&root)
+        .arg("--project")
+        .arg(&target)
+        .args(["init", "--json", "--non-interactive"])
+        .env("GEMINI_API_KEY", "process-private")
+        .assert()
+        .success();
+    assert_eq!(
+        fs::read_to_string(target.join(".env")).unwrap(),
+        credentials::ENV_TEMPLATE
+    );
+    assert_eq!(
+        fs::read_to_string(temporary.path().join(".env")).unwrap(),
+        "GEMINI_API_KEY=ancestor-private\n"
+    );
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        assert_eq!(
+            fs::metadata(target.join(".env"))
+                .unwrap()
+                .permissions()
+                .mode()
+                & 0o077,
+            0
+        );
+    }
+}
+#[test]
+fn malformed_env_stops_init_before_project_or_skill_writes_without_secret_output() {
+    let temporary = tempfile::tempdir().unwrap();
+    let root = temporary.path();
+    let content = "GEMINI_API_KEY=\"fixture-secret-unclosed\n";
+    fs::write(root.join(".env"), content).unwrap();
+    let result = cargo_bin_cmd!("mediaagent")
+        .current_dir(root)
+        .args(["init", "--json", "--non-interactive"])
+        .assert()
+        .failure()
+        .get_output()
+        .clone();
+    assert!(!String::from_utf8_lossy(&result.stdout).contains("fixture-secret"));
+    assert!(!String::from_utf8_lossy(&result.stderr).contains("fixture-secret"));
+    assert_eq!(fs::read_to_string(root.join(".env")).unwrap(), content);
+    assert_eq!(fs::read_dir(root).unwrap().count(), 1);
+}
+#[test]
+fn init_waits_for_setup_lock_and_preserves_credentials_saved_while_waiting() {
+    use fs4::fs_std::FileExt;
+    let temporary = tempfile::tempdir().unwrap();
+    let root = temporary.path();
+    project::init(root, &[]).unwrap();
+    fs::write(root.join(".env"), "GEMINI_API_KEY=\n").unwrap();
+    let guard = storage::lock(&root.join("mediaagent/setup.lock")).unwrap();
+    guard.lock_exclusive().unwrap();
+    let mut child = std::process::Command::new(env!("CARGO_BIN_EXE_mediaagent"))
+        .current_dir(root)
+        .args(["init", "--json", "--non-interactive"])
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .unwrap();
+    std::thread::sleep(std::time::Duration::from_millis(150));
+    assert!(
+        child.try_wait().unwrap().is_none(),
+        "Init must wait for the credential writer"
+    );
+    let prefix = "# Concurrent reviewed save\nGEMINI_API_KEY=fixture-new-private\n";
+    fs::write(root.join(".env"), prefix).unwrap();
+    drop(guard);
+    let output = child.wait_with_output().unwrap();
+    assert!(output.status.success());
+    assert!(!String::from_utf8_lossy(&output.stdout).contains("fixture-new-private"));
+    let saved = fs::read_to_string(root.join(".env")).unwrap();
+    assert!(saved.starts_with(prefix));
+    assert_eq!(saved.matches("GEMINI_API_KEY=").count(), 1);
+}
+#[test]
 fn readiness_requires_voice_and_keys_and_preserves_explicitly_disabled_features() {
     let t = tempfile::tempdir().unwrap();
     let mut s = setup::Session::new(setup::recommended(), vec!["codex".into(), "claude".into()]);
     assert!(!s.finishable(t.path()));
-    fs::write(
-        t.path().join(".env"),
-        "OPENAI_API_KEY=fixture-openai\nFISH_API_KEY=fixture-fish\n",
-    )
-    .unwrap();
+    s.config.defaults.remove(&Media::Music);
+    s.config.default_settings.remove(&Media::Music);
+    for media in [Media::Speech, Media::Podcast] {
+        assert_eq!(
+            s.config.default_settings[&media].voice.as_deref(),
+            Some("Kore")
+        );
+        s.config.default_settings.get_mut(&media).unwrap().voice = None;
+    }
+    fs::write(t.path().join(".env"), "GEMINI_API_KEY=fixture-google\n").unwrap();
     assert!(!s.finishable(t.path()));
     for media in [Media::Speech, Media::Podcast] {
         s.config.default_settings.get_mut(&media).unwrap().voice = Some("fixture-voice".into());
@@ -441,7 +642,7 @@ fn filling_empty_credentials_preserves_export_indentation_and_comments() {
     .unwrap();
     let written = fs::read_to_string(root.path().join(".env")).unwrap();
     assert!(written.starts_with("  export FISH_API_KEY="));
-    assert!(written.ends_with(" # user's note\r\n"));
+    assert!(written.lines().next().unwrap().ends_with(" # user's note"));
     assert_eq!(
         credentials::resolve_with("FISH_API_KEY", root.path(), |_| None).unwrap(),
         "fixture'`$literal"
