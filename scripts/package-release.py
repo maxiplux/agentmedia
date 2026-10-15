@@ -44,6 +44,18 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
         if not response['ok']:
             raise RuntimeError('Offline binary verification failed')
         return response
+    # A downloaded Unix executable is itself named mediaagent. Its directory
+    # cannot also contain the required mediaagent/ project configuration folder.
+    blocker = isolated / 'mediaagent'
+    if not blocker.exists():
+        blocker.write_text('fixture name collision')
+    blocker_bytes = blocker.read_bytes()
+    collision = subprocess.run([str(copied), 'init', '--json', '--non-interactive'], cwd=isolated, env=smoke_environment, capture_output=True, text=True)
+    assert collision.returncode == 2
+    assert json.loads(collision.stdout)['errors'][0]['code'] == 'init_path_conflict'
+    assert blocker.read_bytes() == blocker_bytes
+    assert not (isolated / '.env').exists()
+    checks.append('initialization_rejects_executable_config_path_collision')
     cli(['init', str(project), '--preset', 'empty'])
     cli(['init', str(project), '--preset', 'empty'])
     assert (project / '.env').read_text() == preserved

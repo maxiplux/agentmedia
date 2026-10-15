@@ -1,4 +1,4 @@
-# mediaagent 0.3.0 command reference
+# mediaagent 0.3.1 command reference
 
 Generated from the executable's command definitions. Global flags are accepted before or after the command.
 
@@ -74,7 +74,7 @@ Usage: mediaagent init [OPTIONS] [PATH]
 
 Arguments:
   [PATH]
-          [default: .]
+          Project folder (defaults to --project or the current directory); must allow a mediaagent/ subfolder
 
 Options:
       --agents <AGENTS>

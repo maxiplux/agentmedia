@@ -16,6 +16,9 @@ struct Terminal {
 }
 impl Terminal {
     fn start(root: &std::path::Path, plain: bool) -> Self {
+        Self::start_in(root, plain, None)
+    }
+    fn start_in(root: &std::path::Path, plain: bool, cwd: Option<&std::path::Path>) -> Self {
         let pair = portable_pty::native_pty_system()
             .openpty(PtySize {
                 rows: 45,
@@ -27,6 +30,9 @@ impl Terminal {
         let mut cmd = CommandBuilder::new(env!("CARGO_BIN_EXE_mediaagent"));
         cmd.args(["--color", "never", "init"]);
         cmd.arg(root);
+        if let Some(cwd) = cwd {
+            cmd.cwd(cwd);
+        }
         cmd.env("TERM", if plain { "dumb" } else { "xterm-256color" });
         for key in [
             "OPENAI_API_KEY",
@@ -122,6 +128,35 @@ impl Terminal {
             std::thread::sleep(Duration::from_millis(25));
         }
     }
+}
+#[test]
+fn colliding_executable_offers_another_folder_and_saves_an_unfinished_project_there() {
+    let temporary = tempfile::tempdir().unwrap();
+    let root = temporary.path();
+    fs::write(root.join("mediaagent"), "preserve executable").unwrap();
+    let mut p = Terminal::start_in(std::path::Path::new("."), false, Some(root));
+    p.wait("Choose where to save your project");
+    p.send("\r");
+    p.wait("Project folder (relative to the current directory)");
+    p.send("project with spaces\r");
+    p.wait("Welcome to MediaAgent");
+    p.send("\r");
+    p.wait("Setup checklist");
+    p.send("Save unfinished setup and exit\r");
+    p.wait("Save these reviewed choices?");
+    assert!(!root.join("project with spaces").exists());
+    p.send("Save\r");
+    p.success();
+    let project = root.join("project with spaces");
+    assert!(project.join("mediaagent/config.yaml").is_file());
+    assert!(project.join(".agents/skills/mediaagent/SKILL.md").is_file());
+    assert!(project.join(".claude/skills/mediaagent/SKILL.md").is_file());
+    assert_eq!(
+        fs::read_to_string(root.join("mediaagent")).unwrap(),
+        "preserve executable"
+    );
+    assert!(mediaagent::setup::status(&project).unwrap()["setup_complete"] == false);
+    assert!(!p.output.contains("local_io"));
 }
 impl Drop for Terminal {
     fn drop(&mut self) {

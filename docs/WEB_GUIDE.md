@@ -57,3 +57,5 @@ manifests passed eight offline validation and dry-run checks. Browser checks
 confirmed expandable walkthroughs, command copying and mobile layout.
 
 Version 0.3.0 updates initialization to a resumable keyboard-driven checklist, optional masked credential entry, OpenAI/Fish defaults, local readiness and a reviewed current-stable model policy. Its 63 command pages and 35 downloadable examples match the updated executable and templates. New-model execution uses mocked requests; this documentation update makes no paid provider requests.
+
+Version 0.3.1 documents the executable/configuration folder name conflict, early destination selection, full-path display and `--project` precedence. The command reference is regenerated from the corrected CLI. The example archive remains unchanged.

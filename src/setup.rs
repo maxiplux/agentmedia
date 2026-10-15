@@ -211,6 +211,7 @@ impl Session {
     ) -> Result<serde_json::Value> {
         validation::config(&self.config)?;
         project::check_agents(&self.agents)?;
+        project::check_init_destination(root)?;
         let guard = lock(&root.join("mediaagent/setup.lock"))?;
         guard.lock_exclusive()?;
         if expected.is_some_and(|(config_hash, env_hash)| {
@@ -358,6 +359,40 @@ impl Ui {
 }
 fn options(items: &[&str]) -> Vec<String> {
     items.iter().map(|s| s.to_string()).collect()
+}
+pub fn init_destination(root: &Path, color: crate::cli::Color) -> Result<PathBuf> {
+    let mut selected = absolute(root)?;
+    let ui = Ui::new(color);
+    loop {
+        match project::check_init_destination(&selected) {
+            Ok(()) => return Ok(selected),
+            Err(error) if error.code == "init_path_conflict" => {
+                if !io::stdin().is_terminal() || !io::stderr().is_terminal() {
+                    return Err(error);
+                }
+                ui.message(&error.message, false);
+                if ui.choose(
+                    "Choose where to save your project",
+                    &options(&["Choose a project folder", "Cancel setup"]),
+                    0,
+                )? != Some(0)
+                {
+                    return Err(Error::new(
+                        "setup_cancelled",
+                        "Setup cancelled; no files changed",
+                        130,
+                    ));
+                }
+                let path = ui.input("Project folder (relative to the current directory)", "")?;
+                if path.trim().is_empty() {
+                    ui.message("Enter a project folder, for example ./my-project", false);
+                    continue;
+                }
+                selected = absolute(Path::new(&path))?;
+            }
+            Err(error) => return Err(error),
+        }
+    }
 }
 const MEDIA: [Media; 7] = [
     Media::Image,
@@ -772,6 +807,8 @@ pub fn run(
         ));
     }
     let ui = Ui::new(color);
+    project::check_init_destination(root)?;
+    eprintln!("Project folder: {}", absolute(root)?.display());
     let mut session = Session::new(initial, agents);
     let initial_hash = std::fs::read(root.join("mediaagent/config.yaml"))
         .ok()
@@ -968,6 +1005,8 @@ pub fn run(
     }
 }
 pub fn wizard(root: &Path, color: crate::cli::Color) -> Result<serde_json::Value> {
+    let selected = init_destination(root, color)?;
+    let root = selected.as_path();
     run(
         root,
         if root.join("mediaagent/config.yaml").exists() {

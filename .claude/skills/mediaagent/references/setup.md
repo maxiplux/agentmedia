@@ -2,6 +2,8 @@
 
 `mediaagent init PATH` starts the offline terminal wizard when stdin/stderr are terminals. Use arrows and Enter, type to search, and Escape to go back. The checklist loops through features/models, credentials, voices, project-local skills, optional character scaffolds and advanced settings. Finish requires all enabled features to be locally ready. Save unfinished setup to continue later by running init again. No provider requests occur during setup.
 
+`PATH` is the project folder. If omitted, init uses `--project` or the current directory. A downloaded executable named `mediaagent` conflicts with creating `mediaagent/` in that same folder: use `mediaagent init ./my-project` or install the binary on PATH and initialize elsewhere. The wizard detects this before collecting choices and offers another folder; noninteractive callers receive `init_path_conflict` with corrective arguments. Existing files and credentials are preserved. The full destination is shown before setup and during save review.
+
 New projects default to OpenAI GPT Image 2.5 Flare for images/infographics, Fish s2.1-pro for speech/podcasts, and OpenAI GPT-6 Luna for planning. Music and effects stay disabled until selected. Set an actual Fish voice ID; the wizard can reuse it for the default podcast speaker. Custom podcast casts remain separate.
 
 Agents never open the wizard:
