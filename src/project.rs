@@ -292,13 +292,23 @@ pub fn normalize_agents(agents: &[String]) -> Result<Vec<&'static AgentTarget>> 
 pub fn check_agents(agents: &[String]) -> Result<()> {
     normalize_agents(agents).map(|_| ())
 }
+/// Joins a documented skill directory such as `.config/opencode/skills` onto `root`
+/// one component at a time and appends the skill folder, so the installer and the
+/// status report both produce a path in the platform's own separator throughout
+/// (a single `join` would keep the literal `/` on Windows).
+pub fn skill_dir(root: &Path, dir: &str) -> PathBuf {
+    let mut path = root.to_path_buf();
+    path.extend(dir.split('/').filter(|component| !component.is_empty()));
+    path.push(SKILL_FOLDER);
+    path
+}
 pub fn native_skill_dir(root: &Path, target: &AgentTarget, user_scope: bool) -> PathBuf {
     let dirs = if user_scope {
         target.user
     } else {
         target.project
     };
-    root.join(dirs[0]).join(SKILL_FOLDER)
+    skill_dir(root, dirs[0])
 }
 pub fn install(root: &Path, agents: &[String]) -> Result<Vec<String>> {
     install_with(root, agents, false)
@@ -328,7 +338,7 @@ pub fn install_scoped(
 /// native path, the directories through which the skill is actually found, and
 /// `duplicate_discovery` when more than one of them holds a copy.
 pub fn skills_report(root: &Path) -> serde_json::Value {
-    let skill_at = |dir: &str| root.join(dir).join(SKILL_FOLDER);
+    let skill_at = |dir: &str| skill_dir(root, dir);
     let installed = |dir: &str| skill_at(dir).join("SKILL.md").is_file();
     let mut skills = serde_json::Map::new();
     let mut targets = vec![];

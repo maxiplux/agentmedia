@@ -802,13 +802,14 @@ fn status_reports_shared_discovery_for_every_known_agent() {
     let cursor = targets.iter().find(|t| t["agent"] == "cursor").unwrap();
     assert_eq!(cursor["label"], "Cursor");
     assert_eq!(cursor["native_installed"], false);
+    // JSON strings, so the separators matter: every component is joined on its own.
     assert_eq!(
         cursor["native_path"],
-        json!(root.join(".cursor/skills").join("framechord"))
+        json!(root.join(".cursor").join("skills").join("framechord"))
     );
     assert_eq!(
         cursor["discovered_via"],
-        json!([root.join(".agents/skills").join("framechord")])
+        json!([root.join(".agents").join("skills").join("framechord")])
     );
     assert!(cursor["source"].as_str().unwrap().starts_with("https://"));
     let shared = status["skills_shared_by"][".agents/skills"]
@@ -817,6 +818,55 @@ fn status_reports_shared_discovery_for_every_known_agent() {
     assert!(shared.iter().any(|a| a == "copilot"), "{shared:?}");
     assert!(shared.iter().any(|a| a == "codex"));
     assert!(!shared.iter().any(|a| a == "claude"));
+}
+
+#[test]
+fn skill_paths_use_native_separators_for_installer_and_report() {
+    use std::path::{MAIN_SEPARATOR, Path};
+    let root = Path::new("root");
+    let s = MAIN_SEPARATOR;
+    let foreign = if s == '/' { '\\' } else { '/' };
+    assert_eq!(
+        project::skill_dir(root, ".config/opencode/skills").to_string_lossy(),
+        format!("root{s}.config{s}opencode{s}skills{s}framechord")
+    );
+    for target in project::AGENT_TARGETS {
+        for user_scope in [false, true] {
+            let dirs = if user_scope {
+                target.user
+            } else {
+                target.project
+            };
+            let installed = project::native_skill_dir(root, target, user_scope);
+            assert_eq!(
+                installed,
+                project::skill_dir(root, dirs[0]),
+                "{} user_scope={user_scope}",
+                target.name
+            );
+            for dir in dirs {
+                let reported = project::skill_dir(root, dir).to_string_lossy().into_owned();
+                assert!(
+                    !reported.contains(foreign),
+                    "{} {dir}: {reported}",
+                    target.name
+                );
+            }
+        }
+    }
+    let t = tempfile::tempdir().unwrap();
+    project::init(t.path(), &["opencode".into()]).unwrap();
+    let report = project::skills_report(t.path());
+    let opencode = report["skill_targets"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|t| t["agent"] == "opencode")
+        .unwrap();
+    let native = project::skill_dir(t.path(), ".opencode/skills");
+    assert_eq!(opencode["native_path"], json!(native));
+    assert_eq!(opencode["discovered_via"], json!([native]));
+    assert!(native.join("SKILL.md").is_file());
 }
 
 #[test]
