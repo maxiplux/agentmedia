@@ -1,23 +1,66 @@
 # FrameChord
 
-Formerly MediaAgent. The first FrameChord release is 0.6.1. Existing projects stay supported in place; see [upgrade guidance](assets/skill/references/renaming.md). The owned domain is **framechord.com**; [custom-domain setup](docs/DOMAIN.md) is tracked separately from the published guide.
+Formerly MediaAgent. The first FrameChord release is 0.6.1. Existing projects stay supported in place; see [upgrade guidance](assets/skill/references/renaming.md). The documentation domain is **[framechord.com](https://framechord.com/)**; [DNS and hosting details](docs/DOMAIN.md) are documented separately.
 
 A local Rust CLI for any agent with process access, and for terminal users. Generate images, raster infographics, exact narration, podcasts, music, and sound effects. Characters are optional: save visual identity and a provider voice binding when you need reuse.
 
-Open the [web guide](https://maxiplux.github.io/framechord/) for copyable examples for every media
+Open the [web guide](https://framechord.com/) for copyable examples for every media
 workflow, agent prompts, downloadable YAML/Markdown inputs, and a searchable command
 reference. It is a single HTML file with embedded JavaScript, compiled Tailwind CSS, command
 help and example downloads. You can also [open the HTML locally](docs/site/index.html);
 see [publishing and preview instructions](docs/WEB_GUIDE.md).
 
 The first-version workflows are implemented; visual character consistency has not passed user acceptance. Offline contracts and mocked
-execution tests plus bounded live checks across all five providers. It includes
+execution tests pass, alongside selected bounded live checks across all five providers. It includes
 voice design/cloning, authorized Fish recording synthesis, audio/image AI review,
 Google request retrieval, interactive configuration, and native local packaging.
 Provider voice creation/cloning and recording synthesis have offline coverage;
 live testing still needs selected recordings and actual speaker authorization.
 Human character consistency and media quality checks remain separate. See
 [implementation status](docs/STATUS.md) for exact boundaries.
+
+## What you can create
+
+| Use case | Inputs | Outputs |
+| --- | --- | --- |
+| Article or story illustration | Image brief; optional accepted character references | PNG/JPEG/WebP supported by the selected model |
+| Infographic | Structured YAML with exact copy/data plus a visual brief | Raster infographic requiring typography/data review |
+| Read an article aloud | Local text file and a selected voice | Narration file; original clips retained for chunked speech |
+| Podcast | YAML with ordered scripts and voices per turn | Individual clips and a combined WAV |
+| Background music or a vocal jingle | Music brief, duration, instrumental/vocal choice, exact lyrics when supplied | Music file |
+| App or scene sound effects | Event/texture/timing brief and duration | Sound-effect file |
+| Recurring characters | Portable persona, visual/voice profiles and accepted references | Reusable inputs across jobs and projects |
+
+Google is the default for supported image, speech, podcast, music and text planning
+workflows. OpenAI is an explicit alternative for images, speech and planning.
+Fish supports speech and authorized voice references; ElevenLabs supports speech,
+music, sound effects and explicit voice workflows. OpenRouter provides compatible
+text planning and image-review models. Use `framechord models` to inspect the
+implemented capability registry; account access is checked separately. Video is
+outside the current release.
+
+## Quick start: from installation to your first asset
+
+```sh
+mkdir my-media-project
+cd my-media-project
+framechord init
+framechord config status --json
+framechord doctor
+framechord generate image --prompt 'A friendly woodland library, warm watercolor' \
+  --output library.png --dry-run --json
+```
+
+Choose providers, voices, limits and optional keys in the setup checklist, then
+review and save. Alternatively, edit the project `.env` after initialization and
+run `init` again. The image preview above makes no network call. Remove
+`--dry-run` when ready to submit a potentially billable provider request. A
+successful result reports the final artifact paths and durable run ID.
+
+Credential names are `GEMINI_API_KEY`, `OPENAI_API_KEY`, `FISH_API_KEY`,
+`OPENROUTER_API_KEY` and `ELEVENLABS_API_KEY`. Only configure the providers you
+intend to use. Process environment values take precedence over the project's
+`.env`; unrelated ancestor projects are never searched for credentials.
 
 ## Guided setup and current models
 
@@ -71,25 +114,29 @@ human and agent workflow, optional live model discovery and credential handling.
 macOS/Linux:
 
 ```sh
-curl -fsSL https://maxiplux.github.io/framechord/install.sh | sh
+curl -fsSL https://framechord.com/install.sh | sh
 ```
 
 Windows PowerShell:
 
 ```powershell
-irm https://maxiplux.github.io/framechord/install.ps1 | iex
+irm https://framechord.com/install.ps1 | iex
 ```
 
 Already downloaded a 0.6.1+ binary? Run `./framechord install` (Windows:
 `./framechord.exe install`). Installation uses a user bin directory, verifies
 release bytes, and needs no administrator or Rust installation. Open a new terminal,
-then use `framechord init ./my-project` from your project folder.
+then run `framechord init` inside your project folder, or `framechord init ./my-project` to create another project.
 
 ```sh
 framechord update --check
 framechord update
 framechord update --rollback
 ```
+
+On shared networks, update checks can use optional process-only `GH_TOKEN` or
+`GITHUB_TOKEN` authentication for release metadata. CI uses a read-only workflow
+token; binary downloads never receive it.
 
 Updates preserve project keys, configuration, characters, generated media and
 installed skills. See [installation options](docs/INSTALLATION.md) for exact
@@ -127,6 +174,153 @@ framechord generate sfx --provider elevenlabs --model eleven_text_to_sound_v2 \
 
 Speech retains exact file content. Long OpenAI and ElevenLabs scripts split at documented model character limits and character-safe boundaries, preserve every character, and assemble into a mono 24kHz PCM16 WAV. Original provider clips remain in the run. Articles must be local text files; adapting an article into a conversation is an explicit authoring/planning step.
 
+## Examples for every media workflow
+
+The following examples run inside an initialized project and use its saved
+Google defaults unless a provider/model is explicit. Create the input files
+shown or copy the linked templates and edit them first. Every generation example
+uses `--dry-run`: remove it to execute the reviewed request. Generation, text
+planning, AI review and voice creation can incur provider charges.
+
+### Images
+
+```sh
+framechord generate image \
+  --prompt 'A watercolor woodland library, wide composition, no text' \
+  --output library.png --dry-run --json
+```
+
+For detailed art direction, use `--brief-file image.md` with the
+[image template](assets/templates/image.md). Use `--reference` for general
+content and `--identity-reference` for selected character identities with known
+original-model provenance. Use `--character` for a saved character profile.
+
+### Infographics with exact copy and data
+
+Export templates, then edit `authoring/infographic.yaml` and its referenced
+`authoring/infographic.md`:
+
+```sh
+framechord templates export authoring
+framechord validate --kind infographic authoring/infographic.yaml --json
+framechord generate infographic --spec authoring/infographic.yaml \
+  --output writing-habits.png --dry-run --json
+```
+
+The [structured spec](assets/templates/infographic.yaml) controls the title,
+audience, key message, canvas, layout, ordered sections, exact copy and numeric
+strings. The [visual brief](assets/templates/infographic.md) supplies visual
+hierarchy and style. Include sources and units for data; inspect the rendered
+text and numbers before accepting the image.
+
+### Narration or reading an article
+
+Save only the exact spoken words in `article.txt`; delivery instructions belong
+in a separate brief or voice profile.
+
+```sh
+framechord generate speech --text-file article.txt \
+  --output narration.wav --dry-run --json
+```
+
+To choose a provider explicitly:
+
+```sh
+framechord generate speech --provider openai --model gpt-4o-mini-tts \
+  --voice coral --text-file article.txt --output narration.wav --dry-run --json
+```
+
+This reads a local file; it does not fetch article URLs. Long scripts on supported
+chunking models retain the exact text and save both chunks and assembled audio.
+
+### Two-speaker podcast
+
+Create `episode.yaml`, `host.txt`, `guest.txt` and `delivery.md` in the same
+folder. Put exact dialogue in the text files and delivery guidance in Markdown.
+This example inherits the configured Google speech model and explicitly selects
+a built-in voice for each turn:
+
+```yaml
+schema_version: 2
+id: woodland-episode
+media: podcast
+brief: delivery.md
+locale: en-US
+turns:
+  - id: host-intro
+    text_file: host.txt
+    settings: {voice: Kore}
+  - id: guest-answer
+    text_file: guest.txt
+    settings: {voice: Puck}
+assembly:
+  pause_ms: 250
+```
+
+```sh
+framechord validate --kind job episode.yaml --json
+framechord generate --job episode.yaml --output-dir episode-audio --dry-run --json
+```
+
+Paths are relative to `episode.yaml`. Original turn clips and the combined mono
+24 kHz PCM16 WAV remain available. For saved characters, add a `character` path
+per turn; their pinned voice bindings take precedence over unrelated defaults.
+The [podcast template](assets/templates/podcast.yaml) also documents optional
+turn gains and loudness targets. Music beds are separate assets; automatic music
+mixing into the podcast is not part of this command.
+
+### Instrumental music or a vocal jingle
+
+Write `music.md` with purpose, genre, tempo, instruments, mood and structure using
+the [music template](assets/templates/music.md).
+
+```sh
+framechord generate music --brief-file music.md --duration-seconds 60 \
+  --instrumental --output background.mp3 --dry-run --json
+framechord generate music --brief-file jingle.md --duration-seconds 60 \
+  --vocal --output jingle.mp3 --dry-run --json
+```
+
+Put requested lyrics verbatim in the vocal brief. Duration and formats depend on
+the selected model and are validated before submission. A musical singer is not
+guaranteed to match a character's speaking voice.
+
+### Sound effects
+
+Sound effects use an explicit ElevenLabs selection because the Google preset
+leaves standalone effects disabled. Write the source, environment, texture and
+timing in `sfx.md` using the [sound-effect template](assets/templates/sfx.md).
+
+```sh
+framechord generate sfx --provider elevenlabs --model eleven_text_to_sound_v2 \
+  --brief-file sfx.md --duration-seconds 3 --output notification.mp3 \
+  --dry-run --json
+```
+
+### Ask an agent to author the files
+
+After `init`, Codex and Claude Code discover the project-local FrameChord skill.
+Other agents can use `framechord skills export agent-kit` and run the same binary.
+For example, ask your agent:
+
+> Use FrameChord to prepare a two-speaker podcast from article.txt, an infographic
+> with the article's exact figures, and a 60-second instrumental intro. Use the
+> project's selected providers and voices. Author separate YAML/Markdown inputs,
+> validate them, and show dry-run results and output destinations for review.
+
+The standalone planner can also author reviewable files using the configured
+text model:
+
+```sh
+framechord plan --kind infographic \
+  --prompt 'Explain three habits for clearer writing; avoid invented statistics' \
+  --output-dir planned-infographic --json --non-interactive
+```
+
+Planning is a separate, potentially billable text-model call and has no dry-run
+flag. It saves files for review and never implicitly generates media or saves a
+voice. Validate and preview its generated job before execution.
+
 ## Check API connections
 
 `framechord doctor` checks key presence offline. Use `framechord doctor --live` to
@@ -153,11 +347,54 @@ framechord runs status RUN_ID --json
 framechord runs wait RUN_ID
 ```
 
-Initialization is offline and preserves existing configuration, `.env`, authored files, and modified skills. A fresh interactive terminal opens setup for per-media models, output settings, voices, locales, consistency, and limits; agents supply the complete config with `--defaults-file`. The bundled `project-config.yaml` is an editable example. Without supplied choices, noninteractive init creates an unconfigured scaffold and reports setup is required. Initial and newly created personas inherit configured image and speech profiles; absent choices leave those profiles disabled. Explicit job flags override compatible settings without rewriting source YAML, while selected original identity assets and pinned characters reject conflicting provider/model changes. Podcast defaults supply unconfigured turns; explicit turn models and characters retain their own bindings. Completed narrator, visual mascot, and combined examples are bundled under `templates/examples/`.
+Initialization is offline and preserves existing configuration, `.env`, authored files, and modified skills. A fresh interactive terminal opens setup for per-media models, output settings, voices, locales, consistency, and limits; agents supply the complete config with `--defaults-file`. The bundled `project-config.yaml` is an editable example. Without supplied choices, noninteractive init saves the Google preset and reports missing credentials; use `--preset empty` for an unconfigured scaffold. Initial and newly created personas inherit configured image and speech profiles; absent choices leave those profiles disabled. Explicit job flags override compatible settings without rewriting source YAML, while selected original identity assets and pinned characters reject conflicting provider/model changes. Podcast defaults supply unconfigured turns; explicit turn models and characters retain their own bindings. Completed narrator, visual mascot, and combined examples are bundled under `templates/examples/`.
 
 The visible `framechord/` folder holds YAML configuration, Markdown/YAML authoring templates, portable character folders, job briefs, and run records. Relative paths resolve from their containing manifest. Generated run artifacts and credentials are ignored; authored definitions can be versioned.
 
+```text
+my-media-project/
+  .env                         # Ignored credentials
+  .env.example                 # Names only
+  framechord/
+    config.yaml                # Models, voices, settings and limits
+    templates/                 # Editable YAML/Markdown scaffolds
+    characters/<id>/           # Identity, profiles and local references
+    jobs/<id>/                 # Authored jobs and briefs
+    runs/<run-id>/              # Durable status, receipts and outputs
+  .agents/skills/framechord/    # Codex project skill
+  .claude/skills/framechord/    # Claude Code project skill
+```
+
 Infographics use `infographic.yaml` plus a visual Markdown brief. Exact copy, numeric strings, units, source notes, ordered sections, canvas, and layout compile into the saved prompt. Reference objects specify `path` and `role` (`identity`, `style`, `layout`, or `content`). Rendered typography and data accuracy still need review.
+
+## Parallel jobs, progress and recovery
+
+Save individual YAML jobs first. For example, a `batch.yaml` beside the job folders
+can contain:
+
+```yaml
+schema_version: 1
+jobs:
+  - framechord/jobs/header/job.yaml
+  - framechord/jobs/narration/job.yaml
+```
+
+```sh
+framechord validate --kind batch batch.yaml --json
+framechord batch --manifest batch.yaml --output-dir exports --dry-run --json
+# Submit the reviewed batch and return a durable run ID:
+framechord batch --manifest batch.yaml --output-dir exports --async --json
+framechord runs status RUN_ID --json
+framechord runs wait RUN_ID
+framechord runs resume RUN_ID --json
+```
+
+Replace `RUN_ID` with the ID returned by submission. Independent jobs run
+concurrently within global, provider and shared host ceilings. Dependencies wait
+for their prerequisites. In an interactive terminal, generation shows colors and
+progress; agent JSON output contains no animation. Successful artifacts survive a
+partial failure and are reused on resume. Inspect an uncertain submission before
+explicitly choosing `--retry-unknown`: it may already have incurred charges.
 
 ## Identity, review, and revisions
 
@@ -228,6 +465,15 @@ Default budgets per run lineage: 20 creation requests, 8 images, 1,800 reserved 
 
 Requests do not silently switch providers. Matching fingerprints reuse only verified local artifacts; `--fresh` bypasses reuse. `--request-id` provides submission idempotency. Safe rejected jobs can be resumed, with provider retry guidance honored. Use `runs reconcile RUN_ID` to retrieve uncertain Google interactions by saved ID, then resume local publication. Unknown submissions without retrievable results require explicit `--retry-unknown`; they may already have been charged. Successful jobs remain intact when a batch fails.
 
+## More documentation
+
+- [Installation, update and rollback](docs/INSTALLATION.md)
+- [Complete generated command reference](.agents/skills/framechord/references/commands.md)
+- [Authoring templates and file rules](assets/skill/references/authoring.md)
+- [Character continuity](assets/skill/references/consistency.md) and [voice workflows](assets/skill/references/voices.md)
+- [Contracts, JSON results and lifecycle](docs/CONTRACTS.md)
+- [Implementation and native release status](docs/STATUS.md), [live evidence](docs/LIVE_TESTS.md), and [acceptance boundaries](docs/ACCEPTANCE.md)
+
 ## Verification
 
 ```sh
@@ -236,9 +482,9 @@ cargo clippy --locked --all-targets --all-features -- -D warnings
 cargo test --locked
 ```
 
-Normal tests mock providers and run offline even if credentials exist. The CI matrix checks macOS, Linux, and Windows; only local macOS has been executed during this implementation.
+Normal tests mock providers and run offline even if credentials exist. Native release CI verifies Windows x86-64, Linux x86-64 and macOS Apple Silicon, including public installation, update and offline rollback. See [version-specific results](docs/STATUS.md) for executed checks. Intel Mac release binaries are not produced.
 
-`python3 scripts/live-smoke.py --provider openai --model gpt-image-2.5-flare --media image` reports skipped without generating. Add `--live` to explicitly enable at most one request using this project's credentials and strict limits. Speech also requires `--voice`. Google music smoke tests request the 30-second `lyria-3-clip-preview` preset; the returned duration is measured separately and can differ. Skipped credentials or unavailable account capabilities are never represented as passed live tests.
+`python3 scripts/live-smoke.py --provider openai --model gpt-image-2.5-flare --media image` reports skipped without generating. Add `--live` to explicitly enable at most one request using this project's credentials and strict limits. Speech also requires `--voice`. Historical Google music evidence used a preview preset; new requests must use a currently selectable model shown by `framechord models`. Returned duration is measured separately and can differ from the requested duration. Skipped credentials or unavailable account capabilities are never represented as passed live tests.
 
 `python3 scripts/live-voice-design.py --model eleven_ttv_v3 --speech-model eleven_flash_v2_5 --live` makes one bounded request for up to three fictional narrator previews. It snapshots its temporary character inside the ignored run, preserves `.env`, and never creates or binds a provider voice. Omit `--live` to report skipped.
 
@@ -246,7 +492,7 @@ Normal tests mock providers and run offline even if credentials exist. The CI ma
 
 `python3 scripts/live-audio-review.py --source-run RUN_ID --model gemini-3.8-flash --live` reviews a verified cached short speech clip with one assessment request; it preserves the source generation.
 
-A local native binary can be packaged with `python3 scripts/package-release.py --offline`; the packager verifies it outside this checkout without provider calls. See [packaging](docs/PACKAGING.md) for the current Apple Silicon archive and the unexecuted cross-platform workflow.
+A local native binary can be packaged with `python3 scripts/package-release.py --offline`; the packager verifies it outside this checkout without provider calls. See [packaging](docs/PACKAGING.md) for archive contents, release verification and supported native targets.
 
 See [live test evidence](docs/LIVE_TESTS.md) for the exact models, runs, and verification limits.
 

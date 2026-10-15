@@ -1,4 +1,4 @@
-# framechord 0.6.1 command reference
+# framechord 0.6.2 command reference
 
 Generated from the executable's command definitions. Global flags are accepted before or after the command.
 
@@ -11,7 +11,7 @@ Usage: framechord [OPTIONS] <COMMAND>
 
 Commands:
   install    Install this downloaded binary in your user bin directory, offline and without administrator access
-  update     Update this executable from a verified public GitHub Release; project files stay untouched
+  update     Update this executable from a verified public GitHub Release; optional GH_TOKEN/GITHUB_TOKEN authenticates metadata checks
   init       Initialize offline, preserving existing files and credentials
   config     Inspect or explicitly replace validated configuration
   verify     Preview a bounded live verification suite; execution requires the exact approved preview hash
@@ -115,7 +115,7 @@ Options:
 ## framechord update
 
 ```text
-Update this executable from a verified public GitHub Release; project files stay untouched
+Update this executable from a verified public GitHub Release; optional GH_TOKEN/GITHUB_TOKEN authenticates metadata checks
 
 Usage: framechord update [OPTIONS]
 
@@ -3540,7 +3540,7 @@ Usage: framechord help [COMMAND]
 
 Commands:
   install    Install this downloaded binary in your user bin directory, offline and without administrator access
-  update     Update this executable from a verified public GitHub Release; project files stay untouched
+  update     Update this executable from a verified public GitHub Release; optional GH_TOKEN/GITHUB_TOKEN authenticates metadata checks
   init       Initialize offline, preserving existing files and credentials
   config     Inspect or explicitly replace validated configuration
   verify     Preview a bounded live verification suite; execution requires the exact approved preview hash
@@ -3578,7 +3578,7 @@ Usage: framechord help install
 ## framechord help update
 
 ```text
-Update this executable from a verified public GitHub Release; project files stay untouched
+Update this executable from a verified public GitHub Release; optional GH_TOKEN/GITHUB_TOKEN authenticates metadata checks
 
 Usage: framechord help update
 

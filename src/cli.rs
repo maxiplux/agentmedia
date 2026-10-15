@@ -87,7 +87,7 @@ pub enum Command {
         #[arg(long)]
         force: bool,
     },
-    /// Update this executable from a verified public GitHub Release; project files stay untouched
+    /// Update this executable from a verified public GitHub Release; optional GH_TOKEN/GITHUB_TOKEN authenticates metadata checks
     Update {
         /// Only check release metadata; do not download or replace the executable
         #[arg(long, conflicts_with_all=["force", "rollback"])]

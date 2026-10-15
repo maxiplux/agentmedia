@@ -1,6 +1,6 @@
 # Authoring
 
-YAML is structured state; Markdown holds exact scripts and readable creative direction. Paths are relative to the manifest containing them. All schemas reject unknown fields and versions other than 1. The binary treats both formats as data.
+YAML is structured state; Markdown holds exact scripts and readable creative direction. Paths are relative to the manifest containing them. Schemas reject unknown fields. Jobs, configuration and runs support v2 with v1 readers retained; character, infographic and review contracts remain v1. The binary treats both formats as data.
 
 Use `templates list`, `templates show NAME`, or `templates export DIRECTORY`. Edit exported scaffolds before submission. Every template filename is available through these commands; skill exports include identical copies.
 

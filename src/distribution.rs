@@ -76,7 +76,7 @@ fn existing_record(path: &Path, bytes: &[u8]) -> Result<Record> {
 fn stable_version(value: &str) -> Result<Version> {
     let value = value.strip_prefix('v').unwrap_or(value);
     let v =
-        Version::parse(value).map_err(|_| Error::input("Choose a stable version such as 0.6.1"))?;
+        Version::parse(value).map_err(|_| Error::input("Choose a stable version such as 0.6.2"))?;
     if !v.pre.is_empty() || !v.build.is_empty() {
         return Err(Error::input("Only stable release versions are supported"));
     }
@@ -262,14 +262,56 @@ pub fn install(bin_dir: Option<&Path>, modify_path: bool, force: bool) -> Result
 pub trait ReleaseTransport: Send + Sync {
     async fn get(&self, url: &str, limit: usize) -> Result<Vec<u8>>;
 }
-struct Http(reqwest::Client);
+struct Http {
+    client: reqwest::Client,
+    authorization: Option<reqwest::header::HeaderValue>,
+}
+fn github_authorization(
+    gh_token: Option<&str>,
+    github_token: Option<&str>,
+) -> Result<Option<reqwest::header::HeaderValue>> {
+    let selected = gh_token
+        .filter(|s| !s.trim().is_empty())
+        .or_else(|| github_token.filter(|s| !s.trim().is_empty()));
+    selected
+        .map(|token| {
+            let mut header = reqwest::header::HeaderValue::from_str(&format!("Bearer {}", token.trim()))
+                .map_err(|_| problem("GitHub token has invalid header characters; check GH_TOKEN or GITHUB_TOKEN. No request was sent"))?;
+            header.set_sensitive(true);
+            Ok(header)
+        })
+        .transpose()
+}
+impl Http {
+    fn request(&self, url: &str) -> reqwest::RequestBuilder {
+        let request = self.client.get(url);
+        // Credentials must never reach release downloads or their CDN redirects.
+        if url.starts_with(&format!(
+            "https://api.github.com/repos/{REPOSITORY}/releases/"
+        )) && let Some(authorization) = &self.authorization
+        {
+            request.header(reqwest::header::AUTHORIZATION, authorization.clone())
+        } else {
+            request
+        }
+    }
+}
 #[async_trait]
 impl ReleaseTransport for Http {
     async fn get(&self, url: &str, limit: usize) -> Result<Vec<u8>> {
-        let mut response = self.0.get(url).send().await.map_err(|_| {
+        let mut response = self.request(url).send().await.map_err(|_| {
             problem("Cannot reach GitHub Releases; check your connection and retry explicitly")
         })?;
         if !response.status().is_success() {
+            if response
+                .headers()
+                .get("x-ratelimit-remaining")
+                .is_some_and(|v| v == "0")
+            {
+                return Err(problem(
+                    "GitHub's release API rate limit is exhausted. Wait for its reset or supply a read-only GH_TOKEN (or GITHUB_TOKEN) in the process environment; no executable was replaced",
+                ));
+            }
             return Err(problem(format!(
                 "GitHub Releases returned HTTP {}; use the Releases page or try later",
                 response.status().as_u16()
@@ -303,7 +345,13 @@ impl ReleaseClient {
             .build()
             .map_err(|_| problem("Cannot initialize the release client"))?;
         Ok(Self {
-            transport: Arc::new(Http(client)),
+            transport: Arc::new(Http {
+                client,
+                authorization: github_authorization(
+                    std::env::var("GH_TOKEN").ok().as_deref(),
+                    std::env::var("GITHUB_TOKEN").ok().as_deref(),
+                )?,
+            }),
         })
     }
     pub fn with_transport(transport: Arc<dyn ReleaseTransport>) -> Self {
@@ -399,6 +447,69 @@ impl ReleaseClient {
         Ok(
             json!({"distribution_action":"Updated framechord","version":selected.to_string(),"previous_version":VERSION,"executable":executable,"target":TARGET,"sha256":digest,"replaced":true,"backup":backup_path(dir),"project_files_changed":false,"message":"Update complete. Existing projects and skills were preserved. Use framechord update --rollback to restore the preceding executable."}),
         )
+    }
+}
+
+#[cfg(test)]
+mod github_auth_tests {
+    use super::*;
+
+    #[test]
+    fn optional_authentication_has_explicit_precedence_and_sensitive_headers() {
+        assert!(github_authorization(None, None).unwrap().is_none());
+        let selected = github_authorization(Some(" fixture-first "), Some("fixture-second"))
+            .unwrap()
+            .unwrap();
+        assert_eq!(selected.to_str().unwrap(), "Bearer fixture-first");
+        assert!(selected.is_sensitive());
+        assert!(!format!("{selected:?}").contains("fixture-first"));
+        assert_eq!(
+            github_authorization(Some("  "), Some("fixture-second"))
+                .unwrap()
+                .unwrap(),
+            "Bearer fixture-second"
+        );
+    }
+
+    #[test]
+    fn malformed_tokens_fail_without_revealing_their_values() {
+        let error = github_authorization(Some("fixture-private\nvalue"), None).unwrap_err();
+        assert!(!error.to_string().contains("fixture-private"));
+        assert!(error.to_string().contains("No request was sent"));
+    }
+
+    #[test]
+    fn authorization_is_scoped_to_this_repositorys_api_metadata() {
+        let http = Http {
+            client: reqwest::Client::new(),
+            authorization: github_authorization(Some("fixture-scoped"), None).unwrap(),
+        };
+        let api = http
+            .request(&format!(
+                "https://api.github.com/repos/{REPOSITORY}/releases/latest"
+            ))
+            .build()
+            .unwrap();
+        assert!(
+            api.headers()
+                .get(reqwest::header::AUTHORIZATION)
+                .unwrap()
+                .is_sensitive()
+        );
+        for url in [
+            format!("https://github.com/{REPOSITORY}/releases/download/v0.6.2/framechord"),
+            "https://api.github.com.evil.invalid/repos/maxiplux/framechord/releases/latest".into(),
+            "https://api.github.com/repos/another/project/releases/latest".into(),
+        ] {
+            assert!(
+                !http
+                    .request(&url)
+                    .build()
+                    .unwrap()
+                    .headers()
+                    .contains_key(reqwest::header::AUTHORIZATION)
+            );
+        }
     }
 }
 #[derive(Deserialize)]

@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Published stable version to verify (for example v0.6.1)
+        description: Published stable version to verify (for example v0.6.2)
         required: true
         type: string
   workflow_call:
@@ -30,5 +30,6 @@ jobs:
       - name: Verify the public installer, update and offline rollback in isolation
         env:
           FRAMECHORD_ACCEPT_VERSION: ${{ inputs.version }}
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: python scripts/accept-release.py --version "$FRAMECHORD_ACCEPT_VERSION"

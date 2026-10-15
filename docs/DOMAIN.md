@@ -2,8 +2,10 @@
 
 The user selected FrameChord and owns `framechord.com`. The custom domain's DNS
 and HTTPS deployment must be verified independently of repository publication.
-Until then, use `https://maxiplux.github.io/framechord/` for the guide and installers.
-Do not label the custom domain live until it serves the intended guide over HTTPS.
+The domain is bound to GitHub Pages, its certificate covers the apex and `www`,
+and Enforce HTTPS is enabled. The five Cloudflare web records use DNS-only mode.
+Public DNS resolves to the expected GitHub endpoints; local resolver caches can
+still retain earlier negative answers during propagation.
 
 At the domain's DNS provider, configure these records for GitHub Pages:
 

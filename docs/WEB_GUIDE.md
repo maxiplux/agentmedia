@@ -74,3 +74,11 @@ Version 0.6.1 renames the guide, all 65 generated command pages, installers and
 all four embedded example archives to FrameChord. The upgrade note distinguishes
 new `framechord/` projects from preserved legacy `mediaagent/` directories.
 The custom domain's registration is separate from DNS and HTTPS deployment.
+
+Version 0.6.2 refreshes generated command help for optional release metadata
+authentication. The guide is bound to `https://framechord.com/` with an approved
+apex/www certificate and enforced HTTPS. Local negative DNS caches can take longer
+to refresh than the accepted authoritative records. README workflows now cover
+every supported media type, exact input files, character reuse, agent operation,
+parallel batches and review/recovery; ten generation/validation examples pass
+offline, without paid calls.

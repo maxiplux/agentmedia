@@ -223,3 +223,41 @@ path. No 0.6.0 release assets were published. Version 0.6.1 retains existing
 `~/.config/mediaagent/host.yaml`, rejects conflicting old/new host settings and
 keeps the shared slot locks; two offline regressions cover preservation and
 conflict refusal.
+
+
+FrameChord [0.6.1](https://github.com/maxiplux/framechord/releases/tag/v0.6.1) is
+publicly published from `8280ea0edd22617f67886c0a176ee6b50aabaf2b`. Its 16 assets
+agree with the source manifest and GitHub's stored hashes/sizes; no Intel Mac
+asset is included. The [release workflow](https://github.com/maxiplux/framechord/actions/runs/38735561872)
+passes native checks, 17 package checks per target, publication and public
+installation/update/reinstallation/offline rollback on all three platforms.
+A local real public-download transition from MediaAgent 0.5.1 to FrameChord
+0.6.1 preserves legacy configuration, exact persona content, dotenv bytes, a
+modified old skill, the old executable and its installation receipt; new project
+skills and FrameChord update/rollback also pass. No provider calls were made.
+
+## Authenticated release metadata (0.6.2)
+
+A further [post-domain acceptance run](https://github.com/maxiplux/framechord/actions/runs/38737600285)
+exposed HTTP 403 from a runner's anonymous GitHub API update check. FrameChord now
+supports optional process-only `GH_TOKEN` / `GITHUB_TOKEN`; CI supplies its built-in
+read-only token to avoid depending on the shared anonymous quota. Authorization
+is scoped to this repository's GitHub API metadata URLs and marked sensitive;
+release downloads and media providers receive no GitHub credential. Invalid header
+characters fail before sending a request, with no secret value in the error.
+An exhausted quota has a specific actionable error. Public anonymous operation
+remains available, with no automatic update retries or project dotenv changes.
+Three offline regressions verify token precedence/redaction, malformed credential
+rejection and origin/path scoping. Release results follow execution.
+
+Cloudflare's four apex A records and www CNAME are DNS-only. GitHub's domain check
+accepts both hosts, the certificate covers both, Enforce HTTPS is enabled and a
+TLS-verified origin request serves the exact guide. Earlier negative DNS answers
+remain cached by the local network resolver; independent checks distinguish that
+propagation delay from the accepted records and certificate.
+
+Local 0.6.2 validation passes formatting, strict Clippy and 174 offline Rust
+tests. Ten README generation/validation examples pass offline with isolated
+Google defaults, explicit OpenAI narration and ElevenLabs effects; no provider
+calls are made. All 65 website command pages match the generated reference.
+The publisher and acceptance diagnostic regressions also pass offline.
