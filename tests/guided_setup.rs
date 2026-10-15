@@ -931,8 +931,8 @@ fn status_flags_duplicate_discovery_and_the_human_output_warns_once() {
     assert_eq!(warnings.len(), 1, "{human}");
     assert!(
         warnings[0].contains("Cursor")
-            && warnings[0].contains(".cursor/skills")
-            && warnings[0].contains(".agents/skills")
+            && warnings[0].contains(&*project::skill_dir(root, ".cursor/skills").to_string_lossy())
+            && warnings[0].contains(&*project::skill_dir(root, ".agents/skills").to_string_lossy())
             && warnings[0].contains("keep one"),
         "{}",
         warnings[0]
