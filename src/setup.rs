@@ -1100,7 +1100,7 @@ mod tests {
         let config_file = root.path().join("mediaagent/config.yaml");
         let before = std::fs::read(&config_file).unwrap();
         let config_hash = Some(hash(&before));
-        let env_hash = Some(hash(b""));
+        let env_hash = Some(hash(&std::fs::read(root.path().join(".env")).unwrap()));
         std::fs::write(root.path().join(".env"), "OTHER=newer-user-content\n").unwrap();
         let session = Session::new(recommended(), vec![]);
         assert!(
