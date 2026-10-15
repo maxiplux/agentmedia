@@ -52,6 +52,8 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
+      - name: Verify the publisher offline
+        run: python scripts/test-publish-release.py
       - name: Validate native packages and publish the complete release
         env:
           GH_TOKEN: ${{ github.token }}

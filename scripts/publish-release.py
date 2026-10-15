@@ -53,9 +53,15 @@ assert len({p.name for p in files}) == len(files)
 if args.dry_run:
     print(json.dumps({'validated': True, 'version': version, 'assets': len(files), 'published': False})); raise SystemExit
 repo = 'maxiplux/agentmedia'
+def remote_release():
+    # The by-tag REST endpoint excludes drafts. Resolve the numeric API URL with
+    # gh release view, which can see this repository's authenticated draft.
+    info = json.loads(subprocess.run(['gh', 'release', 'view', args.tag, '--repo', repo, '--json', 'apiUrl'], capture_output=True, text=True, check=True).stdout)
+    return json.loads(subprocess.run(['gh', 'api', info['apiUrl']], capture_output=True, text=True, check=True).stdout)
+
 existing = subprocess.run(['gh', 'release', 'view', args.tag, '--repo', repo, '--json', 'isDraft'], capture_output=True, text=True)
 if existing.returncode == 0 and not json.loads(existing.stdout)['isDraft']:
-    remote = json.loads(subprocess.run(['gh', 'api', f'repos/{repo}/releases/tags/{args.tag}'], capture_output=True, text=True, check=True).stdout)
+    remote = remote_release()
     assets = {a['name']: a for a in remote['assets']}
     for path in files:
         assert assets.get(path.name, {}).get('digest') == 'sha256:' + hashlib.sha256(path.read_bytes()).hexdigest(), 'Published release differs; never overwrite stable assets'
@@ -66,7 +72,7 @@ if existing.returncode != 0:
     subprocess.run(['gh', 'release', 'create', args.tag, '--repo', repo, '--verify-tag', '--draft', '--title', f'mediaagent {version}', '--notes-file', str(notes)], check=True)
 subprocess.run(['gh', 'release', 'upload', args.tag, '--repo', repo, '--clobber'] + [str(p) for p in files], check=True)
 # Verify GitHub's stored digests before making latest/download usable.
-remote = json.loads(subprocess.run(['gh', 'api', f'repos/{repo}/releases/tags/{args.tag}'], capture_output=True, text=True, check=True).stdout)
+remote = remote_release()
 assets = {a['name']: a for a in remote['assets']}
 for path in files:
     assert assets.get(path.name, {}).get('digest') == 'sha256:' + hashlib.sha256(path.read_bytes()).hexdigest(), 'Uploaded asset digest mismatch'
