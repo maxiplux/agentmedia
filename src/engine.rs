@@ -893,23 +893,7 @@ pub fn spawn(root: &Path, id: &str, retry_unknown: bool) -> Result<()> {
                     return Ok(());
                 }
                 if child.try_wait()?.is_some() || start.elapsed() > Duration::from_secs(5) {
-                    let mut error = Error::new(
-                        "worker_start",
-                        format!(
-                            "Worker did not confirm startup for run {id}; inspect the saved run before resuming"
-                        ),
-                        3,
-                    );
-                    error.corrective_argv = vec![
-                        "mediaagent".into(),
-                        "--project".into(),
-                        root.to_string_lossy().into_owned(),
-                        "runs".into(),
-                        "status".into(),
-                        id.into(),
-                        "--json".into(),
-                    ];
-                    return Err(error);
+                    return confirm_worker_start(root, id);
                 }
                 std::thread::sleep(Duration::from_millis(20));
             }
@@ -920,6 +904,30 @@ pub fn spawn(root: &Path, id: &str, retry_unknown: bool) -> Result<()> {
             Err(e.into())
         }
     }
+}
+fn confirm_worker_start(root: &Path, id: &str) -> Result<()> {
+    // The worker may have written its final state between our queued observation
+    // and the child-exit/timeout check. Re-read before declaring startup failure.
+    if load(root, id)?.state != State::Queued {
+        return Ok(());
+    }
+    let mut error = Error::new(
+        "worker_start",
+        format!(
+            "Worker did not confirm startup for run {id}; inspect the saved run before resuming"
+        ),
+        3,
+    );
+    error.corrective_argv = vec![
+        "mediaagent".into(),
+        "--project".into(),
+        root.to_string_lossy().into_owned(),
+        "runs".into(),
+        "status".into(),
+        id.into(),
+        "--json".into(),
+    ];
+    Err(error)
 }
 pub fn cancel(root: &Path, id: &str) -> Result<Run> {
     let path = run_path(root, id)?;
@@ -1080,6 +1088,36 @@ pub fn recover(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn worker_completion_during_startup_poll_preserves_the_final_receipt() {
+        let root = tempfile::tempdir().unwrap();
+        let input: Effective = serde_json::from_value(serde_json::json!({
+            "id":"fast-failure","media":"image","selection":{"provider":"openai","model":"gpt-image-2.5-flare"},
+            "prompt":"Offline fixture","settings":{},"references":[],"depends_on":[]
+        })).unwrap();
+        let mut run = submit(
+            root.path(),
+            vec![input],
+            Limits::default(),
+            Submit::default(),
+        )
+        .unwrap();
+        assert_eq!(
+            confirm_worker_start(root.path(), &run.id).unwrap_err().code,
+            "worker_start"
+        );
+        // A child can exit after saving this result, while the parent still holds
+        // the queued observation from its preceding poll.
+        run.state = State::Failed;
+        run.jobs[0].state = State::Failed;
+        run.jobs[0].attempts = 1;
+        run.jobs[0].error = Some("missing_credentials: fixture".into());
+        let file = run_path(root.path(), &run.id).unwrap().join("run.yaml");
+        save(&file, &run).unwrap();
+        let receipt = fs::read(&file).unwrap();
+        confirm_worker_start(root.path(), &run.id).unwrap();
+        assert_eq!(fs::read(file).unwrap(), receipt);
+    }
     #[test]
     fn status_preserves_a_worker_completion_between_observation_and_lock() {
         let root = tempfile::tempdir().unwrap();

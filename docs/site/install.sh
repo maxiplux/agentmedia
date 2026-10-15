@@ -10,7 +10,7 @@ while [ "$#" -gt 0 ]; do
     --version|--bin-dir) [ "$#" -ge 2 ] || { echo "Missing value for $1" >&2; exit 2; }; key=$1; shift; if [ "$key" = --version ]; then version=$1; else bin_dir=$1; fi ;;
     --no-modify-path) modify_path=0 ;;
     --force) force=1 ;;
-    --help) echo 'Usage: install.sh [--version 0.5.0] [--bin-dir PATH] [--no-modify-path] [--force]'; exit 0 ;;
+    --help) echo 'Usage: install.sh [--version 0.5.1] [--bin-dir PATH] [--no-modify-path] [--force]'; exit 0 ;;
     *) echo "Unknown installer option: $1" >&2; exit 2 ;;
   esac
   shift

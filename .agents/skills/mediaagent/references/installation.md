@@ -7,7 +7,7 @@ Use public GitHub Releases at https://github.com/maxiplux/agentmedia/releases/la
 ./mediaagent install --bin-dir /chosen/bin --no-modify-path --json
 mediaagent update --check --json
 mediaagent update --json
-mediaagent update --version 0.5.0 --force --json
+mediaagent update --version 0.5.1 --force --json
 mediaagent update --rollback --json
 ```
 

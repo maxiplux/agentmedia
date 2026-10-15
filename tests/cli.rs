@@ -294,7 +294,10 @@ fn referenced_job_worker_startup_is_confirmed_without_lock_contention() {
             .unwrap();
         assert_eq!(out.status.code(), Some(3));
         let response: Value = serde_json::from_slice(&out.stdout).unwrap();
-        assert_eq!(response["errors"][0]["code"], "operation_incomplete");
+        assert_eq!(
+            response["errors"][0]["code"], "operation_incomplete",
+            "{response}"
+        );
         assert_eq!(response["data"]["jobs"][0]["attempts"], 1);
         assert!(
             response["data"]["jobs"][0]["error"]

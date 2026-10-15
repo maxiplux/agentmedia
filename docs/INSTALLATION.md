@@ -19,7 +19,7 @@ For an exact version or a custom directory, download the script first:
 
 ```sh
 curl -fsSL https://maxiplux.github.io/agentmedia/install.sh -o install-mediaagent.sh
-sh install-mediaagent.sh --version 0.5.0 --bin-dir "$HOME/tools/bin" --no-modify-path
+sh install-mediaagent.sh --version 0.5.1 --bin-dir "$HOME/tools/bin" --no-modify-path
 ```
 
 `curl` and a SHA-256 tool (`sha256sum` or macOS `shasum`) are required. Fish users receive a manual `fish_add_path` instruction. No shell profile is changed with `--no-modify-path`.
@@ -35,7 +35,7 @@ The installer verifies the Windows x86-64 executable and installs it to `%LOCALA
 To select a version or custom directory:
 
 ```powershell
-& ([scriptblock]::Create((irm https://maxiplux.github.io/agentmedia/install.ps1))) -Version 0.5.0 -BinDir "$HOME\tools\bin" -NoModifyPath
+& ([scriptblock]::Create((irm https://maxiplux.github.io/agentmedia/install.ps1))) -Version 0.5.1 -BinDir "$HOME\tools\bin" -NoModifyPath
 ```
 
 ## Already downloaded the binary?
@@ -60,7 +60,7 @@ mediaagent update --rollback
 
 `--check` reads bounded public GitHub metadata and reports the installed and available versions without downloading a binary or changing files. `update` replaces the executable you invoked after checking GitHub's asset digest and the new executable's version. One preceding executable is saved for offline rollback. An unmanaged file replaced with `install --force` is preserved with an unknown version and restored by its recorded hash; it is never executed just to identify its version. Stop generation workers before updating; other copies on PATH are not replaced.
 
-An exact stable version can be selected with `--version 0.5.0`. Reinstall the same version with `--force`. An intentional downgrade additionally requires `--allow-downgrade`. For scripts and agents, all commands support `--json --non-interactive`.
+An exact stable version can be selected with `--version 0.5.1`. Reinstall the same version with `--force`. An intentional downgrade additionally requires `--allow-downgrade`. For scripts and agents, all commands support `--json --non-interactive`.
 
 Binary installation and updates preserve project `.env`, configuration, characters, references, generated media and installed skills. Initialize a project with `init` separately. Refresh a project's installed skills explicitly with `mediaagent --project PATH skills install --overwrite` when desired. Original character model locks are never rewritten by updating the binary.
 
@@ -68,4 +68,4 @@ Public releases include raw executables, native archives, SHA-256 sidecars, inst
 
 ## Maintainer release workflow
 
-Bump Cargo's version, update the lock file, merge tested changes, then push a matching stable tag such as `v0.5.0`. The `Publish release` workflow builds/tests all four native targets, runs isolated package and bootstrap tests, verifies archives and raw binary hashes, uploads to a draft GitHub Release and checks GitHub's stored digests before publishing it as latest. Existing published release bytes cannot be silently replaced; a changed build needs a new version.
+Bump Cargo's version, update the lock file, merge tested changes, then push a matching stable tag such as `v0.5.1`. The `Publish release` workflow builds/tests all four native targets, runs isolated package and bootstrap tests, verifies archives and raw binary hashes, uploads to a draft GitHub Release and checks GitHub's stored digests before publishing it as latest. Existing published release bytes cannot be silently replaced; a changed build needs a new version.
