@@ -41,13 +41,22 @@ pub fn list(root: &Path) -> Result<Vec<Run>> {
     Ok(runs)
 }
 pub fn status(root: &Path, id: &str) -> Result<Run> {
-    let mut run = load(root, id)?;
+    let run = load(root, id)?;
     if run.state.terminal() {
         return Ok(run);
     }
+    status_after_observation(root, id, run)
+}
+fn status_after_observation(root: &Path, id: &str, mut run: Run) -> Result<Run> {
     let path = run_path(root, id)?;
     let f = lock(&path.join("worker.lock"))?;
     if !f.try_lock_exclusive()? {
+        return Ok(run);
+    }
+    // The worker can finish after our first read and before this lock is acquired.
+    // Never overwrite its terminal receipt with an orphaned stale snapshot.
+    run = load(root, id)?;
+    if run.state.terminal() {
         return Ok(run);
     }
     if run.state == State::Queued
@@ -1071,6 +1080,39 @@ pub fn recover(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn status_preserves_a_worker_completion_between_observation_and_lock() {
+        let root = tempfile::tempdir().unwrap();
+        let input: Effective = serde_json::from_value(serde_json::json!({
+            "id":"fast-failure","media":"image","selection":{"provider":"openai","model":"gpt-image-2.5-flare"},
+            "prompt":"Offline fixture","settings":{},"references":[],"depends_on":[]
+        })).unwrap();
+        let mut run = submit(
+            root.path(),
+            vec![input],
+            Limits::default(),
+            Submit::default(),
+        )
+        .unwrap();
+        run.state = State::Running;
+        run.jobs[0].state = State::Running;
+        let file = run_path(root.path(), &run.id).unwrap().join("run.yaml");
+        save(&file, &run).unwrap();
+        let observed = load(root.path(), &run.id).unwrap();
+        // Simulate the worker's final write/release before the status lock probe.
+        run.state = State::Failed;
+        run.jobs[0].state = State::Failed;
+        run.jobs[0].error = Some("missing_credentials: fixture".into());
+        save(&file, &run).unwrap();
+        let receipt = fs::read(&file).unwrap();
+        let result = status_after_observation(root.path(), &run.id, observed).unwrap();
+        assert_eq!(result.state, State::Failed);
+        assert_eq!(
+            result.jobs[0].error.as_deref(),
+            Some("missing_credentials: fixture")
+        );
+        assert_eq!(fs::read(file).unwrap(), receipt);
+    }
     #[test]
     fn lowered_host_ceilings_count_inflight_slots_across_providers() {
         let root = tempfile::tempdir().unwrap();
