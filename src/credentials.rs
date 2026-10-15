@@ -185,6 +185,25 @@ pub fn render_missing(
             updated.push_str(newline);
         }
     }
+    let final_entries = dotenvy::from_read_iter(updated.as_bytes())
+        .collect::<std::result::Result<Vec<_>, _>>()
+        .map_err(|_| {
+            Error::input("Cannot safely append credential names; project .env was not changed")
+        })?;
+    if !final_entries.starts_with(&parsed)
+        || PROVIDERS
+            .iter()
+            .any(|p| !final_entries.iter().any(|(name, _)| name == p.key()))
+    {
+        return Err(Error::input(
+            "Cannot safely append credential names; project .env was not changed",
+        ));
+    }
+    if updated != original && path.is_symlink() {
+        return Err(Error::input(
+            "Project .env is a symbolic link and needs changes. Edit the linked credential file explicitly or provide a project-local .env with the provider variable names. The link and target were preserved",
+        ));
+    }
     Ok(if updated != original {
         Some(updated)
     } else {

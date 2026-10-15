@@ -360,6 +360,38 @@ fn init_waits_for_setup_lock_and_preserves_credentials_saved_while_waiting() {
     assert!(saved.starts_with(prefix));
     assert_eq!(saved.matches("GEMINI_API_KEY=").count(), 1);
 }
+#[cfg(unix)]
+#[test]
+fn init_preserves_linked_credentials_and_reads_a_complete_link_without_replacing_it() {
+    let temporary = tempfile::tempdir().unwrap();
+    let root = temporary.path().join("project");
+    fs::create_dir(&root).unwrap();
+    let target = temporary.path().join("managed-credentials");
+    let prefix = "GEMINI_API_KEY=fixture-private-linked\n";
+    fs::write(&target, prefix).unwrap();
+    std::os::unix::fs::symlink(&target, root.join(".env")).unwrap();
+    let error = project::init(&root, &[]).unwrap_err();
+    assert!(error.to_string().contains("symbolic link"));
+    assert!(!error.to_string().contains("fixture-private"));
+    assert!(root.join(".env").is_symlink());
+    assert_eq!(fs::read(&target).unwrap(), prefix.as_bytes());
+    assert_eq!(fs::read_dir(&root).unwrap().count(), 1);
+    assert!(
+        credentials::save_missing(
+            &root,
+            &BTreeMap::from([(Provider::Fish, "fixture-other-private".into())])
+        )
+        .is_err()
+    );
+    assert_eq!(fs::read(&target).unwrap(), prefix.as_bytes());
+    let complete = credentials::ENV_TEMPLATE
+        .replace("GEMINI_API_KEY=", "GEMINI_API_KEY=fixture-private-linked");
+    fs::write(&target, &complete).unwrap();
+    project::init_with_config(&root, &[], Some(&setup::recommended())).unwrap();
+    assert!(root.join(".env").is_symlink());
+    assert_eq!(fs::read_to_string(&target).unwrap(), complete);
+    assert_eq!(setup::status(&root).unwrap()["setup_complete"], true);
+}
 #[test]
 fn readiness_requires_voice_and_keys_and_preserves_explicitly_disabled_features() {
     let t = tempfile::tempdir().unwrap();
