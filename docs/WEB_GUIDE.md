@@ -2,7 +2,20 @@
 
 The complete deliverable is `docs/site/index.html`. Open it in a browser or serve
 that one file. No other assets, CDN, build step or internet access are required to
-render the guide. Nothing has been published.
+render the guide.
+
+The public guide is hosted at <https://maxiplux.github.io/agentmedia/>.
+The `Publish documentation` GitHub Actions workflow publishes only `docs/site/`
+to GitHub Pages after changes to that folder or the workflow on `master`. It can
+also be started manually:
+
+```sh
+gh workflow run pages.yml --ref master
+```
+
+Edit `docs/site/index.html` and push to `master` to update the live guide. Check
+the workflow's deployment result before treating an update as published. There is
+no build step, and the hosted document is the same standalone file used locally.
 
 The HTML contains:
 

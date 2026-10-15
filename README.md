@@ -2,10 +2,11 @@
 
 A local Rust CLI for any agent with process access, and for terminal users. Generate images, raster infographics, exact narration, podcasts, music, and sound effects. Characters are optional: save visual identity and a provider voice binding when you need reuse.
 
-Open the [web guide](docs/site/index.html) for copyable examples for every media
+Open the [web guide](https://maxiplux.github.io/agentmedia/) for copyable examples for every media
 workflow, agent prompts, downloadable YAML/Markdown inputs, and a searchable command
 reference. It is a single HTML file with embedded JavaScript, compiled Tailwind CSS, command
-help and example downloads; see [preview instructions](docs/WEB_GUIDE.md).
+help and example downloads. You can also [open the HTML locally](docs/site/index.html);
+see [publishing and preview instructions](docs/WEB_GUIDE.md).
 
 The first-version workflows are implemented; visual character consistency has not passed user acceptance. Offline contracts and mocked
 execution tests plus bounded live checks across all five providers. It includes
