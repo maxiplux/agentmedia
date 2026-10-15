@@ -10,7 +10,7 @@ Older `mediaagent update` commands cannot change the product name. Existing
 ## macOS and Linux
 
 ```sh
-curl -fsSL https://maxiplux.github.io/framechord/install.sh | sh
+curl -fsSL https://framechord.com/install.sh | sh
 ```
 
 The installer downloads the latest stable version, verifies its checksum and version, and installs to `~/.local/bin`. It adds this directory to the relevant zsh/bash/login profile when needed. Open a new terminal, then run:
@@ -23,7 +23,7 @@ framechord init ./my-project
 For an exact version or a custom directory, download the script first:
 
 ```sh
-curl -fsSL https://maxiplux.github.io/framechord/install.sh -o install-framechord.sh
+curl -fsSL https://framechord.com/install.sh -o install-framechord.sh
 sh install-framechord.sh --version 0.6.2 --bin-dir "$HOME/tools/bin" --no-modify-path
 ```
 
@@ -32,7 +32,7 @@ sh install-framechord.sh --version 0.6.2 --bin-dir "$HOME/tools/bin" --no-modify
 ## Windows PowerShell
 
 ```powershell
-irm https://maxiplux.github.io/framechord/install.ps1 | iex
+irm https://framechord.com/install.ps1 | iex
 ```
 
 The installer verifies the Windows x86-64 executable and installs it to `%LOCALAPPDATA%\framechord\bin`, adding only that directory to your user PATH. Restart your terminal if it was already open. It does not require an administrator or change the machine PATH or execution policy.
@@ -40,7 +40,7 @@ The installer verifies the Windows x86-64 executable and installs it to `%LOCALA
 To select a version or custom directory:
 
 ```powershell
-& ([scriptblock]::Create((irm https://maxiplux.github.io/framechord/install.ps1))) -Version 0.6.2 -BinDir "$HOME\tools\bin" -NoModifyPath
+& ([scriptblock]::Create((irm https://framechord.com/install.ps1))) -Version 0.6.2 -BinDir "$HOME\tools\bin" -NoModifyPath
 ```
 
 ## Already downloaded the binary?

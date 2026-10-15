@@ -17,8 +17,30 @@ gh workflow run pages.yml --ref master
 ```
 
 Edit `docs/site/index.html` and push to `master` to update the live guide. Check
-the workflow's deployment result before treating an update as published. There is
-no build step, and the hosted document is the same standalone file used locally.
+the workflow's deployment result before treating an update as published. The hosted
+document is the same standalone file used locally. Four regions are generated:
+
+- the command pages between `<!-- generated:commands -->` markers, from the binary's
+  own `skills export` reference (clap `help` pseudo-commands are dropped);
+- the current-model lists between `<!-- generated:catalog -->` markers, from
+  `assets/models.json`;
+- the four embedded `framechord-examples.zip` links, from `docs/site/examples/`;
+- the version, page-count and catalog-date stamps, from `Cargo.toml` and the catalog.
+
+Regenerate them after any CLI, catalog or example change, and verify before pushing:
+
+```sh
+cargo build --release --locked
+python3 scripts/build-site.py
+python3 scripts/build-site.py --check
+python3 scripts/test-build-site.py
+```
+
+The generator needs Python 3.11 or newer and refuses to run when the built binary's
+version differs from `Cargo.toml`. `--check` compares the committed guide with a fresh
+regeneration (archives by content, everything else byte for byte) and is part of the
+Linux job in `check.yml`. Hand-written sections, including the cost and integration
+sections added on October 15, 2026, live outside the markers and are never touched.
 
 The HTML contains:
 

@@ -1,0 +1,30 @@
+schema_version: 1
+title: "A little time for your garden"
+audience: "New home gardeners"
+key_message: "Make space for three short weekly sessions."
+canvas: "1024x1536"
+layout: "Title at top; three stacked cards; source note at bottom."
+sections:
+  - heading: "Monday"
+    copy: "Check the soil and water if needed."
+    values:
+      - label: "Time"
+        value: "5"
+        unit: "minutes"
+        source: "Illustrative weekly schedule"
+  - heading: "Wednesday"
+    copy: "Look for new leaves and check the light."
+    values:
+      - label: "Time"
+        value: "5"
+        unit: "minutes"
+        source: "Illustrative weekly schedule"
+  - heading: "Saturday"
+    copy: "Tidy the pots and note what changed."
+    values:
+      - label: "Time"
+        value: "10"
+        unit: "minutes"
+        source: "Illustrative weekly schedule"
+visual_brief: infographic.md
+references: []

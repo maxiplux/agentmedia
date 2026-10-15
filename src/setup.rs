@@ -248,7 +248,9 @@ pub fn status(root: &Path) -> Result<serde_json::Value> {
             .unwrap()
             .push("Initialize this project first with framechord init".into());
     }
-    result["skills"] = serde_json::json!({"codex":root.join(".agents/skills/framechord/SKILL.md").is_file(),"claude":root.join(".claude/skills/framechord/SKILL.md").is_file()});
+    for (key, value) in project::skills_report(root).as_object().unwrap() {
+        result[key] = value.clone();
+    }
     Ok(result)
 }
 
@@ -982,17 +984,19 @@ pub fn run(
                 if let Some(i) = ui.choose(
                     "Install project-local skills",
                     &options(&[
-                        "Codex and Claude Code",
+                        "Codex and Claude Code (also found by Cursor, Gemini CLI, OpenCode and Copilot)",
                         "Codex",
                         "Claude Code",
+                        "Choose agents individually…",
                         "No skills (other process-based agent)",
                     ]),
                     0,
                 )? {
                     session.agents = match i {
-                        0 => vec!["codex".into(), "claude".into()],
+                        0 => default_agents(),
                         1 => vec!["codex".into()],
                         2 => vec!["claude".into()],
+                        3 => choose_agents(&ui, session.agents.clone())?,
                         _ => vec![],
                     };
                 }
@@ -1107,14 +1111,87 @@ pub fn wizard(root: &Path, color: crate::cli::Color) -> Result<serde_json::Value
         } else {
             recommended()
         },
-        vec!["codex".into(), "claude".into()],
+        default_agents(),
         color,
     )
+}
+fn default_agents() -> Vec<String> {
+    project::DEFAULT_AGENTS
+        .iter()
+        .map(|agent| (*agent).to_owned())
+        .collect()
+}
+/// Flips one agent in or out of the selection; the `none` placeholder never survives a toggle.
+fn toggle_agent(mut selected: Vec<String>, name: &str) -> Vec<String> {
+    selected.retain(|chosen| chosen != "none");
+    if let Some(position) = selected.iter().position(|chosen| chosen == name) {
+        selected.remove(position);
+    } else {
+        selected.push(name.to_owned());
+    }
+    selected
+}
+/// Toggle individual agent targets with the single-select prompt; "Done" returns.
+/// Toggle rows in catalog order plus Done, and the row to highlight: the first agent
+/// currently selected, or Done when none is, so arrow keys start on the current choice.
+fn agent_menu(selected: &[String]) -> (Vec<String>, usize) {
+    let chosen = |target: &project::AgentTarget| selected.iter().any(|name| name == target.name);
+    let mut items: Vec<String> = project::AGENT_TARGETS
+        .iter()
+        .map(|target| {
+            let mark = if chosen(target) { "x" } else { " " };
+            format!("[{mark}] {}", target.label)
+        })
+        .collect();
+    let default = project::AGENT_TARGETS
+        .iter()
+        .position(chosen)
+        .unwrap_or(items.len());
+    items.push("Done".into());
+    (items, default)
+}
+fn choose_agents(ui: &Ui, mut selected: Vec<String>) -> Result<Vec<String>> {
+    selected.retain(|chosen| chosen != "none");
+    loop {
+        let (items, default) = agent_menu(&selected);
+        match ui.choose("Toggle agents; choose Done to return", &items, default)? {
+            Some(i) if i < project::AGENT_TARGETS.len() => {
+                selected = toggle_agent(selected, project::AGENT_TARGETS[i].name);
+            }
+            _ => return Ok(selected),
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn toggling_an_agent_drops_the_none_placeholder_and_flips_membership() {
+        let selected = toggle_agent(vec!["none".into()], "codex");
+        assert_eq!(selected, vec!["codex".to_string()]);
+        let selected = toggle_agent(vec!["codex".into(), "claude".into()], "codex");
+        assert_eq!(selected, vec!["claude".to_string()]);
+        let selected = toggle_agent(selected, "copilot");
+        assert_eq!(selected, vec!["claude".to_string(), "copilot".to_string()]);
+    }
+    #[test]
+    fn agent_menu_highlights_the_first_selected_agent_or_done() {
+        let (items, default) = agent_menu(&["copilot".into()]);
+        assert_eq!(items[default], "[x] GitHub Copilot");
+        assert_eq!(items.last().unwrap(), "Done");
+        let (items, default) = agent_menu(&["claude".into(), "codex".into()]);
+        assert_eq!(
+            items[default], "[x] Codex",
+            "menu order, not selection order"
+        );
+        let (items, default) = agent_menu(&["claude".into()]);
+        assert_eq!(items[default], "[x] Claude Code");
+        assert_eq!(items[0], "[ ] Codex");
+        let (items, default) = agent_menu(&[]);
+        assert_eq!(items[default], "Done");
+        assert_eq!(default, project::AGENT_TARGETS.len());
+    }
     #[test]
     fn reviewed_save_rejects_stale_files_without_losing_credentials() {
         let root = tempfile::tempdir().unwrap();

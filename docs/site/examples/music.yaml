@@ -1,0 +1,6 @@
+schema_version: 2
+id: garden-intro
+media: music
+selection: {provider: elevenlabs, model: music_v2_5}
+brief: music.md
+settings: {format: mp3, duration_seconds: 10, instrumental: true}

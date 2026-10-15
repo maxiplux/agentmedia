@@ -166,12 +166,78 @@ fn user_scope_install_uses_the_same_embedded_bundle() {
     let export = tempfile::tempdir().unwrap();
     assets::skill(export.path()).unwrap();
     assert!(export.path().join("templates/infographic.yaml").exists());
+    project::install_scoped(
+        home.path(),
+        &["opencode".into(), "copilot".into()],
+        false,
+        true,
+    )
+    .unwrap();
+    let shared = fs::read(home.path().join(".agents/skills/framechord/SKILL.md")).unwrap();
+    for native in [
+        ".config/opencode/skills/framechord/SKILL.md",
+        ".copilot/skills/framechord/SKILL.md",
+    ] {
+        assert_eq!(
+            fs::read(home.path().join(native)).unwrap(),
+            shared,
+            "{native}"
+        );
+    }
 }
 #[test]
 fn invalid_agent_target_causes_no_partial_initialization() {
     let t = tempfile::tempdir().unwrap();
-    assert!(project::init(t.path(), &["codex".into(), "unknown".into()]).is_err());
+    let error = project::init(t.path(), &["codex".into(), "unknown".into()]).unwrap_err();
+    assert_eq!(error.code, "invalid_input");
+    assert!(
+        error.message.contains("cursor, gemini, opencode, copilot"),
+        "{}",
+        error.message
+    );
+    assert!(error.message.contains("none"));
     assert!(!t.path().join("framechord").exists());
+}
+#[test]
+fn native_agent_targets_dedupe_accept_none_and_install_only_their_directories() {
+    let t = tempfile::tempdir().unwrap();
+    let root = t.path();
+    let agents = ["copilot".to_string(), "cursor".into(), "copilot".into()];
+    project::init(root, &agents).unwrap();
+    assert!(root.join(".github/skills/framechord/SKILL.md").is_file());
+    assert!(root.join(".cursor/skills/framechord/SKILL.md").is_file());
+    assert!(!root.join(".agents").exists());
+    assert!(!root.join(".claude").exists());
+    let second = project::init(root, &agents).unwrap();
+    let preserved: Vec<String> =
+        serde_json::from_value(second["existing_preserved"].clone()).unwrap();
+    assert_eq!(
+        preserved.iter().filter(|p| p.ends_with("SKILL.md")).count(),
+        2,
+        "repeated targets install once: {preserved:?}"
+    );
+    let none = tempfile::tempdir().unwrap();
+    project::init(none.path(), &["none".into()]).unwrap();
+    for dir in [
+        ".agents",
+        ".claude",
+        ".cursor",
+        ".gemini",
+        ".opencode",
+        ".github",
+    ] {
+        assert!(!none.path().join(dir).exists(), "{dir} must not be created");
+    }
+    assert!(none.path().join("framechord/config.yaml").is_file());
+    let mixed = tempfile::tempdir().unwrap();
+    assert!(project::init(mixed.path(), &["none".into(), "codex".into()]).is_err());
+    assert!(!mixed.path().join("framechord").exists());
+    let blank = tempfile::tempdir().unwrap();
+    assert!(
+        project::init(blank.path(), &["".into()]).is_err(),
+        "a blank target is a mistake, not a request for no skills"
+    );
+    assert!(!blank.path().join("framechord").exists());
 }
 fn make_character(root: &Path) -> std::path::PathBuf {
     let path = project::add_persona(root, "mira").unwrap();

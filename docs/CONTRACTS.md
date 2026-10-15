@@ -2,9 +2,9 @@
 > fields require v2. Other manifest versions remain v1. See [remediation](REMEDIATION.md)
 > and the CLI-generated schemas for current contracts; older v1 examples remain readable.
 
-# Contracts v1
+# Contracts (v1 and v2 manifests)
 
-The executable and library share typed, unknown-field-rejecting Serde contracts. Schemars emits JSON Schema 2020-12. Every versioned document requires `schema_version: 1`; unsupported versions are rejected. Schemas: config, character, infographic, job, batch, effective, run, artifact, review, revision, budget, operation, voice_design, voice_consent, voice_clone, host_limits, diagnostics. Limits are a typed section of config and can also be supplied independently with `--limits-file`.
+The executable and library share typed, unknown-field-rejecting Serde contracts. Schemars emits JSON Schema 2020-12. Every versioned document requires a supported `schema_version` (1, or 2 for job, config and run); unsupported versions are rejected. Schemas: config, character, infographic, job, batch, effective, run, artifact, review, revision, budget, operation, voice_design, voice_consent, voice_clone, host_limits, diagnostics, verification. Limits are a typed section of config and can also be supplied independently with `--limits-file`.
 
 YAML owns structured state. Markdown owns readable identity, visual/voice descriptions, exact scripts/lyrics, and creative direction. Neither is executed. Effective input snapshots include complete prompt/script content, provider/model, locale/settings, identity hashes, ordered references with role/hash/bytes, dependencies, and output destinations. Run records include isolated job status, attempts, request IDs when available, usage when returned, artifacts, hashes, dimensions/duration, cache provenance, and quality.
 
@@ -74,6 +74,14 @@ portable references retain provenance after export/import. External declarations
 are caller-supplied metadata, not independent proof of their generation history.
 Missing optional origin fields preserve compatibility with old manifests.
 
+
+`usage` is a read-only report. Each job row keeps `provider_reported_usage` raw and adds
+`cost_estimate`, `cost_status` (`estimated`, `provider_reported`, `cached_no_charge`,
+`not_estimable`; operations and local podcast assembly jobs are `not_estimated`) and `cost_note`. Estimates come from the
+dated bundled price table (`assets/pricing.json`, or an explicit validated `--price-table`),
+are computed from recorded artifact dimensions/durations, script characters or returned
+token counts, never replace a provider-returned `cost`, and are summed only into
+`estimated_total_usd` with an `estimate_summary`; `currency_total` remains null.
 
 `diagnostics` is the read-only provider/key report contract. `doctor` is offline by
 default; `--live` explicitly checks the selected providers, returns all per-provider

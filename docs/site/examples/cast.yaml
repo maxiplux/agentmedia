@@ -1,0 +1,15 @@
+schema_version: 2
+id: forest-play
+media: image
+brief: forest.md
+cast:
+  - alias: mira
+    character: ../framechord/characters/mira/character.yaml
+  - alias: kito
+    character: ../framechord/characters/kito/character.yaml
+settings:
+  format: png
+  size: 1536x1024
+  image_quality: medium
+# Requires both saved characters with accepted references from compatible models.
+# These settings assume originals made with OpenAI gpt-image-2.5-flare.

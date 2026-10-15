@@ -133,6 +133,19 @@ pub fn listing(root: &Path, filter: &Filter<'_>) -> Value {
             value
         })
         .collect::<Vec<_>>();
+    let pricing = crate::pricing::bundled();
+    for value in &mut entries {
+        if let (Ok(provider), Some(model)) = (
+            serde_json::from_value::<Provider>(value["provider"].clone()),
+            value["model"].as_str(),
+        ) {
+            let selection = Selection {
+                provider,
+                model: model.to_owned(),
+            };
+            value["pricing"] = json!(crate::pricing::for_model(&pricing, &selection));
+        }
+    }
     if filter.all
         && !filter.recommended
         && let Some(cached) = &cached
@@ -174,7 +187,7 @@ pub fn listing(root: &Path, filter: &Filter<'_>) -> Value {
             }
         }
     }
-    json!({"models":entries,"verified_at":VERIFIED_AT,"policy":"current_stable_only","account_access_verified":false,
+    json!({"models":entries,"verified_at":VERIFIED_AT,"pricing_verified_at":pricing.verified_at,"policy":"current_stable_only","account_access_verified":false,
         "cached_discovery":cached,"text_providers":["openai","google","openrouter"],
         "voice_design_models":[{"provider":"elevenlabs","model":"eleven_ttv_v3","preview_candidates":true,"explicit_voice_creation":true}],
         "image_review_providers":["openai","openrouter"],"audio_review_models":["gemini-3.8-flash"],"audio_review_provider":"google"})

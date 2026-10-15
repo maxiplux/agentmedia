@@ -1,4 +1,4 @@
-# framechord 0.6.2 command reference
+# framechord 0.7.0 command reference
 
 Generated from the executable's command definitions. Global flags are accepted before or after the command.
 
@@ -176,6 +176,8 @@ Arguments:
 
 Options:
       --agents <AGENTS>
+          Agent targets: codex, claude, cursor, gemini, opencode, copilot, or none (comma-separated). The default pair is already discovered by Cursor, Gemini CLI, OpenCode and Copilot
+
           [default: codex,claude]
 
       --project <PROJECT>
@@ -746,6 +748,9 @@ Report provider-returned usage separately from unknown costs
 Usage: framechord usage [OPTIONS]
 
 Options:
+      --price-table <FILE>
+          Explicit price table (JSON or YAML) replacing the bundled dated table; estimates stay labelled and never replace provider-reported cost
+
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
 
@@ -3457,6 +3462,8 @@ Usage: framechord skills install [OPTIONS]
 
 Options:
       --agents <AGENTS>
+          Agent targets: codex, claude, cursor, gemini, opencode, copilot, or none (comma-separated). The default pair is already discovered by Cursor, Gemini CLI, OpenCode and Copilot
+
           [default: codex,claude]
 
       --project <PROJECT>

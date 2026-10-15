@@ -1,0 +1,4 @@
+schema_version: 1
+jobs:
+  - infographic-job.yaml
+  - lesson-speech.yaml

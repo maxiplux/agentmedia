@@ -549,3 +549,106 @@ fn doctor_missing_keys_and_environment_precedence_need_no_network_or_initializat
         .assert()
         .code(2);
 }
+
+#[test]
+fn init_accepts_agents_none_noninteractively() {
+    let temporary = tempfile::tempdir().unwrap();
+    let root = temporary.path().join("no-skills");
+    let output = cargo_bin_cmd!("framechord")
+        .current_dir(temporary.path())
+        .args(["--json", "--non-interactive", "init", "no-skills"])
+        .args(["--preset", "empty", "--agents", "none"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let response: Value = serde_json::from_slice(&output).unwrap();
+    let skills = response["data"]["skills"].as_object().unwrap();
+    assert_eq!(skills.len(), 6);
+    assert!(skills.values().all(|v| v == false), "{skills:?}");
+    for target in response["data"]["skill_targets"].as_array().unwrap() {
+        let native = target["native_path"].as_str().unwrap();
+        assert!(
+            std::path::Path::new(native).is_absolute() && !native.contains("/./"),
+            "{native}"
+        );
+    }
+    assert!(!root.join(".agents").exists());
+    assert!(!root.join(".claude").exists());
+    assert!(root.join("framechord/config.yaml").is_file());
+}
+
+#[test]
+fn usage_price_table_override_is_validated_and_reported() {
+    let temporary = tempfile::tempdir().unwrap();
+    let root = temporary.path().join("project");
+    cargo_bin_cmd!("framechord")
+        .args(["--json", "--non-interactive", "init"])
+        .arg(&root)
+        .args(["--preset", "empty", "--agents", "none"])
+        .assert()
+        .success();
+    let invalid = temporary.path().join("bad.json");
+    fs::write(
+        &invalid,
+        r#"{"schema_version":1,"currency":"EUR","verified_at":"2026-10-15","entries":[]}"#,
+    )
+    .unwrap();
+    let output = cargo_bin_cmd!("framechord")
+        .arg("--project")
+        .arg(&root)
+        .args(["--json", "usage", "--price-table"])
+        .arg(&invalid)
+        .assert()
+        .code(2)
+        .get_output()
+        .stdout
+        .clone();
+    let response: Value = serde_json::from_slice(&output).unwrap();
+    assert_eq!(response["errors"][0]["code"], "invalid_input");
+    let custom = temporary.path().join("custom.json");
+    fs::write(
+        &custom,
+        r#"{"schema_version":1,"currency":"USD","verified_at":"2026-01-02","entries":[{"provider":"google","model":"gemini-nano-banana-2.1","media":"image","unit":"image","qualifier":"1K","usd":0.05,"per":1,"source":"https://example.test/pricing","valid_until":null,"note":null}]}"#,
+    )
+    .unwrap();
+    let output = cargo_bin_cmd!("framechord")
+        .arg("--project")
+        .arg(&root)
+        .args(["--json", "usage", "--price-table"])
+        .arg(&custom)
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let response: Value = serde_json::from_slice(&output).unwrap();
+    assert_eq!(
+        response["data"]["estimate_summary"]["table_verified_at"],
+        "2026-01-02"
+    );
+    let source = response["data"]["estimate_summary"]["table_source"]
+        .as_str()
+        .unwrap();
+    assert!(
+        std::path::Path::new(source).is_absolute() && source.ends_with("custom.json"),
+        "{source}"
+    );
+    assert_eq!(response["data"]["jobs"].as_array().unwrap().len(), 0);
+    assert!(response["data"]["currency_total"].is_null());
+    let output = cargo_bin_cmd!("framechord")
+        .arg("--project")
+        .arg(&root)
+        .args(["--json", "usage"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let response: Value = serde_json::from_slice(&output).unwrap();
+    assert_eq!(
+        response["data"]["estimate_summary"]["table_source"],
+        "bundled assets/pricing.json"
+    );
+}

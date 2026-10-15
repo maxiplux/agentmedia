@@ -109,6 +109,7 @@ pub enum Command {
     Init {
         /// Project folder (defaults to --project or the current directory); must allow a framechord/ subfolder
         path: Option<PathBuf>,
+        /// Agent targets: codex, claude, cursor, gemini, opencode, copilot, or none (comma-separated). The default pair is already discovered by Cursor, Gemini CLI, OpenCode and Copilot
         #[arg(long, value_delimiter = ',', default_value = "codex,claude")]
         agents: Vec<String>,
         /// Complete configuration YAML: provider/models, settings, locales, consistency, and limits
@@ -136,7 +137,11 @@ pub enum Command {
         preview_hash: Option<String>,
     },
     /// Report provider-returned usage separately from unknown costs
-    Usage,
+    Usage {
+        /// Explicit price table (JSON or YAML) replacing the bundled dated table; estimates stay labelled and never replace provider-reported cost
+        #[arg(long, value_name = "FILE")]
+        price_table: Option<PathBuf>,
+    },
     /// Inspect storage or apply a previously reviewed conservative cleanup plan
     Storage {
         #[command(subcommand)]
@@ -402,6 +407,7 @@ pub enum SkillAction {
         overwrite: bool,
     },
     Install {
+        /// Agent targets: codex, claude, cursor, gemini, opencode, copilot, or none (comma-separated). The default pair is already discovered by Cursor, Gemini CLI, OpenCode and Copilot
         #[arg(long, value_delimiter = ',', default_value = "codex,claude")]
         agents: Vec<String>,
         #[arg(long,value_parser=["project","user"],default_value="project")]
@@ -770,6 +776,50 @@ pub fn human_result(data: &Value) -> String {
             data["message"].as_str().unwrap_or("")
         );
     }
+    if let Some(summary) = data["estimate_summary"].as_object() {
+        let mut out =
+            String::from("Usage — provider-reported units and labelled list-price estimates\n");
+        for job in data["jobs"].as_array().into_iter().flatten() {
+            let cost = if job["cost_estimate"].is_object() {
+                format!(
+                    "${} estimated ({} {}{})",
+                    job["cost_estimate"]["usd"],
+                    job["cost_estimate"]["quantity"],
+                    job["cost_estimate"]["unit"].as_str().unwrap_or(""),
+                    job["cost_estimate"]["qualifier"]
+                        .as_str()
+                        .map(|q| format!(", {q}"))
+                        .unwrap_or_default()
+                )
+            } else {
+                format!(
+                    "{}: {}",
+                    job["cost_status"].as_str().unwrap_or(""),
+                    job["cost_note"].as_str().unwrap_or("")
+                )
+            };
+            out += &format!(
+                "{} / {} {}/{} {} — {cost}\n",
+                job["run"].as_str().unwrap_or(""),
+                job["job"].as_str().unwrap_or(""),
+                job["selection"]["provider"].as_str().unwrap_or(""),
+                job["selection"]["model"].as_str().unwrap_or(""),
+                job["state"].as_str().unwrap_or("")
+            );
+        }
+        out += &format!(
+            "Estimated total: {}\n{}\nPrice table: {} (verified {})\n",
+            if data["estimated_total_usd"].is_null() {
+                "none".to_owned()
+            } else {
+                format!("${}", data["estimated_total_usd"])
+            },
+            summary["disclaimer"].as_str().unwrap_or(""),
+            summary["table_source"].as_str().unwrap_or(""),
+            summary["table_verified_at"].as_str().unwrap_or("")
+        );
+        return out;
+    }
     if data["policy"] == "current_stable_only"
         && let Some(models) = data["models"].as_array()
     {
@@ -822,14 +872,35 @@ pub fn human_result(data: &Value) -> String {
             if let Some(path) = data["data_directory"].as_str() {
                 out += &format!("Project files: {path}\n");
             }
-            for (agent, folder) in [("codex", ".agents"), ("claude", ".claude")] {
-                if data["skills"][agent] == true {
+            for target in data["skill_targets"].as_array().into_iter().flatten() {
+                let label = target["label"].as_str().unwrap_or("");
+                if target["native_installed"] == true {
                     out += &format!(
-                        "Skill available: {}/{folder}/skills/framechord\n",
-                        project.as_str().unwrap_or("")
+                        "Skill installed for {label}: {}\n",
+                        target["native_path"].as_str().unwrap_or("")
                     );
+                } else if let Some(via) = target["discovered_via"][0].as_str() {
+                    out += &format!("Skill discoverable by {label} via {via}\n");
                 }
             }
+        }
+        for target in data["skill_targets"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter(|target| target["duplicate_discovery"] == true)
+        {
+            let copies: Vec<&str> = target["discovered_via"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter_map(Value::as_str)
+                .collect();
+            out += &format!(
+                "Warning: {} finds more than one FrameChord skill ({}); keep one copy\n",
+                target["label"].as_str().unwrap_or(""),
+                copies.join(", ")
+            );
         }
         if let Some(steps) = data["pending_steps"].as_array() {
             for step in steps {
@@ -1083,7 +1154,8 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                 })
             };
             let mut result = project::init_with_config(path, agents, configured.as_ref())?;
-            for (k, v) in crate::setup::status(path)?.as_object().unwrap() {
+            let canonical = std::fs::canonicalize(path)?;
+            for (k, v) in crate::setup::status(&canonical)?.as_object().unwrap() {
                 result[k] = v.clone();
             }
             Ok((result, 0))
@@ -1119,7 +1191,16 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                 Ok((json!(c), 0))
             }
         },
-        Command::Usage => Ok((crate::maintenance::usage(&root)?, 0)),
+        Command::Usage { price_table } => {
+            let table = match price_table {
+                Some(path) => crate::pricing::load(path)?,
+                None => crate::pricing::bundled(),
+            };
+            Ok((
+                crate::maintenance::usage_with(&root, &table, price_table.as_deref())?,
+                0,
+            ))
+        }
         Command::Migrate { kind, file, apply } => {
             Ok((crate::maintenance::migrate(&root, file, kind, *apply)?, 0))
         }
@@ -1339,7 +1420,7 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                     root.clone()
                 };
                 Ok((
-                    json!({"scope":scope,"existing_preserved":project::install_with(&dest,agents,*overwrite)?}),
+                    json!({"scope":scope,"existing_preserved":project::install_scoped(&dest,agents,*overwrite,scope=="user")?,"targets":project::normalize_agents(agents)?.iter().map(|target|project::native_skill_dir(&dest,target,scope=="user")).collect::<Vec<_>>()}),
                     0,
                 ))
             }

@@ -71,7 +71,7 @@ lookup; its explicit voice catalog and local model registry remain available.
 Unknown cost is not zero; no exact aggregate currency total is invented. Review and
 voice-operation usage is included separately; historical attempt rows must not be
 summed with their current operation total. Cached job usage describes the original
-response and is not a new charge.
+response and is not a new charge. Labelled list-price estimates (`cost_estimate`, `cost_status`, `estimated_total_usd`) come from the dated bundled price table; see [cost](COST.md).
 
 For an uncertain job, first try supported provider reconciliation. Otherwise:
 

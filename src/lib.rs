@@ -11,6 +11,7 @@ pub mod error;
 pub mod maintenance;
 pub mod operations;
 pub mod planning;
+pub mod pricing;
 pub mod progress;
 pub mod project;
 pub mod provenance;

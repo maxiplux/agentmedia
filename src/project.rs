@@ -184,33 +184,172 @@ pub(crate) fn init_locked(
         serde_json::json!({"project":root,"data_directory":directory(&root),"legacy_layout":directory(&root).file_name().is_some_and(|name|name=="mediaagent"),"credentials_file":root.join(".env"),"credential_variables":crate::credentials::PROVIDERS.iter().map(|p|p.key()).collect::<Vec<_>>(),"existing_preserved":existing,"generation":false,"configured_media":configured_media,"configuration":config,"setup_required":configured_media.is_empty(),"next_steps":if configured_media.is_empty(){vec!["framechord config wizard","framechord config setup --file config.yaml"]}else{vec![]}}),
     )
 }
+/// Documented skill discovery locations per coding agent, verified against each
+/// vendor's documentation on 2026-10-15. The first project/user directory is the
+/// native install location; later ones are compatibility paths the agent also reads.
+pub struct AgentTarget {
+    pub name: &'static str,
+    pub label: &'static str,
+    pub project: &'static [&'static str],
+    pub user: &'static [&'static str],
+    pub source: &'static str,
+}
+pub const SKILL_FOLDER: &str = "framechord";
+pub const DEFAULT_AGENTS: &[&str] = &["codex", "claude"];
+pub const AGENT_TARGETS: &[AgentTarget] = &[
+    AgentTarget {
+        name: "codex",
+        label: "Codex",
+        project: &[".agents/skills"],
+        user: &[".agents/skills"],
+        source: "https://developers.openai.com/codex/skills",
+    },
+    AgentTarget {
+        name: "claude",
+        label: "Claude Code",
+        project: &[".claude/skills"],
+        user: &[".claude/skills"],
+        source: "https://code.claude.com/docs/en/skills",
+    },
+    AgentTarget {
+        name: "cursor",
+        label: "Cursor",
+        project: &[
+            ".cursor/skills",
+            ".agents/skills",
+            ".claude/skills",
+            ".codex/skills",
+        ],
+        user: &[
+            ".cursor/skills",
+            ".agents/skills",
+            ".claude/skills",
+            ".codex/skills",
+        ],
+        source: "https://cursor.com/docs/skills",
+    },
+    AgentTarget {
+        name: "gemini",
+        label: "Gemini CLI",
+        project: &[".gemini/skills", ".agents/skills"],
+        user: &[".gemini/skills"],
+        source: "https://geminicli.com/docs/cli/tutorials/skills-getting-started/",
+    },
+    AgentTarget {
+        name: "opencode",
+        label: "OpenCode",
+        project: &[".opencode/skills", ".claude/skills", ".agents/skills"],
+        user: &[
+            ".config/opencode/skills",
+            ".claude/skills",
+            ".agents/skills",
+        ],
+        source: "https://opencode.ai/docs/skills/",
+    },
+    AgentTarget {
+        name: "copilot",
+        label: "GitHub Copilot",
+        project: &[".github/skills", ".claude/skills", ".agents/skills"],
+        user: &[".copilot/skills", ".claude/skills", ".agents/skills"],
+        source: "https://docs.github.com/en/copilot/concepts/agents/about-agent-skills",
+    },
+];
+pub fn agent_target(name: &str) -> Option<&'static AgentTarget> {
+    AGENT_TARGETS.iter().find(|target| target.name == name)
+}
+fn agent_target_error() -> Error {
+    Error::input(
+        "Agent target must be one of codex, claude, cursor, gemini, opencode, copilot, or none; use skills export DIRECTORY for any other agent",
+    )
+}
+/// Trims and de-duplicates targets while preserving order. `none` is only valid alone.
+pub fn normalize_agents(agents: &[String]) -> Result<Vec<&'static AgentTarget>> {
+    let names: Vec<&str> = agents
+        .iter()
+        .map(|agent| agent.trim())
+        .filter(|agent| !agent.is_empty())
+        .collect();
+    if names.contains(&"none") {
+        if names.len() > 1 {
+            return Err(Error::input(
+                "Agent target none must be given alone: pass --agents none to install no skill, or list only the agents to install",
+            ));
+        }
+        return Ok(vec![]);
+    }
+    if names.is_empty() && !agents.is_empty() {
+        return Err(agent_target_error());
+    }
+    let mut selected: Vec<&'static AgentTarget> = vec![];
+    for name in names {
+        let target = agent_target(name).ok_or_else(agent_target_error)?;
+        if !selected.iter().any(|existing| existing.name == target.name) {
+            selected.push(target);
+        }
+    }
+    Ok(selected)
+}
+pub fn check_agents(agents: &[String]) -> Result<()> {
+    normalize_agents(agents).map(|_| ())
+}
+pub fn native_skill_dir(root: &Path, target: &AgentTarget, user_scope: bool) -> PathBuf {
+    let dirs = if user_scope {
+        target.user
+    } else {
+        target.project
+    };
+    root.join(dirs[0]).join(SKILL_FOLDER)
+}
 pub fn install(root: &Path, agents: &[String]) -> Result<Vec<String>> {
     install_with(root, agents, false)
 }
 pub fn install_with(root: &Path, agents: &[String], overwrite: bool) -> Result<Vec<String>> {
-    check_agents(agents)?;
+    install_scoped(root, agents, overwrite, false)
+}
+/// Installs the bundled skill into each selected agent's native directory under
+/// `root` (a project, or the home directory when `user_scope` is set).
+pub fn install_scoped(
+    root: &Path,
+    agents: &[String],
+    overwrite: bool,
+    user_scope: bool,
+) -> Result<Vec<String>> {
     let mut existing = vec![];
-    for agent in agents {
-        let dir = match agent.as_str() {
-            "codex" => ".agents/skills/framechord",
-            "claude" => ".claude/skills/framechord",
-            _ => {
-                return Err(Error::input(
-                    "Agent target must be codex or claude; use skills export for any other agent",
-                ));
-            }
-        };
-        existing.extend(assets::skill_with(&root.join(dir), overwrite)?);
+    for target in normalize_agents(agents)? {
+        existing.extend(assets::skill_with(
+            &native_skill_dir(root, target, user_scope),
+            overwrite,
+        )?);
     }
     Ok(existing)
 }
-pub fn check_agents(agents: &[String]) -> Result<()> {
-    if agents.iter().any(|a| a != "codex" && a != "claude") {
-        return Err(Error::input(
-            "Agent target must be codex or claude; use skills export for other agents",
-        ));
+/// Per-agent discoverability of the project skill: `skills` says whether a FrameChord
+/// SKILL.md exists in any directory that agent documents; `skill_targets` carries the
+/// native path, the directories through which the skill is actually found, and
+/// `duplicate_discovery` when more than one of them holds a copy.
+pub fn skills_report(root: &Path) -> serde_json::Value {
+    let skill_at = |dir: &str| root.join(dir).join(SKILL_FOLDER);
+    let installed = |dir: &str| skill_at(dir).join("SKILL.md").is_file();
+    let mut skills = serde_json::Map::new();
+    let mut targets = vec![];
+    let mut shared: std::collections::BTreeMap<&str, Vec<&str>> = Default::default();
+    for target in AGENT_TARGETS {
+        let discovered: Vec<PathBuf> = target
+            .project
+            .iter()
+            .filter(|dir| installed(dir))
+            .map(|dir| skill_at(dir))
+            .collect();
+        skills.insert(target.name.to_owned(), (!discovered.is_empty()).into());
+        // More than one discovered copy means the agent sees two skills with the same
+        // name (native plus shared directory); docs/INTEGRATION.md asks users to keep one.
+        targets.push(serde_json::json!({"agent":target.name,"label":target.label,"native_path":skill_at(target.project[0]),"native_installed":installed(target.project[0]),"discovered_via":discovered,"duplicate_discovery":discovered.len()>1,"source":target.source}));
+        for dir in target.project {
+            shared.entry(dir).or_default().push(target.name);
+        }
     }
-    Ok(())
+    shared.retain(|_, agents| agents.len() > 1);
+    serde_json::json!({"skills":skills,"skill_targets":targets,"skills_shared_by":shared})
 }
 pub fn add_persona(root: &Path, name: &str) -> Result<PathBuf> {
     id(name)?;
