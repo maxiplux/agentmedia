@@ -1,6 +1,6 @@
 # FrameChord
 
-Formerly MediaAgent. The first FrameChord release is 0.6.0. Existing projects stay supported in place; see [upgrade guidance](assets/skill/references/renaming.md). The owned domain is **framechord.com**; [custom-domain setup](docs/DOMAIN.md) is tracked separately from the published guide.
+Formerly MediaAgent. The first FrameChord release is 0.6.1. Existing projects stay supported in place; see [upgrade guidance](assets/skill/references/renaming.md). The owned domain is **framechord.com**; [custom-domain setup](docs/DOMAIN.md) is tracked separately from the published guide.
 
 A local Rust CLI for any agent with process access, and for terminal users. Generate images, raster infographics, exact narration, podcasts, music, and sound effects. Characters are optional: save visual identity and a provider voice binding when you need reuse.
 
@@ -80,7 +80,7 @@ Windows PowerShell:
 irm https://maxiplux.github.io/framechord/install.ps1 | iex
 ```
 
-Already downloaded a 0.6.0+ binary? Run `./framechord install` (Windows:
+Already downloaded a 0.6.1+ binary? Run `./framechord install` (Windows:
 `./framechord.exe install`). Installation uses a user bin directory, verifies
 release bytes, and needs no administrator or Rust installation. Open a new terminal,
 then use `framechord init ./my-project` from your project folder.

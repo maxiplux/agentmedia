@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Published stable version to verify (for example v0.6.0)
+        description: Published stable version to verify (for example v0.6.1)
         required: true
         type: string
   workflow_call:

@@ -1,6 +1,6 @@
 # Implementation status
 
-FrameChord is the project name from 0.6.0 onward. Earlier evidence below keeps its original MediaAgent commands, release names and artifact paths. Existing `mediaagent/` projects remain supported in place. See [rename and upgrade guidance](../assets/skill/references/renaming.md).
+FrameChord is the project name from 0.6.1 onward. Earlier evidence below keeps its original MediaAgent commands, release names and artifact paths. Existing `mediaagent/` projects remain supported in place. See [rename and upgrade guidance](../assets/skill/references/renaming.md).
 
 Development snapshot, October 15, 2026. The first-version command families are implemented within the provider boundaries below. Visual character consistency has failed user acceptance and must not be described as complete. Native validation is separate from media-quality acceptance; public binary availability is recorded on the [Releases page](https://github.com/maxiplux/agentmedia/releases/latest).
 
@@ -192,7 +192,7 @@ dry run as a complete 16-asset, three-target release set. This validates future
 publication without changing the immutable 0.5.1 release or creating another tag.
 
 
-## FrameChord rename (0.6.0)
+## FrameChord rename (0.6.1)
 
 The package, executable and bundled skill are renamed to `framechord`; new
 projects initialize `framechord/`. Existing `mediaagent/` project directories
@@ -209,9 +209,17 @@ the FrameChord name. Older executables require an explicit new installation;
 `mediaagent update` does not rename the product. Historical release bytes,
 acceptance evidence and authored project files are preserved.
 
-Local formatting, strict Clippy and 169 offline Rust tests pass, including
+Local formatting, strict Clippy and 171 offline Rust tests pass, including
 legacy initialization/configuration/skill preservation, unchanged readable run
 receipts and rejection of ambiguous project roots. Native release and public
 installation acceptance are recorded after they execute. No paid provider calls
 are made by rename validation. The owned `framechord.com` domain requires
 separate DNS/HTTPS verification; see [domain setup](DOMAIN.md).
+
+
+The v0.6.0 source tag was stopped before publication after rename review found
+that an existing user-level host ceiling would be bypassed by the new settings
+path. No 0.6.0 release assets were published. Version 0.6.1 retains existing
+`~/.config/mediaagent/host.yaml`, rejects conflicting old/new host settings and
+keeps the shared slot locks; two offline regressions cover preservation and
+conflict refusal.

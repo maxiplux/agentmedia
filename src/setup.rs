@@ -50,7 +50,21 @@ pub fn host_path() -> Result<PathBuf> {
     let home = std::env::var_os("HOME")
         .or_else(|| std::env::var_os("USERPROFILE"))
         .ok_or_else(|| Error::input("Cannot locate user home for framechord host settings"))?;
-    Ok(PathBuf::from(home).join(".config/framechord/host.yaml"))
+    host_path_in(Path::new(&home))
+}
+fn host_path_in(home: &Path) -> Result<PathBuf> {
+    let current = home.join(".config/framechord/host.yaml");
+    let legacy = home.join(".config/mediaagent/host.yaml");
+    if legacy.exists() {
+        if current.exists() {
+            return Err(Error::input(
+                "Both FrameChord and MediaAgent host limits exist. Stop workers and reconcile these files explicitly before continuing; neither limit was selected automatically",
+            ));
+        }
+        Ok(legacy)
+    } else {
+        Ok(current)
+    }
 }
 pub fn host() -> Result<HostLimits> {
     let path = host_path()?;
@@ -1141,6 +1155,42 @@ mod tests {
                 config.default_settings.insert(model.media, settings);
             }
             validation::config(&config).unwrap_or_else(|error| panic!("{}: {error}", model.model));
+        }
+    }
+
+    #[test]
+    fn renamed_host_settings_keep_existing_limits_and_file_bytes() {
+        let home = tempfile::tempdir().unwrap();
+        let legacy = home.path().join(".config/mediaagent/host.yaml");
+        std::fs::create_dir_all(legacy.parent().unwrap()).unwrap();
+        let bytes =
+            b"# User-selected host ceiling\nschema_version: 1\nconcurrency: 1\nper_provider: 1\n";
+        std::fs::write(&legacy, bytes).unwrap();
+        let selected = host_path_in(home.path()).unwrap();
+        let limits: HostLimits = yaml(&selected).unwrap();
+        validate_host(&limits).unwrap();
+        assert_eq!(limits.concurrency, 1);
+        assert_eq!(limits.per_provider, 1);
+        assert_eq!(std::fs::read(&selected).unwrap(), bytes);
+        assert_eq!(selected, legacy);
+        assert!(!home.path().join(".config/framechord").exists());
+    }
+
+    #[test]
+    fn conflicting_host_settings_fail_without_choosing_a_higher_ceiling() {
+        let home = tempfile::tempdir().unwrap();
+        for name in ["mediaagent", "framechord"] {
+            let path = home.path().join(format!(".config/{name}/host.yaml"));
+            std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+            std::fs::write(path, "conflicting fixture").unwrap();
+        }
+        assert!(host_path_in(home.path()).is_err());
+        for name in ["mediaagent", "framechord"] {
+            assert_eq!(
+                std::fs::read_to_string(home.path().join(format!(".config/{name}/host.yaml")))
+                    .unwrap(),
+                "conflicting fixture"
+            );
         }
     }
 }

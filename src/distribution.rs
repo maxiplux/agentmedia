@@ -76,7 +76,7 @@ fn existing_record(path: &Path, bytes: &[u8]) -> Result<Record> {
 fn stable_version(value: &str) -> Result<Version> {
     let value = value.strip_prefix('v').unwrap_or(value);
     let v =
-        Version::parse(value).map_err(|_| Error::input("Choose a stable version such as 0.6.0"))?;
+        Version::parse(value).map_err(|_| Error::input("Choose a stable version such as 0.6.1"))?;
     if !v.pre.is_empty() || !v.build.is_empty() {
         return Err(Error::input("Only stable release versions are supported"));
     }

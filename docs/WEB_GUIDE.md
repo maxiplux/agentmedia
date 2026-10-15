@@ -1,6 +1,6 @@
 # Single-file FrameChord guide
 
-FrameChord is the project name from 0.6.0 onward. Earlier evidence below keeps its original MediaAgent commands, release names and artifact paths. Existing `mediaagent/` projects remain supported in place. See [rename and upgrade guidance](../assets/skill/references/renaming.md).
+FrameChord is the project name from 0.6.1 onward. Earlier evidence below keeps its original MediaAgent commands, release names and artifact paths. Existing `mediaagent/` projects remain supported in place. See [rename and upgrade guidance](../assets/skill/references/renaming.md).
 
 The complete deliverable is `docs/site/index.html`. Open it in a browser or serve
 that one file. No other assets, CDN, build step or internet access are required to
@@ -70,7 +70,7 @@ The 0.4.0 public guide and both installer downloads were fetched from GitHub Pag
 Version 0.5.1 updates the setup walkthrough and generated command help for Google-first defaults, the explicit OpenAI preset, built-in speech voices, target-project dotenv creation/update and default installation of Codex/Claude project skills. Examples that name other providers remain explicit provider choices and require their corresponding credentials.
 
 
-Version 0.6.0 renames the guide, all 65 generated command pages, installers and
+Version 0.6.1 renames the guide, all 65 generated command pages, installers and
 all four embedded example archives to FrameChord. The upgrade note distinguishes
 new `framechord/` projects from preserved legacy `mediaagent/` directories.
 The custom domain's registration is separate from DNS and HTTPS deployment.

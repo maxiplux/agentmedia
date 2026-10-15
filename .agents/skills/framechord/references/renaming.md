@@ -1,6 +1,6 @@
 # FrameChord and older MediaAgent projects
 
-FrameChord 0.6.0 renames the executable, Rust package and skill to `framechord`.
+FrameChord 0.6.1 renames the executable, Rust package and skill to `framechord`.
 The GitHub repository is `maxiplux/framechord`. The owned domain is
 `framechord.com`; domain registration and a working DNS/HTTPS deployment are
 separate steps. The documentation remains reachable through its published
@@ -42,3 +42,11 @@ The development checkout deliberately retains its historical `mediaagent/`
 authored data and ignored evidence. This is compatibility data, not an incomplete
 branding change. Historical test and acceptance reports retain their original
 commands, release names and artifact paths.
+
+## Preserve host ceilings
+
+FrameChord also reuses `~/.config/mediaagent/host.yaml` when it exists. New user
+settings use `~/.config/framechord/host.yaml`. Conflicting files are rejected
+instead of silently replacing a selected limit with a higher default. Stop
+workers before explicitly reconciling duplicate host settings. Old and new
+binaries share the existing host slot locks.

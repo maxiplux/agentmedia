@@ -1,6 +1,6 @@
 # Local live verification
 
-FrameChord is the project name from 0.6.0 onward. Earlier evidence below keeps its original MediaAgent commands, release names and artifact paths. Existing `mediaagent/` projects remain supported in place. See [rename and upgrade guidance](../assets/skill/references/renaming.md).
+FrameChord is the project name from 0.6.1 onward. Earlier evidence below keeps its original MediaAgent commands, release names and artifact paths. Existing `mediaagent/` projects remain supported in place. See [rename and upgrade guidance](../assets/skill/references/renaming.md).
 
 Executed on macOS on October 14, 2026, using this repository's ignored `.env`. These are selected adapter smoke tests, not certification of every model, account entitlement, or media quality. Each generation smoke run allowed one request and one attempt. Speech used the exact 33-character script `Hello. This is a short local test.` Images used a teal leaf on a cream background; music was instrumental and sound effects used a quiet bell.
 
