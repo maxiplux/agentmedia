@@ -288,11 +288,10 @@ DNS and HTTPS (no address override): public installer, read-only update check,
 verified reinstall, offline rollback and project-file preservation. Its isolated
 environment excludes media-provider keys and makes zero provider calls.
 
-## Cost estimates, agent targets and site generator (0.7.0, unreleased)
+## Cost estimates, agent targets and site generator (0.7.0)
 
 October 15, 2026. Three implementation changes back the new cost and integration
-documentation; no 0.7.0 release has been published yet, so the public installers still
-deliver 0.6.2 until the release workflow runs.
+documentation. The release evidence follows the local validation below.
 
 - `usage --json` now reports labelled list-price estimates beside provider-reported
   units: `cost_estimate`, `cost_status` (`estimated`, `provider_reported`,
@@ -313,11 +312,49 @@ deliver 0.6.2 until the release workflow runs.
   checked-in `docs/site/examples/`; `--check` runs in the Linux CI job. The guide gained
   hand-written cost and integration sections and a Google-default hero.
 
-Local validation on macOS Apple Silicon: formatting, strict Clippy, 189 passing
+Local validation on macOS Apple Silicon: formatting, strict Clippy, 196 passing
 offline Rust tests (one ignored platform test), 8 generator unit tests,
 `build-site.py --check` clean against the regenerated 0.7.0 guide (65 command pages,
 18 sections), and `package-release.py --offline` with 18 isolated native checks
 including the new native-target and estimate assertions. The guide was opened locally
 in a browser at desktop and phone widths with no console errors or horizontal overflow.
-No provider calls were made; native CI and public release results for 0.7.0 follow its
-publication.
+No provider calls were made.
+
+The changes merged to master through [pull request #6](https://github.com/maxiplux/framechord/pull/6)
+(`14068fb`). Its [Windows Rust checks](https://github.com/maxiplux/framechord/actions/runs/38786018023)
+failed in one new test, `status_reports_shared_discovery_for_every_known_agent`, which
+compared a native skill path joined as a single `".cursor/skills/framechord"` string
+against the report's `root.join(dir).join("framechord")` construction; Windows
+serializes the two with different separators. Linux and macOS passed. The test-only
+alignment `7fde6338cb51d19297407ee22ec42c3e92c5f115` uses the same join order, and the
+[master checks](https://github.com/maxiplux/framechord/actions/runs/38787016204) on that
+commit pass on Windows x86-64, Linux x86-64 and macOS Apple Silicon. No product code
+changed; on Windows the reported native paths keep mixed separators (for example
+`...\.cursor/skills\framechord`), which resolve correctly.
+
+FrameChord [0.7.0](https://github.com/maxiplux/framechord/releases/tag/v0.7.0) is
+publicly published from `7fde6338cb51d19297407ee22ec42c3e92c5f115`. The
+[release workflow](https://github.com/maxiplux/framechord/actions/runs/38787795161)
+passes native format/Clippy/tests (196 offline tests on Linux and macOS, 195 on
+Windows, one ignored on each), 18 isolated package checks per target, verified
+publication of 16 assets and public installer/update/reinstallation/offline rollback on
+Windows x86-64, Linux x86-64 and macOS Apple Silicon. The
+[tag checks](https://github.com/maxiplux/framechord/actions/runs/38787794745) also pass.
+The 15 assets listed in the release manifest match GitHub's stored sizes and digests,
+the manifest records the tag commit, `latest/download/version.txt` serves `0.7.0`, and
+no Intel Mac asset is included. The
+[independent public acceptance run](https://github.com/maxiplux/framechord/actions/runs/38792124986)
+for `v0.7.0` passes on all three platforms, each reporting a successful public
+installation, read-only update check, checksum-verified reinstallation, offline
+rollback and project-file preservation with zero paid provider calls.
+
+The [Pages deployment](https://github.com/maxiplux/framechord/actions/runs/38786017995)
+for the merge passes: <https://framechord.com/> serves the guide with the `v0.7.0`
+header, the hosted guide and both installers byte-match `docs/site` on master, and
+`www` redirects to the apex. On this Mac, `curl -fsSL https://framechord.com/install.sh | sh`
+(into an isolated `--bin-dir` with `--no-modify-path`) installed `framechord 0.7.0`
+whose SHA-256 equals the published Apple Silicon sidecar. The standard public
+acceptance script also passes locally for 0.7.0 with normal DNS and HTTPS: public
+installer, read-only update check, verified reinstall, offline rollback and
+project-file preservation, with zero provider calls. No paid provider calls were made
+at any point of this release.
