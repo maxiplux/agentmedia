@@ -6,7 +6,7 @@ parser.add_argument('--version', required=True)
 args = parser.parse_args()
 version = args.version.removeprefix('v')
 with tempfile.TemporaryDirectory(prefix='mediaagent-public-acceptance-') as temporary:
-    root = pathlib.Path(temporary)
+    root = pathlib.Path(temporary).resolve()
     bin_dir = root / 'installed bin'
     environment = {k: v for k, v in os.environ.items() if k not in ['OPENAI_API_KEY','GEMINI_API_KEY','FISH_API_KEY','ELEVENLABS_API_KEY','OPENROUTER_API_KEY']}
     if os.name == 'nt':

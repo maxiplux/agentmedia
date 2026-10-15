@@ -9,7 +9,7 @@ root = pathlib.Path(__file__).resolve().parents[1]
 binary = args.binary.resolve()
 version = subprocess.run([str(binary), '--version'], capture_output=True, text=True, check=True).stdout.strip().split()[1]
 with tempfile.TemporaryDirectory(prefix='mediaagent-bootstrap-') as temporary:
-    work = pathlib.Path(temporary)
+    work = pathlib.Path(temporary).resolve()
     environment = {k: v for k, v in os.environ.items() if k not in ['OPENAI_API_KEY','GEMINI_API_KEY','FISH_API_KEY','ELEVENLABS_API_KEY','OPENROUTER_API_KEY']}
     if os.name == 'nt':
         # CI starts in PowerShell 7; Windows PowerShell 5.1 must load its own modules.
