@@ -230,6 +230,10 @@ fn wrong_version_update_is_rejected_before_replacement() {
 fn rollback_restores_a_verified_backup_without_network_access() {
     child_case("rollback");
 }
+#[test]
+fn overlapping_update_preserves_the_winning_installation_and_rollback_backup() {
+    child_case("overlap");
+}
 fn child_case(action: &str) {
     let root = tempfile::tempdir().unwrap();
     let helper = root.path().join(if cfg!(windows) {
@@ -271,7 +275,10 @@ fn child_case(action: &str) {
         String::from_utf8_lossy(&child.stdout),
         String::from_utf8_lossy(&child.stderr)
     );
-    if matches!(action, "success" | "rollback" | "unmanaged-rollback") {
+    if matches!(
+        action,
+        "success" | "rollback" | "unmanaged-rollback" | "overlap"
+    ) {
         assert_eq!(fs::read(&helper).unwrap(), fs::read(&replacement).unwrap());
         assert!(
             std::process::Command::new(&helper)
@@ -296,6 +303,49 @@ async fn update_child_entry() {
     let bytes = fs::read(std::env::var("MEDIAAGENT_TEST_UPDATE_BINARY").unwrap()).unwrap();
     let current = std::env::current_exe().unwrap();
     let dir = current.parent().unwrap();
+    if action == "overlap" {
+        struct Overlap {
+            inner: Arc<Mock>,
+            candidate: std::path::PathBuf,
+        }
+        #[async_trait]
+        impl ReleaseTransport for Overlap {
+            async fn get(&self, url: &str, limit: usize) -> Result<Vec<u8>> {
+                if url.starts_with("https://api.") {
+                    // Another updater completes while this process fetches metadata.
+                    self_replace::self_replace(&self.candidate).unwrap();
+                }
+                self.inner.get(url, limit).await
+            }
+        }
+        let backup = dir.join(if cfg!(windows) {
+            ".mediaagent-previous.exe"
+        } else {
+            ".mediaagent-previous"
+        });
+        fs::write(&backup, b"preceding accepted backup").unwrap();
+        let prior = dir.join(".mediaagent-previous.yaml");
+        fs::write(&prior, b"preceding backup receipt").unwrap();
+        let fake = transport(fixture(distribution::VERSION, &bytes), bytes);
+        let result = ReleaseClient::with_transport(Arc::new(Overlap {
+            inner: fake.clone(),
+            candidate: std::env::var("MEDIAAGENT_TEST_UPDATE_BINARY")
+                .unwrap()
+                .into(),
+        }))
+        .update(None, false, true, false)
+        .await;
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("changed during this update")
+        );
+        assert_eq!(fake.calls.lock().unwrap().len(), 1);
+        assert_eq!(fs::read(backup).unwrap(), b"preceding accepted backup");
+        assert_eq!(fs::read(prior).unwrap(), b"preceding backup receipt");
+        return;
+    }
     if action == "rollback" || action == "unmanaged-rollback" {
         fs::write(
             dir.join(if cfg!(windows) {

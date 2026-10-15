@@ -316,6 +316,12 @@ impl ReleaseClient {
         force: bool,
         allow_downgrade: bool,
     ) -> Result<Value> {
+        let executable = fs::canonicalize(std::env::current_exe()?)?;
+        let observed_hash = if check {
+            None
+        } else {
+            Some(storage::hash(&fs::read(&executable)?))
+        };
         let suffix = match version {
             Some(v) => format!("tags/v{}", stable_version(v)?),
             None => "latest".into(),
@@ -349,7 +355,6 @@ impl ReleaseClient {
             return Err(problem("Release asset URL or size is invalid"));
         }
         let digest = asset.digest.strip_prefix("sha256:").filter(|s|s.len()==64&&s.bytes().all(|b|b.is_ascii_hexdigit())).ok_or_else(|| problem("Release asset is missing its GitHub SHA-256 digest; no executable was replaced"))?;
-        let executable = fs::canonicalize(std::env::current_exe()?)?;
         if check || (selected == current && !force) || (selected < current && version.is_none()) {
             return Ok(
                 json!({"distribution_action":"Release check complete","installed_version":VERSION,"available_version":selected.to_string(),"update_available":selected>current,"executable":executable,"target":TARGET,"check_only":check,"replaced":false,"message":if selected>current {"Update available. Run mediaagent update to install it."} else {"This executable is current or newer than the latest stable release."}}),
@@ -363,6 +368,15 @@ impl ReleaseClient {
         let dir = executable.parent().unwrap();
         let lock = storage::lock(&dir.join(".mediaagent-install.lock"))?;
         lock.lock_exclusive()?;
+        let installed = fs::read(&executable)?;
+        if observed_hash.as_deref() != Some(storage::hash(&installed).as_str())
+            || (receipt(dir).exists()
+                && existing_record(&receipt(dir), &installed)?.version != VERSION)
+        {
+            return Err(problem(
+                "The installed executable changed during this update; run mediaagent update again from the installed version. The preceding backup was preserved",
+            ));
+        }
         eprintln!("Downloading mediaagent {selected} for {TARGET}…");
         let bytes = self.transport.get(&expected_url, MAX_BINARY).await?;
         if bytes.len() != asset.size || storage::hash(&bytes) != digest.to_lowercase() {
