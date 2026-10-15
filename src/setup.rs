@@ -8,6 +8,7 @@ use crate::{
     storage::*,
     validation,
 };
+use fs4::fs_std::FileExt;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -112,7 +113,11 @@ fn defaults(media: Media, provider: Provider) -> Settings {
         }
         Media::Music | Media::Sfx => {
             settings.format = Some("mp3".into());
-            settings.duration_seconds = Some(if media == Media::Music { 10 } else { 3 });
+            settings.duration_seconds = Some(if media == Media::Music {
+                if provider == Provider::Google { 60 } else { 10 }
+            } else {
+                3
+            });
             if media == Media::Music {
                 settings.instrumental = Some(true);
             }
@@ -197,7 +202,28 @@ impl Session {
         self.report(root)["setup_complete"] == true
     }
     pub fn save(&self, root: &Path) -> Result<serde_json::Value> {
+        self.commit(root, None)
+    }
+    fn commit(
+        &self,
+        root: &Path,
+        expected: Option<(&Option<String>, &Option<String>)>,
+    ) -> Result<serde_json::Value> {
         validation::config(&self.config)?;
+        project::check_agents(&self.agents)?;
+        let guard = lock(&root.join("mediaagent/setup.lock"))?;
+        guard.lock_exclusive()?;
+        if expected.is_some_and(|(config_hash, env_hash)| {
+            &std::fs::read(root.join("mediaagent/config.yaml"))
+                .ok()
+                .map(|b| hash(&b))
+                != config_hash
+                || &std::fs::read(root.join(".env")).ok().map(|b| hash(&b)) != env_hash
+        }) {
+            return Err(Error::input(
+                "Configuration or credentials changed during setup; restart to review the current files",
+            ));
+        }
         let credentials = credentials::render_missing(root, &self.pending_keys)?;
         for name in &self.personas {
             crate::storage::id(name)?;
@@ -216,7 +242,9 @@ impl Session {
         if let Some(content) = credentials {
             atomic(&root.join(".env"), content.as_bytes(), true)?;
         }
-        if existing {
+        if existing
+            && serde_json::to_value(project::config(root)?)? != serde_json::to_value(&self.config)?
+        {
             save(&root.join("mediaagent/config.yaml"), &self.config)?;
         }
         for name in &self.personas {
@@ -907,7 +935,7 @@ pub fn run(
                         "Configuration changed during setup; restart to review the current file",
                     ));
                 }
-                match session.save(root) {
+                match session.commit(root, Some((&initial_hash, &initial_env_hash))) {
                     Ok(value) => return Ok(value),
                     Err(error) => {
                         ui.message(&error.to_string(), false);
@@ -950,4 +978,51 @@ pub fn wizard(root: &Path, color: crate::cli::Color) -> Result<serde_json::Value
         vec!["codex".into(), "claude".into()],
         color,
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn reviewed_save_rejects_stale_files_without_losing_credentials() {
+        let root = tempfile::tempdir().unwrap();
+        project::init(root.path(), &[]).unwrap();
+        let config_file = root.path().join("mediaagent/config.yaml");
+        let before = std::fs::read(&config_file).unwrap();
+        let config_hash = Some(hash(&before));
+        let env_hash = Some(hash(b""));
+        std::fs::write(root.path().join(".env"), "OTHER=newer-user-content\n").unwrap();
+        let session = Session::new(recommended(), vec![]);
+        assert!(
+            session
+                .commit(root.path(), Some((&config_hash, &env_hash)))
+                .is_err()
+        );
+        assert_eq!(std::fs::read(config_file).unwrap(), before);
+        assert_eq!(
+            std::fs::read_to_string(root.path().join(".env")).unwrap(),
+            "OTHER=newer-user-content\n"
+        );
+    }
+    #[test]
+    fn every_selectable_model_starts_with_compatible_generation_settings() {
+        for model in catalog::models()
+            .into_iter()
+            .filter(|m| m.current && m.supported)
+        {
+            let mut config = Config::default();
+            config.defaults.insert(
+                model.media,
+                Selection {
+                    provider: model.provider,
+                    model: model.model.clone(),
+                },
+            );
+            let settings = defaults(model.media, model.provider);
+            if model.media != Media::Text {
+                config.default_settings.insert(model.media, settings);
+            }
+            validation::config(&config).unwrap_or_else(|error| panic!("{}: {error}", model.model));
+        }
+    }
 }

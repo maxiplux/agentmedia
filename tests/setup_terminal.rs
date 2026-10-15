@@ -3,13 +3,13 @@ use portable_pty::{CommandBuilder, PtySize};
 use std::{
     fs,
     io::{Read, Write},
-    sync::mpsc,
+    sync::{Arc, Mutex, mpsc},
     time::{Duration, Instant},
 };
 struct Terminal {
     child: Box<dyn portable_pty::Child + Send + Sync>,
     _master: Box<dyn portable_pty::MasterPty + Send>,
-    writer: Box<dyn Write + Send>,
+    writer: Arc<Mutex<Box<dyn Write + Send>>>,
     receiver: mpsc::Receiver<Vec<u8>>,
     output: String,
     cursor: usize,
@@ -40,12 +40,35 @@ impl Terminal {
         let child = pair.slave.spawn_command(cmd).unwrap();
         drop(pair.slave);
         let mut reader = pair.master.try_clone_reader().unwrap();
-        let writer = pair.master.take_writer().unwrap();
+        let writer = Arc::new(Mutex::new(pair.master.take_writer().unwrap()));
+        let responses = Arc::clone(&writer);
         let (tx, receiver) = mpsc::channel();
         std::thread::spawn(move || {
             let mut buf = [0; 4096];
+            let mut query = Vec::new();
             while let Ok(n) = reader.read(&mut buf) {
-                if n == 0 || tx.send(buf[..n].to_vec()).is_err() {
+                if n == 0 {
+                    break;
+                }
+                // ConPTY asks the hosting terminal for its initial cursor position.
+                // A PTY driver must answer this just as an actual terminal does.
+                for byte in &buf[..n] {
+                    query.push(*byte);
+                    if query.ends_with(b"\x1b[6n") {
+                        let mut input = responses.lock().unwrap();
+                        if input
+                            .write_all(b"\x1b[1;1R")
+                            .and_then(|_| input.flush())
+                            .is_err()
+                        {
+                            return;
+                        }
+                    }
+                    if query.len() > 4 {
+                        query.remove(0);
+                    }
+                }
+                if tx.send(buf[..n].to_vec()).is_err() {
                     break;
                 }
             }
@@ -79,8 +102,9 @@ impl Terminal {
     fn send(&mut self, keys: &str) {
         // Let the prompt renderer finish switching terminal input mode before typing.
         std::thread::sleep(Duration::from_millis(50));
-        self.writer.write_all(keys.as_bytes()).unwrap();
-        self.writer.flush().unwrap();
+        let mut writer = self.writer.lock().unwrap();
+        writer.write_all(keys.as_bytes()).unwrap();
+        writer.flush().unwrap();
     }
     fn success(&mut self) {
         let deadline = Instant::now() + Duration::from_secs(15);

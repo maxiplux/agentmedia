@@ -33,6 +33,8 @@ pub fn target(media: Media) -> Media {
         other => other,
     }
 }
+/// Lifecycle guard, separate from adapter capability validation. Dedicated voice-design
+/// models may be current while not selectable as ordinary speech-generation models.
 pub fn require_current(selection: &Selection) -> Result<()> {
     if models().iter().any(|m| {
         m.provider == selection.provider
@@ -78,7 +80,7 @@ pub fn listing(root: &Path, filter: &Filter<'_>) -> Value {
             (filter.providers.is_empty() || filter.providers.contains(&m.provider))
                 && filter.media.is_none_or(|media| target(media) == m.media)
                 && (!filter.recommended || m.recommended)
-                && (filter.all || m.current && m.supported)
+                && (filter.all || (m.current && m.supported))
                 && filter.search.is_none_or(|q| {
                     format!("{} {} {}", m.name, m.model, m.description)
                         .to_lowercase()
@@ -92,6 +94,11 @@ pub fn listing(root: &Path, filter: &Filter<'_>) -> Value {
                 false
             } else {
                 !m.recommended
+            },
+            if filter.sort_name {
+                m.name.to_lowercase()
+            } else {
+                String::new()
             },
             m.provider,
             m.model.clone(),

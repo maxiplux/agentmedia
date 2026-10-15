@@ -382,4 +382,22 @@ async fn model_popularity_is_provider_scoped_and_discovery_does_not_enable_unkno
     assert_eq!(report["catalogs"][0]["models"][1]["current"], false);
     assert_eq!(report["catalogs"][0]["models"][1]["supported"], false);
     assert_eq!(report["generation_performed"], false);
+    let before = fake.calls.load(Ordering::SeqCst);
+    for media in [
+        mediaagent::contracts::Media::Music,
+        mediaagent::contracts::Media::Sfx,
+    ] {
+        let unsupported = health::Client::with_transport(2, fake.clone())
+            .unwrap()
+            .models_filtered(root.path(), &[Provider::Openrouter], Some(media), false)
+            .await
+            .unwrap();
+        assert!(
+            unsupported["catalogs"][0]["models"]
+                .as_array()
+                .unwrap()
+                .is_empty()
+        );
+    }
+    assert_eq!(fake.calls.load(Ordering::SeqCst), before);
 }

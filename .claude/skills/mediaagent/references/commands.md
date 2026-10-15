@@ -1502,6 +1502,8 @@ Arguments:
 
 Options:
       --model <MODEL>
+          Use eleven_ttv_v3 for new previews; the historical v2 value remains readable but cannot submit
+
           [possible values: eleven_multilingual_ttv_v2, eleven_ttv_v3]
 
       --project <PROJECT>
@@ -2195,7 +2197,7 @@ Options:
           Emit a structured JSON result; diagnostics stay on stderr, with no animation
 
       --input-fidelity <INPUT_FIDELITY>
-          OpenAI image-edit input preservation; identity references require high on supported models
+          Historical image-edit fidelity field; omit for current GPT Image 2.5 models
 
           [possible values: high, low]
 
@@ -2226,7 +2228,7 @@ Options:
       --image-quality <IMAGE_QUALITY>
           OpenAI image quality: low/medium/high/auto; current 2.5 models also support xhigh/max
 
-          [possible values: low, medium, high, auto]
+          [possible values: low, medium, high, auto, xhigh, max]
 
       --provider <PROVIDER>
           [possible values: openai, google, fish, openrouter, elevenlabs]

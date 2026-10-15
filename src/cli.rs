@@ -397,6 +397,7 @@ pub enum PersonaAction {
     /// Generate ElevenLabs voice preview candidates without creating or binding a saved voice
     VoiceDesign {
         id: String,
+        /// Use eleven_ttv_v3 for new previews; the historical v2 value remains readable but cannot submit
         #[arg(long,value_parser=clap::builder::PossibleValuesParser::new(crate::voices::DESIGN_MODELS.iter().copied()))]
         model: String,
         /// Exact 100–1000 character preview script
@@ -569,7 +570,7 @@ pub struct Input {
     /// Preserve referenced character identities; repeat for multiple selected characters
     #[arg(long)]
     pub identity_reference: Vec<PathBuf>,
-    /// OpenAI image-edit input preservation; identity references require high on supported models
+    /// Historical image-edit fidelity field; omit for current GPT Image 2.5 models
     #[arg(long,value_parser=["high","low"])]
     pub input_fidelity: Option<String>,
 
@@ -583,7 +584,7 @@ pub struct Input {
     #[arg(long, requires = "voice_sample")]
     pub consent_file: Option<PathBuf>,
     /// OpenAI image quality: low/medium/high/auto; current 2.5 models also support xhigh/max
-    #[arg(long,value_parser=["low","medium","high","auto"])]
+    #[arg(long,value_parser=["low","medium","high","auto","xhigh","max"])]
     pub image_quality: Option<String>,
     #[arg(long, value_enum, requires = "model")]
     pub provider: Option<Provider>,
@@ -1116,7 +1117,12 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                                     .to_lowercase()
                                     .contains(&q.to_lowercase())
                             }) && (!*recommended || m["recommended"] == true)
+                                && (*all || (m["current"] == true && m["supported"] == true))
                         });
+                        if *sort == ModelSort::Name {
+                            models
+                                .sort_by_key(|m| m["model"].as_str().unwrap_or("").to_lowercase());
+                        }
                     }
                 }
                 let exit =

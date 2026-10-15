@@ -92,7 +92,7 @@ fn credentials_round_trip_literal_characters_without_touching_existing_content()
     let t = tempfile::tempdir().unwrap();
     let prefix = "# keep this comment\r\nOTHER=keep-me\r\nOPENAI_API_KEY=\r\n";
     fs::write(t.path().join(".env"), prefix).unwrap();
-    let value = "fixture $not_expanded # slash\\ quote\" and ' spaces";
+    let value = "fixture $not_expanded `literal` # slash\\ quote\" and ' spaces";
     credentials::save_missing(
         t.path(),
         &BTreeMap::from([(Provider::Openai, value.into())]),
@@ -325,4 +325,132 @@ async fn saved_legacy_operation_results_remain_readable_without_new_submissions(
     assert_eq!(reused.state, State::Succeeded);
     assert_eq!(reused.attempts, 1);
     assert_eq!(reused.request_id.as_deref(), Some("receipt"));
+}
+
+#[test]
+fn filling_empty_credentials_preserves_export_indentation_and_comments() {
+    let root = tempfile::tempdir().unwrap();
+    fs::write(
+        root.path().join(".env"),
+        "  export FISH_API_KEY= # user's note\r\n",
+    )
+    .unwrap();
+    credentials::save_missing(
+        root.path(),
+        &BTreeMap::from([(Provider::Fish, "fixture'`$literal".into())]),
+    )
+    .unwrap();
+    let written = fs::read_to_string(root.path().join(".env")).unwrap();
+    assert!(written.starts_with("  export FISH_API_KEY="));
+    assert!(written.ends_with(" # user's note\r\n"));
+    assert_eq!(
+        credentials::resolve_with("FISH_API_KEY", root.path(), |_| None).unwrap(),
+        "fixture'`$literal"
+    );
+}
+#[test]
+fn concurrent_character_creation_never_overwrites_a_winning_scaffold() {
+    let root = tempfile::tempdir().unwrap();
+    let path = root.path().to_owned();
+    let results = std::thread::scope(|scope| {
+        let handles = (0..4)
+            .map(|_| {
+                let p = path.clone();
+                scope.spawn(move || project::add_persona(&p, "unique"))
+            })
+            .collect::<Vec<_>>();
+        handles
+            .into_iter()
+            .map(|h| h.join().unwrap())
+            .collect::<Vec<_>>()
+    });
+    assert_eq!(results.iter().filter(|r| r.is_ok()).count(), 1);
+    assert!(
+        mediaagent::validation::character(
+            &path.join("mediaagent/characters/unique/character.yaml")
+        )
+        .is_ok()
+    );
+}
+
+#[test]
+fn direct_cli_accepts_current_image_quality_and_size_controls_without_generation() {
+    let root = tempfile::tempdir().unwrap();
+    for quality in ["xhigh", "max"] {
+        let output = cargo_bin_cmd!("mediaagent")
+            .arg("--project")
+            .arg(root.path())
+            .args([
+                "generate",
+                "image",
+                "--provider",
+                "openai",
+                "--model",
+                "gpt-image-2.5-flare",
+                "--prompt",
+                "Offline quality preview",
+                "--image-quality",
+                quality,
+                "--size",
+                "2048x2048",
+                "--dry-run",
+                "--json",
+            ])
+            .assert()
+            .success()
+            .get_output()
+            .stdout
+            .clone();
+        let result: Value = serde_json::from_slice(&output).unwrap();
+        assert_eq!(
+            result["data"]["inputs"][0]["settings"]["image_quality"],
+            quality
+        );
+        assert!(!root.path().join("mediaagent/runs").exists());
+    }
+}
+
+#[test]
+fn unchanged_setup_save_preserves_configuration_comments_and_formatting() {
+    let root = tempfile::tempdir().unwrap();
+    project::init(root.path(), &[]).unwrap();
+    let path = root.path().join("mediaagent/config.yaml");
+    let original = format!(
+        "# Keep my configuration notes\n{}",
+        fs::read_to_string(&path).unwrap()
+    );
+    fs::write(&path, &original).unwrap();
+    setup::Session::new(project::config(root.path()).unwrap(), vec![])
+        .save(root.path())
+        .unwrap();
+    assert_eq!(fs::read_to_string(path).unwrap(), original);
+}
+
+#[test]
+fn live_bundled_catalog_hides_historical_models_unless_all_is_explicit() {
+    let root = tempfile::tempdir().unwrap();
+    for all in [false, true] {
+        let mut command = cargo_bin_cmd!("mediaagent");
+        command.arg("--project").arg(root.path()).args([
+            "models",
+            "--live",
+            "--provider",
+            "fish",
+            "--json",
+        ]);
+        if all {
+            command.arg("--all");
+        }
+        let output = command.assert().success().get_output().stdout.clone();
+        let result: Value = serde_json::from_slice(&output).unwrap();
+        let rows = result["data"]["catalogs"][0]["models"].as_array().unwrap();
+        assert!(rows.iter().any(|m| m["model"] == "s2.1-pro"));
+        assert_eq!(rows.iter().any(|m| m["model"] == "s1"), all);
+        if !all {
+            assert!(
+                rows.iter()
+                    .all(|m| m["current"] == true && m["supported"] == true)
+            );
+        }
+    }
 }

@@ -92,11 +92,10 @@ pub fn render_missing(
                 provider.key()
             )));
         }
-        let encoded = value
-            .replace('\\', "\\\\")
-            .replace('"', "\\\"")
-            .replace('$', "\\$");
-        let replacement = format!("{}=\"{}\"", provider.key(), encoded);
+        // Single-quoted segments are literal in both dotenvy and ordinary shells.
+        // Close/escape/reopen around apostrophes; never execute stored content.
+        let encoded = value.replace('\'', "'\\''");
+        let replacement = format!("{}='{}'", provider.key(), encoded);
         let mut found = false;
         let mut next = String::new();
         for line in updated.split_inclusive('\n') {
@@ -109,7 +108,21 @@ pub fn render_missing(
                 .split_once('=')
                 .is_some_and(|(name, _)| name.trim() == provider.key())
             {
+                next.push_str(&content[..content.len() - content.trim_start().len()]);
+                if content.trim_start().starts_with("export ") {
+                    next.push_str("export ");
+                }
                 next.push_str(&replacement);
+                let tail = entry.split_once('=').unwrap().1.trim();
+                let comment = tail
+                    .strip_prefix("\"\"")
+                    .or_else(|| tail.strip_prefix("''"))
+                    .unwrap_or(tail)
+                    .trim_start();
+                if comment.starts_with('#') {
+                    next.push(' ');
+                    next.push_str(comment);
+                }
                 next.push_str(if line.ends_with("\r\n") {
                     "\r\n"
                 } else if line.ends_with('\n') {

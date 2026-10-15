@@ -423,6 +423,11 @@ impl Client {
         };
         let mut rows = Vec::new();
         for provider in selected {
+            if provider == Provider::Openrouter && matches!(media, Some(Media::Music | Media::Sfx))
+            {
+                rows.push(serde_json::json!({"provider":provider,"status":"catalog_visible","models":[],"generation_tested":false,"action":"No implemented OpenRouter catalog modality for music or sound effects"}));
+                continue;
+            }
             let endpoint = match provider {
                 Provider::Openai => "https://api.openai.com/v1/models",
                 Provider::Google => {
