@@ -1,4 +1,4 @@
-# mediaagent 0.1.0 command reference
+# mediaagent 0.2.0 command reference
 
 Generated from the executable's command definitions. Global flags are accepted before or after the command.
 
@@ -12,6 +12,10 @@ Usage: mediaagent [OPTIONS] <COMMAND>
 Commands:
   init       Initialize offline, preserving existing files and credentials
   config     Inspect or explicitly replace validated configuration
+  verify     Preview a bounded live verification suite; execution requires the exact approved preview hash
+  usage      Report provider-returned usage separately from unknown costs
+  storage    Inspect storage or apply a previously reviewed conservative cleanup plan
+  migrate    Preview migration of a v1 job, config or run; --apply creates a non-overwriting backup
   doctor     Inspect credentials offline, or explicitly check all provider endpoints and keys with --live
   schema     Print a JSON Schema for a versioned manifest
   models     List implemented provider/model capabilities (not account entitlements)
@@ -32,7 +36,7 @@ Commands:
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -43,13 +47,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -78,7 +82,7 @@ Options:
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --defaults-file <DEFAULTS_FILE>
@@ -95,13 +99,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -120,7 +124,7 @@ Usage: mediaagent config [OPTIONS] <COMMAND>
 Commands:
   wizard  Terminal-only guided defaults; agents use setup --file instead
   host    Explicit user-scope host concurrency ceilings, independent of agent settings
-  show    
+  show
   setup   Replace config only after validating the supplied file
   limits  Inspect finite generation limits
   help    Print this message or the help of the given subcommand(s)
@@ -128,7 +132,7 @@ Commands:
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -139,13 +143,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -164,7 +168,7 @@ Usage: mediaagent config wizard [OPTIONS]
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -175,13 +179,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -198,14 +202,14 @@ Explicit user-scope host concurrency ceilings, independent of agent settings
 Usage: mediaagent config host [OPTIONS] <COMMAND>
 
 Commands:
-  show   
-  setup  
+  show
+  setup
   help   Print this message or the help of the given subcommand(s)
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -216,13 +220,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -239,7 +243,7 @@ Usage: mediaagent config host show [OPTIONS]
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -250,13 +254,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -272,11 +276,11 @@ Usage: mediaagent config host setup [OPTIONS] --file <FILE>
 
 Options:
       --file <FILE>
-          
+
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -287,13 +291,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -310,8 +314,8 @@ Print this message or the help of the given subcommand(s)
 Usage: mediaagent config host help [COMMAND]
 
 Commands:
-  show   
-  setup  
+  show
+  setup
   help   Print this message or the help of the given subcommand(s)
 
 ```
@@ -347,7 +351,7 @@ Usage: mediaagent config show [OPTIONS]
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -358,13 +362,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -382,11 +386,11 @@ Usage: mediaagent config setup [OPTIONS] --file <FILE>
 
 Options:
       --file <FILE>
-          
+
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -397,13 +401,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -422,7 +426,7 @@ Usage: mediaagent config limits [OPTIONS]
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -433,13 +437,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -458,7 +462,7 @@ Usage: mediaagent config help [COMMAND]
 Commands:
   wizard  Terminal-only guided defaults; agents use setup --file instead
   host    Explicit user-scope host concurrency ceilings, independent of agent settings
-  show    
+  show
   setup   Replace config only after validating the supplied file
   limits  Inspect finite generation limits
   help    Print this message or the help of the given subcommand(s)
@@ -482,7 +486,7 @@ Explicit user-scope host concurrency ceilings, independent of agent settings
 Usage: mediaagent config help host [COMMAND]
 
 Commands:
-  show   
+  show
   setup
 
 ```
@@ -535,6 +539,335 @@ Usage: mediaagent config help help
 
 ```
 
+## mediaagent verify
+
+```text
+Preview a bounded live verification suite; execution requires the exact approved preview hash
+
+Usage: mediaagent verify [OPTIONS] --suite <SUITE>
+
+Options:
+      --project <PROJECT>
+          Target project root; credentials are loaded only from this root's .env
+
+          [default: .]
+
+      --suite <SUITE>
+
+
+      --execute
+
+
+      --json
+          Emit a structured JSON result; diagnostics stay on stderr, with no animation
+
+      --non-interactive
+          Never prompt; supply YAML files or explicit flags for automation
+
+      --preview-hash <PREVIEW_HASH>
+
+
+      --progress <PROGRESS>
+          Terminal progress mode; redirected auto progress uses plain stage updates
+
+          [default: auto]
+          [possible values: auto, plain, off]
+
+      --color <COLOR>
+          Progress colors; auto honors NO_COLOR
+
+          [default: auto]
+          [possible values: auto, always, never]
+
+  -h, --help
+          Print help
+
+```
+
+## mediaagent usage
+
+```text
+Report provider-returned usage separately from unknown costs
+
+Usage: mediaagent usage [OPTIONS]
+
+Options:
+      --project <PROJECT>
+          Target project root; credentials are loaded only from this root's .env
+
+          [default: .]
+
+      --json
+          Emit a structured JSON result; diagnostics stay on stderr, with no animation
+
+      --non-interactive
+          Never prompt; supply YAML files or explicit flags for automation
+
+      --progress <PROGRESS>
+          Terminal progress mode; redirected auto progress uses plain stage updates
+
+          [default: auto]
+          [possible values: auto, plain, off]
+
+      --color <COLOR>
+          Progress colors; auto honors NO_COLOR
+
+          [default: auto]
+          [possible values: auto, always, never]
+
+  -h, --help
+          Print help
+
+```
+
+## mediaagent storage
+
+```text
+Inspect storage or apply a previously reviewed conservative cleanup plan
+
+Usage: mediaagent storage [OPTIONS] <COMMAND>
+
+Commands:
+  inspect
+  plan     Save a cleanup preview; only unreferenced blobs can be removed
+  clean    Revalidate and apply a saved cleanup preview; fails if stale or workers active
+  help     Print this message or the help of the given subcommand(s)
+
+Options:
+      --project <PROJECT>
+          Target project root; credentials are loaded only from this root's .env
+
+          [default: .]
+
+      --json
+          Emit a structured JSON result; diagnostics stay on stderr, with no animation
+
+      --non-interactive
+          Never prompt; supply YAML files or explicit flags for automation
+
+      --progress <PROGRESS>
+          Terminal progress mode; redirected auto progress uses plain stage updates
+
+          [default: auto]
+          [possible values: auto, plain, off]
+
+      --color <COLOR>
+          Progress colors; auto honors NO_COLOR
+
+          [default: auto]
+          [possible values: auto, always, never]
+
+  -h, --help
+          Print help
+
+```
+
+## mediaagent storage inspect
+
+```text
+Usage: mediaagent storage inspect [OPTIONS]
+
+Options:
+      --project <PROJECT>
+          Target project root; credentials are loaded only from this root's .env
+
+          [default: .]
+
+      --json
+          Emit a structured JSON result; diagnostics stay on stderr, with no animation
+
+      --non-interactive
+          Never prompt; supply YAML files or explicit flags for automation
+
+      --progress <PROGRESS>
+          Terminal progress mode; redirected auto progress uses plain stage updates
+
+          [default: auto]
+          [possible values: auto, plain, off]
+
+      --color <COLOR>
+          Progress colors; auto honors NO_COLOR
+
+          [default: auto]
+          [possible values: auto, always, never]
+
+  -h, --help
+          Print help
+
+```
+
+## mediaagent storage plan
+
+```text
+Save a cleanup preview; only unreferenced blobs can be removed
+
+Usage: mediaagent storage plan [OPTIONS] --output <OUTPUT>
+
+Options:
+      --output <OUTPUT>
+
+
+      --project <PROJECT>
+          Target project root; credentials are loaded only from this root's .env
+
+          [default: .]
+
+      --json
+          Emit a structured JSON result; diagnostics stay on stderr, with no animation
+
+      --non-interactive
+          Never prompt; supply YAML files or explicit flags for automation
+
+      --progress <PROGRESS>
+          Terminal progress mode; redirected auto progress uses plain stage updates
+
+          [default: auto]
+          [possible values: auto, plain, off]
+
+      --color <COLOR>
+          Progress colors; auto honors NO_COLOR
+
+          [default: auto]
+          [possible values: auto, always, never]
+
+  -h, --help
+          Print help
+
+```
+
+## mediaagent storage clean
+
+```text
+Revalidate and apply a saved cleanup preview; fails if stale or workers active
+
+Usage: mediaagent storage clean [OPTIONS] --plan <PLAN>
+
+Options:
+      --plan <PLAN>
+
+
+      --project <PROJECT>
+          Target project root; credentials are loaded only from this root's .env
+
+          [default: .]
+
+      --json
+          Emit a structured JSON result; diagnostics stay on stderr, with no animation
+
+      --non-interactive
+          Never prompt; supply YAML files or explicit flags for automation
+
+      --progress <PROGRESS>
+          Terminal progress mode; redirected auto progress uses plain stage updates
+
+          [default: auto]
+          [possible values: auto, plain, off]
+
+      --color <COLOR>
+          Progress colors; auto honors NO_COLOR
+
+          [default: auto]
+          [possible values: auto, always, never]
+
+  -h, --help
+          Print help
+
+```
+
+## mediaagent storage help
+
+```text
+Print this message or the help of the given subcommand(s)
+
+Usage: mediaagent storage help [COMMAND]
+
+Commands:
+  inspect
+  plan     Save a cleanup preview; only unreferenced blobs can be removed
+  clean    Revalidate and apply a saved cleanup preview; fails if stale or workers active
+  help     Print this message or the help of the given subcommand(s)
+
+```
+
+## mediaagent storage help inspect
+
+```text
+Usage: mediaagent storage help inspect
+
+```
+
+## mediaagent storage help plan
+
+```text
+Save a cleanup preview; only unreferenced blobs can be removed
+
+Usage: mediaagent storage help plan
+
+```
+
+## mediaagent storage help clean
+
+```text
+Revalidate and apply a saved cleanup preview; fails if stale or workers active
+
+Usage: mediaagent storage help clean
+
+```
+
+## mediaagent storage help help
+
+```text
+Print this message or the help of the given subcommand(s)
+
+Usage: mediaagent storage help help
+
+```
+
+## mediaagent migrate
+
+```text
+Preview migration of a v1 job, config or run; --apply creates a non-overwriting backup
+
+Usage: mediaagent migrate [OPTIONS] --kind <KIND> --file <FILE>
+
+Options:
+      --kind <KIND>
+          [possible values: job, config, run]
+
+      --project <PROJECT>
+          Target project root; credentials are loaded only from this root's .env
+
+          [default: .]
+
+      --file <FILE>
+
+
+      --json
+          Emit a structured JSON result; diagnostics stay on stderr, with no animation
+
+      --apply
+
+
+      --non-interactive
+          Never prompt; supply YAML files or explicit flags for automation
+
+      --progress <PROGRESS>
+          Terminal progress mode; redirected auto progress uses plain stage updates
+
+          [default: auto]
+          [possible values: auto, plain, off]
+
+      --color <COLOR>
+          Progress colors; auto honors NO_COLOR
+
+          [default: auto]
+          [possible values: auto, always, never]
+
+  -h, --help
+          Print help
+
+```
+
 ## mediaagent doctor
 
 ```text
@@ -548,7 +881,7 @@ Options:
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -556,7 +889,7 @@ Options:
 
       --provider <PROVIDER>
           Selected providers (repeat or comma-separate); default all five, including missing keys
-          
+
           [possible values: openai, google, fish, openrouter, elevenlabs]
 
       --non-interactive
@@ -564,18 +897,18 @@ Options:
 
       --timeout-seconds <TIMEOUT_SECONDS>
           Timeout per provider, including response download; 1–60 seconds, no retries
-          
+
           [default: 10]
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -593,12 +926,12 @@ Usage: mediaagent schema [OPTIONS] <KIND>
 
 Arguments:
   <KIND>
-          [possible values: config, character, infographic, job, batch, run, artifact, review, effective, budget, revision, operation, voice_design, voice_consent, voice_clone, host_limits, diagnostics]
+          [possible values: config, character, infographic, job, batch, run, artifact, review, effective, budget, revision, operation, voice_design, voice_consent, voice_clone, host_limits, diagnostics, verification]
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -609,13 +942,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -632,26 +965,32 @@ List implemented provider/model capabilities (not account entitlements)
 Usage: mediaagent models [OPTIONS]
 
 Options:
+      --live
+          Explicit read-only provider catalog lookup; not a generation entitlement check
+
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
           Emit a structured JSON result; diagnostics stay on stderr, with no animation
+
+      --provider <PROVIDER>
+          [possible values: openai, google, fish, openrouter, elevenlabs]
 
       --non-interactive
           Never prompt; supply YAML files or explicit flags for automation
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -670,7 +1009,7 @@ Usage: mediaagent voices [OPTIONS] --provider <PROVIDER>
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --provider <PROVIDER>
@@ -690,7 +1029,7 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
@@ -699,18 +1038,18 @@ Options:
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
       --page-size <PAGE_SIZE>
           Maximum voices per page, 1–100
-          
+
           [default: 20]
 
       --max-pages <MAX_PAGES>
           Maximum catalog requests, 1–20; default one
-          
+
           [default: 1]
 
       --page-token <PAGE_TOKEN>
@@ -718,14 +1057,14 @@ Options:
 
       --page-number <PAGE_NUMBER>
           Fish catalog page, starting at one
-          
+
           [default: 1]
 
       --search <SEARCH>
-          
+
 
       --language <LANGUAGE>
-          
+
 
       --category <CATEGORY>
           Google: prebuilt/replicated/prompted; ElevenLabs: premade/cloned/generated/professional
@@ -743,15 +1082,15 @@ Inspect or export embedded authoring templates
 Usage: mediaagent templates [OPTIONS] <COMMAND>
 
 Commands:
-  list    
-  show    
-  export  
+  list
+  show
+  export
   help    Print this message or the help of the given subcommand(s)
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -762,13 +1101,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -785,7 +1124,7 @@ Usage: mediaagent templates list [OPTIONS]
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -796,13 +1135,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -818,12 +1157,12 @@ Usage: mediaagent templates show [OPTIONS] <NAME>
 
 Arguments:
   <NAME>
-          
+
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -834,13 +1173,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -856,7 +1195,7 @@ Usage: mediaagent templates export [OPTIONS] <DIRECTORY>
 
 Arguments:
   <DIRECTORY>
-          
+
 
 Options:
       --overwrite
@@ -864,7 +1203,7 @@ Options:
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -875,13 +1214,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -898,9 +1237,9 @@ Print this message or the help of the given subcommand(s)
 Usage: mediaagent templates help [COMMAND]
 
 Commands:
-  list    
-  show    
-  export  
+  list
+  show
+  export
   help    Print this message or the help of the given subcommand(s)
 
 ```
@@ -948,20 +1287,20 @@ Commands:
   voice-design        Generate ElevenLabs voice preview candidates without creating or binding a saved voice
   voice-create        Create a provider voice from one selected candidate; canonical binding is explicit
   voice-status        Inspect saved voice candidates, creation results, and uncertain operations
-  add                 
-  list                
-  show                
+  add
+  list
+  show
   bootstrap           Generate visual candidates; this never promotes references
   accept-sample       Accept a selected recording, exact transcript, and granted consent as a portable voice sample
   accept              Accept a user-selected image or recording into the canonical profile
-  export              
-  import              
+  export
+  import
   help                Print this message or the help of the given subcommand(s)
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -972,13 +1311,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -997,41 +1336,41 @@ Usage: mediaagent persona voice-clone [OPTIONS] --request <REQUEST>
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --request <REQUEST>
-          
+
 
       --json
           Emit a structured JSON result; diagnostics stay on stderr, with no animation
 
       --limits-file <LIMITS_FILE>
-          
+
 
       --dry-run
-          
+
 
       --non-interactive
           Never prompt; supply YAML files or explicit flags for automation
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --retry-unknown
-          
+
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
       --refresh-verification
-          
+
 
   -h, --help
           Print help
@@ -1047,12 +1386,12 @@ Usage: mediaagent persona voice-clone-status [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
-          
+
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -1063,13 +1402,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -1087,7 +1426,7 @@ Usage: mediaagent persona voice-design [OPTIONS] --model <MODEL> --text-file <TE
 
 Arguments:
   <ID>
-          
+
 
 Options:
       --model <MODEL>
@@ -1095,7 +1434,7 @@ Options:
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -1111,22 +1450,22 @@ Options:
           Stable design run ID for recovery; omit for a new run
 
       --limits-file <LIMITS_FILE>
-          
+
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
       --dry-run
-          
+
 
       --retry-unknown
           Explicit retry of an uncertain paid design request
@@ -1145,25 +1484,25 @@ Usage: mediaagent persona voice-create [OPTIONS] --design-run <DESIGN_RUN> --can
 
 Arguments:
   <ID>
-          
+
 
 Options:
       --design-run <DESIGN_RUN>
-          
+
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --candidate <CANDIDATE>
-          
+
 
       --json
           Emit a structured JSON result; diagnostics stay on stderr, with no animation
 
       --name <NAME>
-          
+
 
       --non-interactive
           Never prompt; supply YAML files or explicit flags for automation
@@ -1173,27 +1512,27 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
       --replace-binding
-          
+
 
       --refresh-verification
           Refresh provider verification with one metadata lookup before binding
 
       --dry-run
-          
+
 
       --retry-unknown
-          
+
 
   -h, --help
           Print help
@@ -1209,12 +1548,12 @@ Usage: mediaagent persona voice-status [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
-          
+
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -1225,13 +1564,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -1247,12 +1586,12 @@ Usage: mediaagent persona add [OPTIONS] <ID>
 
 Arguments:
   <ID>
-          
+
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -1263,13 +1602,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -1286,7 +1625,7 @@ Usage: mediaagent persona list [OPTIONS]
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -1297,13 +1636,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -1319,12 +1658,12 @@ Usage: mediaagent persona show [OPTIONS] <ID>
 
 Arguments:
   <ID>
-          
+
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -1335,13 +1674,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -1359,19 +1698,19 @@ Usage: mediaagent persona bootstrap [OPTIONS] --output-dir <OUTPUT_DIR> <ID>
 
 Arguments:
   <ID>
-          
+
 
 Options:
       --output-dir <OUTPUT_DIR>
-          
+
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --async
-          
+
 
       --json
           Emit a structured JSON result; diagnostics stay on stderr, with no animation
@@ -1381,13 +1720,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -1405,38 +1744,38 @@ Usage: mediaagent persona accept-sample [OPTIONS] --audio <AUDIO> --transcript <
 
 Arguments:
   <ID>
-          
+
 
 Options:
       --audio <AUDIO>
-          
+
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
           Emit a structured JSON result; diagnostics stay on stderr, with no animation
 
       --transcript <TRANSCRIPT>
-          
+
 
       --consent <CONSENT>
-          
+
 
       --non-interactive
           Never prompt; supply YAML files or explicit flags for automation
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -1454,16 +1793,16 @@ Usage: mediaagent persona accept [OPTIONS] --reference <REFERENCE> --kind <KIND>
 
 Arguments:
   <ID>
-          
+
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --reference <REFERENCE>
-          
+
 
       --json
           Emit a structured JSON result; diagnostics stay on stderr, with no animation
@@ -1476,13 +1815,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -1498,15 +1837,15 @@ Usage: mediaagent persona export [OPTIONS] --destination <DESTINATION> <ID>
 
 Arguments:
   <ID>
-          
+
 
 Options:
       --destination <DESTINATION>
-          
+
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -1517,13 +1856,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -1539,15 +1878,15 @@ Usage: mediaagent persona import [OPTIONS] <DIRECTORY>
 
 Arguments:
   <DIRECTORY>
-          
+
 
 Options:
       --id <ID>
-          
+
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -1558,13 +1897,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -1586,14 +1925,14 @@ Commands:
   voice-design        Generate ElevenLabs voice preview candidates without creating or binding a saved voice
   voice-create        Create a provider voice from one selected candidate; canonical binding is explicit
   voice-status        Inspect saved voice candidates, creation results, and uncertain operations
-  add                 
-  list                
-  show                
+  add
+  list
+  show
   bootstrap           Generate visual candidates; this never promotes references
   accept-sample       Accept a selected recording, exact transcript, and granted consent as a portable voice sample
   accept              Accept a user-selected image or recording into the canonical profile
-  export              
-  import              
+  export
+  import
   help                Print this message or the help of the given subcommand(s)
 
 ```
@@ -1723,7 +2062,7 @@ Usage: mediaagent validate [OPTIONS] --kind <KIND> <PATH>
 
 Arguments:
   <PATH>
-          
+
 
 Options:
       --kind <KIND>
@@ -1731,7 +2070,7 @@ Options:
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -1742,13 +2081,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -1774,7 +2113,7 @@ Options:
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --identity-reference <IDENTITY_REFERENCE>
@@ -1785,7 +2124,7 @@ Options:
 
       --input-fidelity <INPUT_FIDELITY>
           OpenAI image-edit input preservation; identity references require high on supported models
-          
+
           [possible values: high, low]
 
       --non-interactive
@@ -1793,7 +2132,7 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
@@ -1802,7 +2141,7 @@ Options:
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -1814,26 +2153,26 @@ Options:
 
       --image-quality <IMAGE_QUALITY>
           OpenAI image quality: low, medium, high, or auto
-          
+
           [possible values: low, medium, high, auto]
 
       --provider <PROVIDER>
           [possible values: openai, google, fish, openrouter, elevenlabs]
 
       --model <MODEL>
-          
+
 
       --prompt <PROMPT>
           Creative direction (not speech script); conflicts with --brief-file
 
       --brief-file <BRIEF_FILE>
-          
+
 
       --text <TEXT>
           Exact spoken words; conflicts with --text-file
 
       --text-file <TEXT_FILE>
-          
+
 
       --spec <SPEC>
           Structured infographic YAML
@@ -1842,25 +2181,25 @@ Options:
           Character YAML; pins identity, provider/model, and accepted references
 
       --reference <REFERENCE>
-          
+
 
       --voice <VOICE>
-          
+
 
       --locale <LOCALE>
-          
+
 
       --format <FORMAT>
-          
+
 
       --size <SIZE>
-          
+
 
       --duration-seconds <DURATION_SECONDS>
-          
+
 
       --instrumental
-          
+
 
       --vocal
           Request vocal music; conflicts with --instrumental
@@ -1903,11 +2242,11 @@ Usage: mediaagent batch [OPTIONS] --manifest <MANIFEST>
 
 Options:
       --manifest <MANIFEST>
-          
+
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -1927,13 +2266,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -1965,18 +2304,19 @@ Inspect, wait, cancel, or resume durable runs
 Usage: mediaagent runs [OPTIONS] <COMMAND>
 
 Commands:
+  recover    Stage a manually recovered response for an uncertain job; resume publishes without a new paid request
   reconcile  Retrieve saved Google interactions without a new generation; resume publishes recovered output
-  list       
-  status     
-  wait       
-  cancel     
-  resume     
+  list
+  status
+  wait
+  cancel
+  resume
   help       Print this message or the help of the given subcommand(s)
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -1987,15 +2327,70 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
+
+  -h, --help
+          Print help
+
+```
+
+## mediaagent runs recover
+
+```text
+Stage a manually recovered response for an uncertain job; resume publishes without a new paid request
+
+Usage: mediaagent runs recover [OPTIONS] --job <JOB> --file <FILE> --format <FORMAT> --fingerprint <FINGERPRINT> --evidence <EVIDENCE> <RUN_ID>
+
+Arguments:
+  <RUN_ID>
+
+
+Options:
+      --job <JOB>
+
+
+      --project <PROJECT>
+          Target project root; credentials are loaded only from this root's .env
+
+          [default: .]
+
+      --file <FILE>
+
+
+      --json
+          Emit a structured JSON result; diagnostics stay on stderr, with no animation
+
+      --format <FORMAT>
+
+
+      --non-interactive
+          Never prompt; supply YAML files or explicit flags for automation
+
+      --fingerprint <FINGERPRINT>
+
+
+      --progress <PROGRESS>
+          Terminal progress mode; redirected auto progress uses plain stage updates
+
+          [default: auto]
+          [possible values: auto, plain, off]
+
+      --color <COLOR>
+          Progress colors; auto honors NO_COLOR
+
+          [default: auto]
+          [possible values: auto, always, never]
+
+      --evidence <EVIDENCE>
+          Markdown reconciliation evidence, without account information or credentials
 
   -h, --help
           Print help
@@ -2011,12 +2406,12 @@ Usage: mediaagent runs reconcile [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
-          
+
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -2027,13 +2422,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2050,7 +2445,7 @@ Usage: mediaagent runs list [OPTIONS]
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -2061,13 +2456,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2083,12 +2478,12 @@ Usage: mediaagent runs status [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
-          
+
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -2099,13 +2494,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2121,16 +2516,16 @@ Usage: mediaagent runs wait [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
-          
+
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --timeout-seconds <TIMEOUT_SECONDS>
-          
+
 
       --json
           Emit a structured JSON result; diagnostics stay on stderr, with no animation
@@ -2140,13 +2535,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2162,12 +2557,12 @@ Usage: mediaagent runs cancel [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
-          
+
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -2178,13 +2573,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2200,19 +2595,19 @@ Usage: mediaagent runs resume [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
-          
+
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --retry-unknown
-          
+
 
       --async
-          
+
 
       --json
           Emit a structured JSON result; diagnostics stay on stderr, with no animation
@@ -2222,13 +2617,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2245,13 +2640,23 @@ Print this message or the help of the given subcommand(s)
 Usage: mediaagent runs help [COMMAND]
 
 Commands:
+  recover    Stage a manually recovered response for an uncertain job; resume publishes without a new paid request
   reconcile  Retrieve saved Google interactions without a new generation; resume publishes recovered output
-  list       
-  status     
-  wait       
-  cancel     
-  resume     
+  list
+  status
+  wait
+  cancel
+  resume
   help       Print this message or the help of the given subcommand(s)
+
+```
+
+## mediaagent runs help recover
+
+```text
+Stage a manually recovered response for an uncertain job; resume publishes without a new paid request
+
+Usage: mediaagent runs help recover
 
 ```
 
@@ -2317,19 +2722,19 @@ Usage: mediaagent resume [OPTIONS] <RUN_ID>
 
 Arguments:
   <RUN_ID>
-          
+
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --retry-unknown
-          
+
 
       --async
-          
+
 
       --json
           Emit a structured JSON result; diagnostics stay on stderr, with no animation
@@ -2339,13 +2744,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2362,6 +2767,7 @@ Check artifact integrity, request explicit image/audio AI review, or record a hu
 Usage: mediaagent review [OPTIONS] <COMMAND>
 
 Commands:
+  report     Export a comparison report and immutable references without making acceptance decisions
   reconcile  Retrieve uncertain Google audio reviews without submitting another assessment
   status     Inspect recorded AI review attempts, provider receipts, and uncertain outcomes
   check      Verify an artifact; AI review uses OpenAI/OpenRouter for images and Google for audio
@@ -2371,7 +2777,7 @@ Commands:
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -2382,13 +2788,55 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
+          [default: auto]
+          [possible values: auto, always, never]
+
+  -h, --help
+          Print help
+
+```
+
+## mediaagent review report
+
+```text
+Export a comparison report and immutable references without making acceptance decisions
+
+Usage: mediaagent review report [OPTIONS] --artifact <ARTIFACT> --output <OUTPUT>
+
+Options:
+      --artifact <ARTIFACT>
+
+
+      --project <PROJECT>
+          Target project root; credentials are loaded only from this root's .env
+
+          [default: .]
+
+      --json
+          Emit a structured JSON result; diagnostics stay on stderr, with no animation
+
+      --output <OUTPUT>
+
+
+      --non-interactive
+          Never prompt; supply YAML files or explicit flags for automation
+
+      --progress <PROGRESS>
+          Terminal progress mode; redirected auto progress uses plain stage updates
+
+          [default: auto]
+          [possible values: auto, plain, off]
+
+      --color <COLOR>
+          Progress colors; auto honors NO_COLOR
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2406,11 +2854,11 @@ Usage: mediaagent review reconcile [OPTIONS] --artifact <ARTIFACT>
 
 Options:
       --artifact <ARTIFACT>
-          
+
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -2421,13 +2869,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2445,11 +2893,11 @@ Usage: mediaagent review status [OPTIONS] --artifact <ARTIFACT>
 
 Options:
       --artifact <ARTIFACT>
-          
+
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -2460,13 +2908,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2484,15 +2932,15 @@ Usage: mediaagent review check [OPTIONS] --artifact <ARTIFACT>
 
 Options:
       --artifact <ARTIFACT>
-          
+
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --ai
-          
+
 
       --json
           Emit a structured JSON result; diagnostics stay on stderr, with no animation
@@ -2504,17 +2952,17 @@ Options:
           [possible values: openai, google, fish, openrouter, elevenlabs]
 
       --model <MODEL>
-          
+
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2535,11 +2983,11 @@ Usage: mediaagent review record [OPTIONS] --file <FILE>
 
 Options:
       --file <FILE>
-          
+
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -2550,13 +2998,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2573,11 +3021,21 @@ Print this message or the help of the given subcommand(s)
 Usage: mediaagent review help [COMMAND]
 
 Commands:
+  report     Export a comparison report and immutable references without making acceptance decisions
   reconcile  Retrieve uncertain Google audio reviews without submitting another assessment
   status     Inspect recorded AI review attempts, provider receipts, and uncertain outcomes
   check      Verify an artifact; AI review uses OpenAI/OpenRouter for images and Google for audio
   record     Record a schema-validated assessment with human/agent provenance
   help       Print this message or the help of the given subcommand(s)
+
+```
+
+## mediaagent review help report
+
+```text
+Export a comparison report and immutable references without making acceptance decisions
+
+Usage: mediaagent review help report
 
 ```
 
@@ -2635,15 +3093,15 @@ Usage: mediaagent revise [OPTIONS] --artifact <ARTIFACT> --instructions-file <IN
 
 Options:
       --artifact <ARTIFACT>
-          
+
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --instructions-file <INSTRUCTIONS_FILE>
-          
+
 
       --json
           Emit a structured JSON result; diagnostics stay on stderr, with no animation
@@ -2656,7 +3114,7 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
@@ -2664,11 +3122,11 @@ Options:
           Revise one podcast turn and reuse verified unchanged clips
 
       --async
-          
+
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2690,38 +3148,44 @@ Options:
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
           Emit a structured JSON result; diagnostics stay on stderr, with no animation
 
       --prompt <PROMPT>
-          
+
 
       --non-interactive
           Never prompt; supply YAML files or explicit flags for automation
 
       --output-dir <OUTPUT_DIR>
-          
+
+
+      --character <CHARACTERS>
+          Existing character manifests copied into the contained authoring bundle
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
+
+      --asset <SELECTED_ASSETS>
+          Selected image/audio assets copied by the binary
+
+      --color <COLOR>
+          Progress colors; auto honors NO_COLOR
+
+          [default: auto]
+          [possible values: auto, always, never]
 
       --provider <PROVIDER>
           [possible values: openai, google, fish, openrouter, elevenlabs]
 
-      --color <COLOR>
-          Progress colors; auto honors NO_COLOR
-          
-          [default: auto]
-          [possible values: auto, always, never]
-
       --model <MODEL>
-          
+
 
   -h, --help
           Print help
@@ -2736,14 +3200,14 @@ Export a portable skill or install it in agent discovery locations
 Usage: mediaagent skills [OPTIONS] <COMMAND>
 
 Commands:
-  export   
-  install  
+  export
+  install
   help     Print this message or the help of the given subcommand(s)
 
 Options:
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -2754,13 +3218,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2776,7 +3240,7 @@ Usage: mediaagent skills export [OPTIONS] <DIRECTORY>
 
 Arguments:
   <DIRECTORY>
-          
+
 
 Options:
       --overwrite
@@ -2784,7 +3248,7 @@ Options:
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -2795,13 +3259,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2821,7 +3285,7 @@ Options:
 
       --project <PROJECT>
           Target project root; credentials are loaded only from this root's .env
-          
+
           [default: .]
 
       --json
@@ -2839,13 +3303,13 @@ Options:
 
       --progress <PROGRESS>
           Terminal progress mode; redirected auto progress uses plain stage updates
-          
+
           [default: auto]
           [possible values: auto, plain, off]
 
       --color <COLOR>
           Progress colors; auto honors NO_COLOR
-          
+
           [default: auto]
           [possible values: auto, always, never]
 
@@ -2862,8 +3326,8 @@ Print this message or the help of the given subcommand(s)
 Usage: mediaagent skills help [COMMAND]
 
 Commands:
-  export   
-  install  
+  export
+  install
   help     Print this message or the help of the given subcommand(s)
 
 ```
@@ -2901,6 +3365,10 @@ Usage: mediaagent help [COMMAND]
 Commands:
   init       Initialize offline, preserving existing files and credentials
   config     Inspect or explicitly replace validated configuration
+  verify     Preview a bounded live verification suite; execution requires the exact approved preview hash
+  usage      Report provider-returned usage separately from unknown costs
+  storage    Inspect storage or apply a previously reviewed conservative cleanup plan
+  migrate    Preview migration of a v1 job, config or run; --apply creates a non-overwriting backup
   doctor     Inspect credentials offline, or explicitly check all provider endpoints and keys with --live
   schema     Print a JSON Schema for a versioned manifest
   models     List implemented provider/model capabilities (not account entitlements)
@@ -2939,7 +3407,7 @@ Usage: mediaagent help config [COMMAND]
 Commands:
   wizard  Terminal-only guided defaults; agents use setup --file instead
   host    Explicit user-scope host concurrency ceilings, independent of agent settings
-  show    
+  show
   setup   Replace config only after validating the supplied file
   limits  Inspect finite generation limits
 
@@ -2962,7 +3430,7 @@ Explicit user-scope host concurrency ceilings, independent of agent settings
 Usage: mediaagent help config host [COMMAND]
 
 Commands:
-  show   
+  show
   setup
 
 ```
@@ -3003,6 +3471,72 @@ Usage: mediaagent help config setup
 Inspect finite generation limits
 
 Usage: mediaagent help config limits
+
+```
+
+## mediaagent help verify
+
+```text
+Preview a bounded live verification suite; execution requires the exact approved preview hash
+
+Usage: mediaagent help verify
+
+```
+
+## mediaagent help usage
+
+```text
+Report provider-returned usage separately from unknown costs
+
+Usage: mediaagent help usage
+
+```
+
+## mediaagent help storage
+
+```text
+Inspect storage or apply a previously reviewed conservative cleanup plan
+
+Usage: mediaagent help storage [COMMAND]
+
+Commands:
+  inspect
+  plan     Save a cleanup preview; only unreferenced blobs can be removed
+  clean    Revalidate and apply a saved cleanup preview; fails if stale or workers active
+
+```
+
+## mediaagent help storage inspect
+
+```text
+Usage: mediaagent help storage inspect
+
+```
+
+## mediaagent help storage plan
+
+```text
+Save a cleanup preview; only unreferenced blobs can be removed
+
+Usage: mediaagent help storage plan
+
+```
+
+## mediaagent help storage clean
+
+```text
+Revalidate and apply a saved cleanup preview; fails if stale or workers active
+
+Usage: mediaagent help storage clean
+
+```
+
+## mediaagent help migrate
+
+```text
+Preview migration of a v1 job, config or run; --apply creates a non-overwriting backup
+
+Usage: mediaagent help migrate
 
 ```
 
@@ -3050,8 +3584,8 @@ Inspect or export embedded authoring templates
 Usage: mediaagent help templates [COMMAND]
 
 Commands:
-  list    
-  show    
+  list
+  show
   export
 
 ```
@@ -3090,13 +3624,13 @@ Commands:
   voice-design        Generate ElevenLabs voice preview candidates without creating or binding a saved voice
   voice-create        Create a provider voice from one selected candidate; canonical binding is explicit
   voice-status        Inspect saved voice candidates, creation results, and uncertain operations
-  add                 
-  list                
-  show                
+  add
+  list
+  show
   bootstrap           Generate visual candidates; this never promotes references
   accept-sample       Accept a selected recording, exact transcript, and granted consent as a portable voice sample
   accept              Accept a user-selected image or recording into the canonical profile
-  export              
+  export
   import
 
 ```
@@ -3243,12 +3777,22 @@ Inspect, wait, cancel, or resume durable runs
 Usage: mediaagent help runs [COMMAND]
 
 Commands:
+  recover    Stage a manually recovered response for an uncertain job; resume publishes without a new paid request
   reconcile  Retrieve saved Google interactions without a new generation; resume publishes recovered output
-  list       
-  status     
-  wait       
-  cancel     
+  list
+  status
+  wait
+  cancel
   resume
+
+```
+
+## mediaagent help runs recover
+
+```text
+Stage a manually recovered response for an uncertain job; resume publishes without a new paid request
+
+Usage: mediaagent help runs recover
 
 ```
 
@@ -3313,10 +3857,20 @@ Check artifact integrity, request explicit image/audio AI review, or record a hu
 Usage: mediaagent help review [COMMAND]
 
 Commands:
+  report     Export a comparison report and immutable references without making acceptance decisions
   reconcile  Retrieve uncertain Google audio reviews without submitting another assessment
   status     Inspect recorded AI review attempts, provider receipts, and uncertain outcomes
   check      Verify an artifact; AI review uses OpenAI/OpenRouter for images and Google for audio
   record     Record a schema-validated assessment with human/agent provenance
+
+```
+
+## mediaagent help review report
+
+```text
+Export a comparison report and immutable references without making acceptance decisions
+
+Usage: mediaagent help review report
 
 ```
 
@@ -3382,7 +3936,7 @@ Export a portable skill or install it in agent discovery locations
 Usage: mediaagent help skills [COMMAND]
 
 Commands:
-  export   
+  export
   install
 
 ```

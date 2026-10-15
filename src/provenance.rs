@@ -1,7 +1,6 @@
 //! Resolve immutable local artifact receipts without provider calls or ancestor-project discovery.
 use crate::{
     contracts::*,
-    engine,
     error::{Error, Result},
     storage,
 };
@@ -21,20 +20,31 @@ pub struct Index {
 impl Index {
     pub fn load(root: &Path) -> Result<Self> {
         let mut records = vec![];
-        for run in engine::list(root)? {
-            for job in run.jobs {
-                for artifact in job.artifacts {
-                    records.push(Recorded {
-                        path: artifact.path,
-                        quality: artifact.quality,
-                        origin: AssetOrigin {
-                            selection: job.input.selection.clone(),
-                            settings: job.input.settings.clone(),
-                            locale: job.input.locale.clone(),
-                            sha256: artifact.sha256,
-                            artifact: Some(artifact.id),
-                        },
-                    });
+        let runs = root.join("mediaagent/runs");
+        if runs.exists() {
+            for entry in fs::read_dir(runs)? {
+                let path = entry?.path().join("run.yaml");
+                if !path.is_file() {
+                    continue;
+                }
+                let run = crate::blobs::read_metadata(&path)?;
+                for job in run["jobs"].as_array().into_iter().flatten() {
+                    for a in job["artifacts"].as_array().into_iter().flatten() {
+                        let artifact: Artifact = serde_json::from_value(a.clone())?;
+                        records.push(Recorded {
+                            path: artifact.path,
+                            quality: artifact.quality,
+                            origin: AssetOrigin {
+                                selection: serde_json::from_value(
+                                    job["input"]["selection"].clone(),
+                                )?,
+                                settings: serde_json::from_value(job["input"]["settings"].clone())?,
+                                locale: serde_json::from_value(job["input"]["locale"].clone())?,
+                                sha256: artifact.sha256,
+                                artifact: Some(artifact.id),
+                            },
+                        });
+                    }
                 }
             }
         }

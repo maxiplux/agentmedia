@@ -1,0 +1,8 @@
+schema_version: 1
+id: acceptance-narrator
+persona: persona.md
+voice:
+  description: voice.md
+  selection: {provider: elevenlabs, model: eleven_flash_v2_5}
+  binding: null
+  references: []

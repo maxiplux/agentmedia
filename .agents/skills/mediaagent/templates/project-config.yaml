@@ -1,7 +1,7 @@
 # Offline init: mediaagent init ./project --defaults-file project-config.yaml --json
 # These are explicit example choices, not a promise of account/model access.
 # Select from `mediaagent models --json`; adjust before initialization.
-schema_version: 1
+schema_version: 2
 defaults:
   image: {provider: openai, model: gpt-image-1.5}
   infographic: {provider: openai, model: gpt-image-1.5}

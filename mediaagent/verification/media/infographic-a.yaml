@@ -1,0 +1,6 @@
+schema_version: 2
+id: infographic-a
+media: infographic
+selection: {provider: openai, model: gpt-image-1}
+spec: infographic-a-spec.yaml
+settings: {format: png, size: 1024x1536, image_quality: medium}

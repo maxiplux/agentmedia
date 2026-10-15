@@ -1,0 +1,10 @@
+schema_version: 2
+id: paired-scene-1
+media: image
+brief: paired-scene-1.md
+cast:
+  - alias: mira
+    character: ../../characters/demo-mira/character.yaml
+  - alias: kito
+    character: ../../characters/demo-kito/character.yaml
+settings: {format: png, size: 1536x1024, image_quality: medium, input_fidelity: high}

@@ -58,7 +58,10 @@ pub fn init_with_config(
     }
     create(&root.join(".env.example"),b"OPENAI_API_KEY=\nGEMINI_API_KEY=\nFISH_API_KEY=\nOPENROUTER_API_KEY=\nELEVENLABS_API_KEY=\n")?;
     create(&root.join(".env"), b"")?;
-    create(&root.join("mediaagent/.gitignore"), b"runs/\ncache/\n")?;
+    create(
+        &root.join("mediaagent/.gitignore"),
+        b"runs/\ncache/\nblobs/\n",
+    )?;
     // Preserve existing ignore rules; add only missing credential/artifact protection.
     let ignore = root.join(".gitignore");
     let original = fs::read_to_string(&ignore).unwrap_or_default();
@@ -69,6 +72,7 @@ pub fn init_with_config(
         "!.env.example",
         "/mediaagent/runs/",
         "/mediaagent/cache/",
+        "/mediaagent/blobs/",
     ] {
         if !original.lines().any(|l| l == rule) {
             if !updated.ends_with('\n') && !updated.is_empty() {

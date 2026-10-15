@@ -1,0 +1,19 @@
+schema_version: 1
+id: bounded-check
+description: One image request for a human-reviewed acceptance check.
+jobs: [job.yaml]
+limits:
+  requests: 1
+  images: 1
+  audio_seconds: 60
+  speech_chars: 1000
+  revisions: 1
+  attempts: 1
+  concurrency: 1
+  per_provider: 1
+criteria:
+  - Human reviewer confirms requested content and identity against original references.
+  - Exact text and numbers are readable and unchanged where applicable.
+# verify --suite verification.yaml previews offline.
+# After approval: verify --suite verification.yaml --execute --preview-hash HASH
+# Jobs omit output. Results remain in isolated durable runs.

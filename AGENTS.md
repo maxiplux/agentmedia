@@ -8,6 +8,15 @@ The intended package, binary, and skill name is `mediaagent`. The initialized co
 
 The repository now contains the Rust 2024 `mediaagent` package, a reusable library and CLI, versioned contracts, offline initialization/validation, embedded skills/templates, portable characters, concurrent durable runs, limits/cache/recovery, native audio assembly, reviews/revisions, and initial adapters for all five providers. Local offline tests verify contracts and mocked execution. Bounded live tests have verified selected image, speech, music, sound-effect, and OpenAI planning paths; media quality remains unverified, and the first paired character scene failed user review for identity drift. Explicit identity-reference roles, original provider/model provenance locks, complete offline init setup, and supported high-fidelity controls are implemented; do not describe visual consistency as accepted. Bounded voice discovery is implemented for Google, Fish, and ElevenLabs. ElevenLabs descriptive voice previews and explicit saved-voice creation/binding are implemented, with live preview testing and mocked creation/binding checks. Durable AI image review records preserve request receipts and explicit retry history. Consent-gated ElevenLabs cloning, portable authorized voice samples, Fish reference synthesis, Google audio review and interaction retrieval, paginated/filterable catalogs, an offline configuration wizard, and explicit host ceilings are implemented. Live audio review and filtered catalogs passed; cloning/reference synthesis use offline fixtures until selected authorized recordings are supplied. Human quality/consistency, Linux/Windows execution, and public release/signing remain unverified. Local Apple Silicon release packaging has passed isolated offline checks. See `docs/STATUS.md` for exact implementation boundaries. Do not describe planned capabilities or unexecuted live tests as completed.
 
+
+Remediation adds v2 jobs/config/runs (v1 readers retained), cast authoring, planner
+selected-input bundles, bounded verification previews, read-only model discovery,
+user-attested response recovery, usage/storage/migration commands, reference blobs,
+and optional podcast assembly controls. Keep older character/infographic/review
+contracts at v1. Paid acceptance batches require the user's approval of their
+concrete preview; media quality, selected voices and canonical references still
+require actual human acceptance. See docs/REMEDIATION.md and docs/ACCEPTANCE.md.
+
 ## First-version scope
 
 - Generate character images, spoken dialogue and narration, instrumental and vocal music, and sound effects.

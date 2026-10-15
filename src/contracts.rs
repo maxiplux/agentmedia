@@ -92,7 +92,7 @@ impl Default for Limits {
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct Config {
-    #[schemars(range(min = 1, max = 1))]
+    #[schemars(range(min = 1, max = 2))]
     pub schema_version: u32,
     #[serde(default)]
     pub defaults: BTreeMap<Media, Selection>,
@@ -108,7 +108,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            schema_version: 1,
+            schema_version: 2,
             defaults: BTreeMap::new(),
             default_settings: BTreeMap::new(),
             default_locales: BTreeMap::new(),
@@ -364,8 +364,25 @@ pub struct Turn {
 }
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
+pub struct CastMember {
+    pub alias: String,
+    pub character: PathBuf,
+    pub direction: Option<PathBuf>,
+}
+#[derive(Debug, Clone, Default, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Assembly {
+    #[serde(default)]
+    pub pause_ms: u32,
+    #[serde(default)]
+    pub turn_gain_db: BTreeMap<String, f32>,
+    /// Optional integrated loudness target; peak ceiling is -1 dBFS.
+    pub loudness_lufs: Option<f64>,
+}
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
 pub struct Job {
-    #[schemars(range(min = 1, max = 1))]
+    #[schemars(range(min = 1, max = 2))]
     pub schema_version: u32,
     pub id: String,
     pub media: Media,
@@ -373,6 +390,10 @@ pub struct Job {
     pub brief: Option<PathBuf>,
     pub text_file: Option<PathBuf>,
     pub character: Option<PathBuf>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub cast: Vec<CastMember>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assembly: Option<Assembly>,
     pub spec: Option<PathBuf>,
     #[serde(default)]
     pub references: Vec<JobReference>,
@@ -403,7 +424,10 @@ pub struct Reference {
     pub name: String,
     pub mime: String,
     pub sha256: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub base64: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub blob: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub transcript: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -412,6 +436,8 @@ pub struct Reference {
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct Effective {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assembly: Option<Assembly>,
     pub id: String,
     pub media: Media,
     pub selection: Selection,
@@ -485,7 +511,7 @@ pub struct JobRecord {
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct Run {
-    #[schemars(range(min = 1, max = 1))]
+    #[schemars(range(min = 1, max = 2))]
     pub schema_version: u32,
     pub id: String,
     pub budget_group: String,

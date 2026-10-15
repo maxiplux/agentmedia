@@ -1,0 +1,19 @@
+schema_version: 1
+id: character-baseline
+description: Two original-model reference-sheet candidates; no acceptance or voice creation.
+jobs:
+  - mira.yaml
+  - kito.yaml
+limits:
+  requests: 2
+  images: 2
+  audio_seconds: 60
+  speech_chars: 1000
+  revisions: 1
+  attempts: 1
+  concurrency: 2
+  per_provider: 2
+criteria:
+  - User confirms each sheet preserves the original identity in every view.
+  - Full character including head feet and accessories stays inside the frame.
+  - Neither candidate becomes canonical until explicitly selected.

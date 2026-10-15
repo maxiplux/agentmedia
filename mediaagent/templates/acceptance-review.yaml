@@ -1,0 +1,14 @@
+schema_version: 1
+artifact: REPLACE_WITH_ACTUAL_ARTIFACT_ID
+quality: inconclusive
+provenance: human
+reviewer: null
+findings:
+  - check: identity
+    severity: major
+    expected: Describe the selected original's fixed face/body/voice traits.
+    observed: Describe what the actual generated asset shows or sounds like.
+    evidence: Cite the compared original and concrete visible/audible differences.
+    location: null
+    suggested_fix: null
+# Replace placeholders with actual evidence; do not record an unperformed human review.

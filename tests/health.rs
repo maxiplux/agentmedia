@@ -48,7 +48,10 @@ impl Transport for Mock {
         assert!(request.body().is_none());
         let url = request.url();
         assert!(url.scheme() == "https");
-        assert!(url.query().is_none_or(|q| q == "pageSize=1"));
+        assert!(
+            url.query()
+                .is_none_or(|q| q == "pageSize=1" || q == "pageSize=100")
+        );
         let header = match url.host_str().unwrap() {
             "generativelanguage.googleapis.com" => "x-goog-api-key",
             "api.elevenlabs.io" => "xi-api-key",
@@ -302,4 +305,53 @@ async fn interrupted_or_timed_out_probes_do_not_claim_key_rejection_or_expose_er
     assert_eq!(fake.calls.load(Ordering::SeqCst), 1);
     assert!(health::Client::new(0).is_err());
     assert!(health::Client::new(61).is_err());
+}
+
+#[tokio::test]
+async fn model_discovery_is_read_only_bounded_and_does_not_claim_entitlement() {
+    let root = root();
+    for (provider, body, model) in [
+        (
+            Provider::Openai,
+            json!({"data":[{"id":"gpt-image-1","owned_by":"PRIVATE","shutdown_date":"2027-01-01"}]}),
+            "gpt-image-1",
+        ),
+        (
+            Provider::Google,
+            json!({"models":[{"name":"models/gemini-2.5-flash-image"}],"nextPageToken":"PRIVATE"}),
+            "gemini-2.5-flash-image",
+        ),
+        (
+            Provider::Openrouter,
+            json!({"data":[{"id":"openai/gpt-image-1","pricing":{"private":"PRIVATE"}}]}),
+            "openai/gpt-image-1",
+        ),
+        (
+            Provider::Elevenlabs,
+            json!([{"model_id":"eleven_v3","description":"PRIVATE"}]),
+            "eleven_v3",
+        ),
+    ] {
+        let fake = Arc::new(Mock::new(200, Some(body)));
+        let report = health::Client::with_transport(2, fake.clone())
+            .unwrap()
+            .models(root.path(), &[provider])
+            .await
+            .unwrap();
+        assert_eq!(fake.calls.load(Ordering::SeqCst), 1);
+        assert_eq!(report["catalogs"][0]["models"][0]["model"], model);
+        assert_eq!(
+            report["catalogs"][0]["account_generation_access"],
+            "unverified"
+        );
+        assert!(!report.to_string().contains("PRIVATE"));
+    }
+    let fake = Arc::new(Mock::new(403, Some(json!({"error":"PRIVATE"}))));
+    let report = health::Client::with_transport(2, fake.clone())
+        .unwrap()
+        .models(root.path(), &[Provider::Openai, Provider::Fish])
+        .await
+        .unwrap();
+    assert_eq!(fake.calls.load(Ordering::SeqCst), 1);
+    assert!(!report.to_string().contains("PRIVATE"));
 }

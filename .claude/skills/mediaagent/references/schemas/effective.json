@@ -1,5 +1,33 @@
 {
   "$defs": {
+    "Assembly": {
+      "additionalProperties": false,
+      "properties": {
+        "loudness_lufs": {
+          "description": "Optional integrated loudness target; peak ceiling is -1 dBFS.",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "pause_ms": {
+          "default": 0,
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "turn_gain_db": {
+          "additionalProperties": {
+            "format": "float",
+            "type": "number"
+          },
+          "default": {},
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
     "AssetOrigin": {
       "additionalProperties": false,
       "properties": {
@@ -68,6 +96,12 @@
         "base64": {
           "type": "string"
         },
+        "blob": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "consent_hash": {
           "type": [
             "string",
@@ -107,8 +141,7 @@
         "role",
         "name",
         "mime",
-        "sha256",
-        "base64"
+        "sha256"
       ],
       "type": "object"
     },
@@ -199,6 +232,16 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "assembly": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Assembly"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "character_hash": {
       "type": [
         "string",

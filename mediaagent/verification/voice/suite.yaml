@@ -1,0 +1,17 @@
+schema_version: 1
+id: designed-voice-reuse
+description: Three repeated clips after an explicitly selected designed voice is saved and bound.
+jobs: [clip-1.yaml, clip-2.yaml, clip-3.yaml]
+limits:
+  requests: 3
+  images: 1
+  audio_seconds: 60
+  speech_chars: 1000
+  revisions: 1
+  attempts: 1
+  concurrency: 2
+  per_provider: 2
+criteria:
+  - Human confirms stable recognizable timbre across all clips.
+  - Exact words and numbers are spoken with acceptable pronunciation.
+  - Export and import reuse the same accessible provider binding without creating a replacement.

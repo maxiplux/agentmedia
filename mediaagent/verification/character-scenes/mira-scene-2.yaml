@@ -1,0 +1,8 @@
+schema_version: 2
+id: mira-scene-2
+media: image
+brief: mira-scene-2.md
+cast:
+  - alias: mira
+    character: ../../characters/demo-mira/character.yaml
+settings: {format: png, size: 1536x1024, image_quality: medium, input_fidelity: high}

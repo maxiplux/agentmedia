@@ -1,0 +1,29 @@
+schema_version: 1
+title: Workshop attendance
+audience: Adult learners
+key_message: Compare three fictional example values
+canvas: 1024x1536
+layout: Title followed by three clearly labelled rows and a source footer
+visual_brief: infographic-b.md
+sections:
+  - heading: Morning
+    copy: "12 people"
+    values:
+      - label: Morning
+        value: "12"
+        unit: people
+        source: Fictional acceptance-test data
+  - heading: Afternoon
+    copy: "18 people"
+    values:
+      - label: Afternoon
+        value: "18"
+        unit: people
+        source: Fictional acceptance-test data
+  - heading: Evening
+    copy: "9 people"
+    values:
+      - label: Evening
+        value: "9"
+        unit: people
+        source: Fictional acceptance-test data

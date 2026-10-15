@@ -76,6 +76,31 @@ pub enum Command {
         #[command(subcommand)]
         action: ConfigAction,
     },
+    /// Preview a bounded live verification suite; execution requires the exact approved preview hash
+    Verify {
+        #[arg(long)]
+        suite: PathBuf,
+        #[arg(long)]
+        execute: bool,
+        #[arg(long, requires = "execute")]
+        preview_hash: Option<String>,
+    },
+    /// Report provider-returned usage separately from unknown costs
+    Usage,
+    /// Inspect storage or apply a previously reviewed conservative cleanup plan
+    Storage {
+        #[command(subcommand)]
+        action: StorageAction,
+    },
+    /// Preview migration of a v1 job, config or run; --apply creates a non-overwriting backup
+    Migrate {
+        #[arg(long,value_parser=["job","config","run"])]
+        kind: String,
+        #[arg(long)]
+        file: PathBuf,
+        #[arg(long)]
+        apply: bool,
+    },
     /// Inspect credentials offline, or explicitly check all provider endpoints and keys with --live
     Doctor {
         /// Make one read-only authenticated GET per selected provider; never generate media
@@ -94,7 +119,13 @@ pub enum Command {
         kind: String,
     },
     /// List implemented provider/model capabilities (not account entitlements)
-    Models,
+    Models {
+        /// Explicit read-only provider catalog lookup; not a generation entitlement check
+        #[arg(long)]
+        live: bool,
+        #[arg(long, value_enum, value_delimiter = ',')]
+        provider: Vec<Provider>,
+    },
     /// List built-in voices or search bounded pages of provider account voices
     Voices {
         #[arg(long, value_enum)]
@@ -219,6 +250,12 @@ pub enum Command {
         prompt: String,
         #[arg(long)]
         output_dir: PathBuf,
+        /// Existing character manifests copied into the contained authoring bundle
+        #[arg(long = "character")]
+        characters: Vec<PathBuf>,
+        /// Selected image/audio assets copied by the binary
+        #[arg(long = "asset")]
+        selected_assets: Vec<PathBuf>,
         #[arg(long, value_enum)]
         provider: Option<Provider>,
         #[arg(long)]
@@ -234,6 +271,20 @@ pub enum Command {
         run_id: String,
         #[arg(long)]
         retry_unknown: bool,
+    },
+}
+#[derive(Debug, Subcommand)]
+pub enum StorageAction {
+    Inspect,
+    /// Save a cleanup preview; only unreferenced blobs can be removed
+    Plan {
+        #[arg(long)]
+        output: PathBuf,
+    },
+    /// Revalidate and apply a saved cleanup preview; fails if stale or workers active
+    Clean {
+        #[arg(long)]
+        plan: PathBuf,
     },
 }
 #[derive(Debug, Subcommand)]
@@ -403,6 +454,21 @@ pub enum PersonaAction {
 }
 #[derive(Debug, Subcommand)]
 pub enum RunAction {
+    /// Stage a manually recovered response for an uncertain job; resume publishes without a new paid request
+    Recover {
+        run_id: String,
+        #[arg(long)]
+        job: String,
+        #[arg(long)]
+        file: PathBuf,
+        #[arg(long)]
+        format: String,
+        #[arg(long)]
+        fingerprint: String,
+        /// Markdown reconciliation evidence, without account information or credentials
+        #[arg(long)]
+        evidence: PathBuf,
+    },
     /// Retrieve saved Google interactions without a new generation; resume publishes recovered output
     Reconcile {
         run_id: String,
@@ -429,6 +495,13 @@ pub enum RunAction {
 }
 #[derive(Debug, Subcommand)]
 pub enum ReviewAction {
+    /// Export a comparison report and immutable references without making acceptance decisions
+    Report {
+        #[arg(long, required = true)]
+        artifact: Vec<String>,
+        #[arg(long)]
+        output: PathBuf,
+    },
     /// Retrieve uncertain Google audio reviews without submitting another assessment
     Reconcile {
         #[arg(long)]
@@ -564,6 +637,7 @@ pub const SCHEMAS: &[&str] = &[
     "voice_clone",
     "host_limits",
     "diagnostics",
+    "verification",
 ];
 pub fn schema(kind: &str) -> Result<Value> {
     macro_rules! s {
@@ -572,11 +646,16 @@ pub fn schema(kind: &str) -> Result<Value> {
         };
     }
     Ok(match kind {
+        "verification" => s!(crate::verification::Suite),
         "diagnostics" => s!(providers::health::Report),
         "config" => s!(Config),
         "character" => s!(Character),
         "infographic" => s!(Infographic),
-        "job" => s!(Job),
+        "job" => {
+            let mut schema = s!(Job);
+            schema["allOf"] = json!([{"if":{"properties":{"schema_version":{"const":1}}},"then":{"properties":{"cast":{"maxItems":0},"assembly":{"type":"null"}}}}]);
+            schema
+        }
         "batch" => s!(Batch),
         "run" => s!(Run),
         "artifact" => s!(Artifact),
@@ -608,7 +687,11 @@ pub fn command_reference() -> String {
         env!("CARGO_PKG_VERSION")
     );
     visit(Cli::command(), "mediaagent".into(), &mut out);
-    out
+    out.lines()
+        .map(str::trim_end)
+        .collect::<Vec<_>>()
+        .join("\n")
+        + "\n"
 }
 pub fn human_result(data: &Value) -> String {
     if data.get("live_requested").is_some()
@@ -655,6 +738,8 @@ fn direct_job(media: Media, input: &Input, dir: &Path) -> Result<Job> {
         input.text_file.as_ref().map(|p| absolute(p)).transpose()?
     };
     Ok(Job {
+        cast: vec![],
+        assembly: None,
         voice_samples: match (
             &input.voice_sample,
             &input.sample_transcript,
@@ -667,7 +752,7 @@ fn direct_job(media: Media, input: &Input, dir: &Path) -> Result<Job> {
             }],
             _ => vec![],
         },
-        schema_version: 1,
+        schema_version: 2,
         id: "asset".into(),
         media,
         selection: match (input.provider, &input.model) {
@@ -834,6 +919,52 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                 Ok((json!(c), 0))
             }
         },
+        Command::Usage => Ok((crate::maintenance::usage(&root)?, 0)),
+        Command::Migrate { kind, file, apply } => {
+            Ok((crate::maintenance::migrate(&root, file, kind, *apply)?, 0))
+        }
+        Command::Storage { action } => match action {
+            StorageAction::Inspect => Ok((crate::maintenance::storage_plan(&root)?, 0)),
+            StorageAction::Plan { output } => {
+                let plan = crate::maintenance::storage_plan(&root)?;
+                atomic(
+                    output,
+                    serde_saphyr::to_string(&plan)
+                        .map_err(|_| Error::input("Cannot serialize cleanup plan"))?
+                        .as_bytes(),
+                    false,
+                )?;
+                Ok((json!({"plan":plan,"output":absolute(output)?}), 0))
+            }
+            StorageAction::Clean { plan } => Ok((crate::maintenance::clean(&root, plan)?, 0)),
+        },
+        Command::Verify {
+            suite,
+            execute,
+            preview_hash,
+        } => {
+            let prepared = crate::verification::prepare(&root, suite)?;
+            if !execute {
+                return Ok((prepared.preview, 0));
+            }
+            let hash = preview_hash.as_deref().ok_or_else(|| {
+                Error::input("Execution requires --preview-hash from the approved offline preview")
+            })?;
+            let (run, mut receipt) = crate::verification::submit(&root, prepared, hash)?;
+            let Some(run) = run else {
+                return Ok((receipt, 3));
+            };
+            let mut exit = engine::exit(&run);
+            if !run.state.terminal() {
+                engine::spawn(&root, &run.id, false)?;
+                exit = wait(cli, &root, &run.id, None).await?.1;
+            }
+            if receipt["skipped"].as_array().is_some_and(|a| !a.is_empty()) && exit == 0 {
+                exit = 4;
+            }
+            receipt["run"] = json!(engine::load(&root, &run.id)?);
+            Ok((receipt, exit))
+        }
         Command::Doctor {
             live,
             provider,
@@ -846,8 +977,24 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
             Ok((json!(report), exit))
         }
         Command::Schema { kind } => Ok((schema(kind)?, 0)),
-        Command::Models => Ok((
-            json!({"models":providers::capabilities(),"voice_design_models":crate::voices::DESIGN_MODELS.iter().map(|model|json!({"provider":"elevenlabs","model":model,"preview_candidates":true,"explicit_voice_creation":true,"recorded_voice_cloning":true})).collect::<Vec<_>>(),"text_providers":["openai","google","openrouter"],"image_review_providers":["openai","openrouter"],"audio_review_models":["gemini-3.8-flash","gemini-2.5-flash"],"audio_review_provider":"google","account_access_verified":false}),
+        Command::Models { live, provider } if *live => {
+            let result = providers::health::Client::new(10)?
+                .models(&root, provider)
+                .await?;
+            let exit = if result["catalogs"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|r| r["status"] != "catalog_visible")
+            {
+                3
+            } else {
+                0
+            };
+            Ok((result, exit))
+        }
+        Command::Models { provider, .. } => Ok((
+            json!({"models":providers::capabilities().into_iter().filter(|c|provider.is_empty()||provider.iter().any(|p|serde_json::to_value(p).ok().as_ref()==c.get("provider"))).collect::<Vec<_>>(),"voice_design_models":crate::voices::DESIGN_MODELS.iter().map(|model|json!({"provider":"elevenlabs","model":model,"preview_candidates":true,"explicit_voice_creation":true,"recorded_voice_cloning":true})).collect::<Vec<_>>(),"text_providers":["openai","google","openrouter"],"image_review_providers":["openai","openrouter"],"audio_review_models":["gemini-3.8-flash","gemini-2.5-flash"],"audio_review_provider":"google","account_access_verified":false}),
             0,
         )),
         Command::Voices {
@@ -1213,8 +1360,10 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                 let c = validation::character(&p)?;
                 let v=c.visual.ok_or_else(||Error::input("Enable a visual profile before bootstrapping; use persona voice-design or voice-clone for voices"))?;
                 let j = Job {
+                    cast: vec![],
+                    assembly: None,
                     voice_samples: vec![],
-                    schema_version: 1,
+                    schema_version: 2,
                     id: format!("{id}-candidate"),
                     media: Media::Image,
                     selection: Some(v.selection),
@@ -1249,6 +1398,17 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
             }
         },
         Command::Runs { action } => match action {
+            RunAction::Recover {
+                run_id,
+                job,
+                file,
+                format,
+                fingerprint,
+                evidence,
+            } => Ok((
+                json!({"run":engine::recover(&root,run_id,job,file,format,fingerprint,evidence)?,"next_action":"runs resume; recovered bytes will be published without resubmission","provenance":"user_attested"}),
+                0,
+            )),
             RunAction::Reconcile { run_id } => {
                 let run = engine::reconcile(&root, run_id, &HttpAdapter::new(&root)?).await?;
                 let exit = engine::exit(&run);
@@ -1320,6 +1480,8 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
             }
         }
         Command::Plan {
+            characters,
+            selected_assets,
             kind,
             prompt,
             output_dir,
@@ -1333,7 +1495,11 @@ pub async fn dispatch(cli: &Cli) -> Result<(Value, u8)> {
                 prompt,
                 output_dir,
                 *provider,
-                model.as_deref(),
+                (
+                    model.as_deref(),
+                    characters.as_slice(),
+                    selected_assets.as_slice(),
+                ),
             )
             .await
         }
@@ -1623,6 +1789,9 @@ fn validate_review(r: &Review) -> Result<()> {
 }
 async fn review(root: &Path, action: &ReviewAction) -> Result<(Value, u8)> {
     let assessment = match action {
+        ReviewAction::Report { artifact, output } => {
+            return Ok((crate::maintenance::comparison(root, artifact, output)?, 0));
+        }
         ReviewAction::Reconcile { artifact } => {
             let (run, _, a) = find_artifact(root, artifact)?;
             let bytes = fs::read(&a.path)?;
@@ -1826,6 +1995,7 @@ async fn review(root: &Path, action: &ReviewAction) -> Result<(Value, u8)> {
                         &r.budget_group,
                         &r.limits,
                         Some(&Effective {
+                            assembly: None,
                             id: "review".into(),
                             media: Media::Text,
                             selection: selection.clone(),
@@ -1937,22 +2107,27 @@ async fn plan(
     prompt: &str,
     dest: &Path,
     provider: Option<Provider>,
-    model: Option<&str>,
+    selected: (Option<&str>, &[PathBuf], &[PathBuf]),
 ) -> Result<(Value, u8)> {
+    let (model, characters, selected_assets) = selected;
     if dest.exists() {
         return Err(Error::input(
             "Planning output directory already exists; choose a new reviewable destination",
         ));
     }
     let selection = choose_text(root, provider, model)?;
+    let stage = tempfile::tempdir()?;
+    let inventory =
+        crate::planning::prepare_inputs(root, stage.path(), characters, selected_assets)?;
     let contract = schema(kind)?;
     let instruction = format!(
-        "Author a {kind} manifest and companion Markdown files. Return only JSON {{\"files\":[{{\"path\":\"{kind}.yaml\",\"content\":\"...\"}}]}}. Paths must be relative, dependencies inside the bundle. Do not generate media or include credentials. Preserve exact supplied dialogue, lyrics, numeric values. Use explicit configured media choices or null selection; do not invent model IDs or voice bindings. For derived identity assets, use the original asset’s exact provider/model rather than project defaults, and preserve its known hash-bound origin metadata/settings. Never invent an original model or relabel an existing asset to match defaults; conflicting or missing required identity provenance must be resolved before generation. Schema: {}. Config: {}. Templates: {}. User request: {prompt}",
+        "Selected inputs (already copied; reference these paths and never author or replace _inputs files): {inventory}. Author a {kind} manifest and companion Markdown files. Return only JSON {{\"files\":[{{\"path\":\"{kind}.yaml\",\"content\":\"...\"}}]}}. Paths must be relative, dependencies inside the bundle. Do not generate media or include credentials. Preserve exact supplied dialogue, lyrics, numeric values. Use explicit configured media choices or null selection; do not invent model IDs or voice bindings. For derived identity assets, use the original asset’s exact provider/model rather than project defaults, and preserve its known hash-bound origin metadata/settings. Never invent an original model or relabel an existing asset to match defaults; conflicting or missing required identity provenance must be resolved before generation. Schema: {}. Config: {}. Templates: {}. User request: {prompt}",
         serde_json::to_string(&contract)?,
         serde_json::to_string(&project::config(root)?)?,
         serde_json::to_string(assets::TEMPLATES)?
     );
     let input = Effective {
+        assembly: None,
         id: "plan".into(),
         media: Media::Text,
         selection,
@@ -1981,7 +2156,6 @@ async fn plan(
     let run = engine::load(root, &run.id)?;
     let path = &run.jobs[0].artifacts[0].path;
     let content = fs::read_to_string(path)?;
-    let stage = tempfile::tempdir()?;
     crate::planning::stage(&content, kind, stage.path(), &project::config(root)?).map_err(
         |mut error| {
             error.message = format!(

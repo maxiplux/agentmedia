@@ -1,9 +1,8 @@
-schema_version: 1
+schema_version: 2
 id: same-characters-new-scene
 media: image
-selection:
-  provider: openai
-  model: gpt-image-1
+# Provider/model is inherited from the selected original artifacts.
+# For external images, add origin metadata as described in references/consistency.md.
 brief: character-scene.md
 references:
   - path: selected-character-1.png
@@ -13,4 +12,4 @@ references:
 settings:
   size: 1536x1024
   image_quality: high
-  input_fidelity: high
+# Supported identity-edit fidelity is resolved automatically for the original model.

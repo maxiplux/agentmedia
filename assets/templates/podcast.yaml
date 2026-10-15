@@ -1,4 +1,4 @@
-schema_version: 1
+schema_version: 2
 id: episode-intro
 media: podcast
 selection: null
@@ -12,3 +12,10 @@ turns:
       voice: null
 locale: en-US
 depends_on: []
+
+# Optional local assembly, leaving original clips unchanged:
+# assembly:
+#   pause_ms: 250
+#   turn_gain_db: {host-intro: -2}
+#   loudness_lufs: -19
+# Use actual turn IDs; peak ceiling is -1 dBFS. Target may be peak-limited.

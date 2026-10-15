@@ -23,7 +23,7 @@ pub fn run_path(root: &Path, id: &str) -> Result<PathBuf> {
 }
 pub fn load(root: &Path, id: &str) -> Result<Run> {
     let run: Run = yaml(&run_path(root, id)?.join("run.yaml"))?;
-    version(run.schema_version)?;
+    version2(run.schema_version)?;
     Ok(run)
 }
 pub fn list(root: &Path) -> Result<Vec<Run>> {
@@ -155,7 +155,7 @@ pub fn submit(root: &Path, inputs: Vec<Effective>, limits: Limits, options: Subm
         }
     }
     let run = Run {
-        schema_version: 1,
+        schema_version: 2,
         id: id.clone(),
         budget_group: options.budget_group.unwrap_or(id),
         request_id: options.request_id,
@@ -326,7 +326,28 @@ fn verified(a: &Artifact) -> bool {
     fs::read(&a.path).is_ok_and(|bytes| bytes.len() as u64 == a.bytes && hash(&bytes) == a.sha256)
 }
 fn cached(root: &Path, fingerprint: &str) -> Result<Option<JobRecord>> {
-    for run in list(root)? {
+    let runs = root.join("mediaagent/runs");
+    if !runs.exists() {
+        return Ok(None);
+    }
+    let mut paths = fs::read_dir(runs)?
+        .map(|e| e.map(|e| e.path().join("run.yaml")))
+        .collect::<std::result::Result<Vec<_>, _>>()?;
+    paths.sort();
+    for path in paths {
+        if !path.is_file() {
+            continue;
+        }
+        let meta = crate::blobs::read_metadata(&path)?;
+        if !meta["jobs"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .any(|j| j["fingerprint"] == fingerprint && j["state"] == "succeeded")
+        {
+            continue;
+        }
+        let run: Run = yaml(&path)?;
         if let Some(j) = run.jobs.into_iter().find(|j| {
             j.fingerprint == fingerprint
                 && j.state == State::Succeeded
@@ -617,7 +638,7 @@ pub async fn work(
                 save(&path.join("run.yaml"), &run)?;
                 let mut j = run.jobs[i].clone();
                 let result: Result<()> = (|| {
-                    let mut combined = vec![];
+                    let mut clips = vec![];
                     for turn in &j.input.turns {
                         let name = format!("{}--{}", j.input.id, turn.id);
                         let clip = run
@@ -628,8 +649,9 @@ pub async fn work(
                             .ok_or_else(|| {
                                 Error::new("assembly", "A successful turn has no artifact", 3)
                             })?;
-                        combined.extend(audio::mono_24k(&fs::read(&clip.path)?)?);
+                        clips.push((turn.id.clone(), audio::mono_24k(&fs::read(&clip.path)?)?));
                     }
+                    let combined = audio::assemble(&clips, j.input.assembly.as_ref())?;
                     publish(&path, &run, &mut j, &audio::wav(&combined)?, "wav")
                 })();
                 match result {
@@ -970,6 +992,74 @@ pub async fn reconcile(root: &Path, id: &str, adapter: &dyn Adapter) -> Result<R
         State::Failed
     };
     save(&path.join("run.yaml"), &run)?;
+    Ok(run)
+}
+
+/// Stage a user-attested recovered response; resume performs normal publication.
+pub fn recover(
+    root: &Path,
+    run_id: &str,
+    job_id: &str,
+    file: &Path,
+    format: &str,
+    fingerprint: &str,
+    evidence: &Path,
+) -> Result<Run> {
+    let path = run_path(root, run_id)?;
+    let guard = lock(&path.join("worker.lock"))?;
+    if !guard.try_lock_exclusive()? {
+        return Err(Error::input("A worker owns this run"));
+    }
+    let run = load(root, run_id)?;
+    let job = run
+        .jobs
+        .iter()
+        .find(|j| j.input.id == job_id)
+        .ok_or_else(|| Error::input("Unknown job ID"))?;
+    if job.state != State::Unknown || !job.input.turns.is_empty() || job.fingerprint != fingerprint
+    {
+        return Err(Error::input(
+            "Recovery requires an uncertain leaf job and its exact recorded fingerprint",
+        ));
+    }
+    let allowed = match job.input.media {
+        Media::Image | Media::Infographic => matches!(format, "png" | "jpeg" | "webp"),
+        Media::Speech | Media::Music | Media::Sfx => matches!(format, "wav" | "mp3" | "flac"),
+        Media::Text => format == "md",
+        _ => false,
+    };
+    if !allowed {
+        return Err(Error::input("Recovered format does not match job media"));
+    }
+    let bytes = fs::read(file)?;
+    integrity(&bytes, format)?;
+    let evidence_text = text(
+        evidence.parent().unwrap_or(Path::new(".")),
+        evidence.file_name().unwrap().as_ref(),
+    )?;
+    if evidence_text.len() > 16384 {
+        return Err(Error::input(
+            "Recovery evidence must be at most 16 KiB; omit credentials and account details",
+        ));
+    }
+    let raw = path.join("responses").join(format!("{job_id}.bin"));
+    let meta = raw.with_extension("yaml");
+    if raw.exists() || meta.exists() {
+        return Err(Error::input(
+            "A saved response already exists; inspect it before resume",
+        ));
+    }
+    let receipt = serde_json::json!({"provenance":"user_attested","job":job_id,"fingerprint":fingerprint,"request_id":job.request_id,"sha256":hash(&bytes),"format":format,"evidence":evidence_text});
+    atomic(&raw, &bytes, false)?;
+    save(&raw.with_extension("recovery.yaml"), &receipt)?;
+    save(
+        &meta,
+        &ResponseMeta {
+            format: format.into(),
+            request_id: job.request_id.clone(),
+            usage: job.usage.clone(),
+        },
+    )?;
     Ok(run)
 }
 

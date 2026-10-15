@@ -3,6 +3,30 @@ use std::path::Path;
 
 pub const TEMPLATES: &[(&str, &str)] = &[
     (
+        "reference-sheet.md",
+        include_str!("../assets/templates/reference-sheet.md"),
+    ),
+    (
+        "identity-checklist.md",
+        include_str!("../assets/templates/identity-checklist.md"),
+    ),
+    (
+        "cast-scene.yaml",
+        include_str!("../assets/templates/cast-scene.yaml"),
+    ),
+    (
+        "verification.yaml",
+        include_str!("../assets/templates/verification.yaml"),
+    ),
+    (
+        "recovery-evidence.md",
+        include_str!("../assets/templates/recovery-evidence.md"),
+    ),
+    (
+        "acceptance-review.yaml",
+        include_str!("../assets/templates/acceptance-review.yaml"),
+    ),
+    (
         "project-config.yaml",
         include_str!("../assets/templates/project-config.yaml"),
     ),
@@ -152,6 +176,10 @@ pub fn skill_with(path: &Path, overwrite: bool) -> Result<Vec<String>> {
         (
             "references/connections.md",
             include_str!("../docs/CONNECTIONS.md").to_owned(),
+        ),
+        (
+            "references/remediation.md",
+            include_str!("../docs/REMEDIATION.md").to_owned(),
         ),
         ("references/commands.md", cli::command_reference()),
     ] {

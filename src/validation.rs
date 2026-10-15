@@ -8,7 +8,7 @@ use base64::{Engine as _, engine::general_purpose::STANDARD};
 use std::{collections::BTreeSet, fs, path::Path};
 
 pub fn config(config: &Config) -> Result<()> {
-    version(config.schema_version)?;
+    version2(config.schema_version)?;
     limits(&config.limits)?;
     for (media, selection) in &config.defaults {
         model(selection)?;
@@ -52,6 +52,7 @@ pub fn config(config: &Config) -> Result<()> {
             other => *other,
         };
         let mut probe = Effective {
+            assembly: None,
             id: "configuration-check".into(),
             media: target,
             selection: selection.clone(),
@@ -74,6 +75,7 @@ pub fn config(config: &Config) -> Result<()> {
         }
         if probe.settings.input_fidelity.is_some() {
             probe.references.push(Reference {
+                blob: None,
                 origin: None,
                 role: ReferenceRole::Content,
                 name: "edit-only-placeholder.png".into(),
@@ -269,6 +271,7 @@ pub fn reference(base: &Path, path: &Path) -> Result<Reference> {
             .map_err(|_| Error::input("Reference audio cannot be decoded"))?;
     }
     Ok(Reference {
+        blob: None,
         origin: None,
         transcript: None,
         consent_hash: None,
@@ -332,8 +335,23 @@ fn resolve_inner(
     cfg: &Config,
     index: Option<&crate::provenance::Index>,
 ) -> Result<Effective> {
-    version(job.schema_version)?;
+    version2(job.schema_version)?;
     id(&job.id)?;
+    if job.schema_version == 1 && (!job.cast.is_empty() || job.assembly.is_some()) {
+        return Err(Error::input("cast and assembly require schema_version 2"));
+    }
+    if !job.cast.is_empty() {
+        return resolve_cast(job, base, cfg, index);
+    }
+    if let Some(assembly) = &job.assembly {
+        if job.media != Media::Podcast {
+            return Err(Error::input("assembly is only valid for podcasts"));
+        }
+        crate::audio::validate_assembly(
+            assembly,
+            &job.turns.iter().map(|t| t.id.as_str()).collect::<Vec<_>>(),
+        )?;
+    }
     for dep in &job.depends_on {
         id(dep)?;
     }
@@ -636,6 +654,8 @@ fn resolve_inner(
             };
             turn_settings.overlay(&t.settings);
             let turn = Job {
+                cast: vec![],
+                assembly: None,
                 voice_samples: t.voice_samples.clone(),
                 schema_version: 1,
                 id: t.id.clone(),
@@ -672,6 +692,7 @@ fn resolve_inner(
     })?;
     model(&selection)?;
     let mut input = Effective {
+        assembly: job.assembly.clone(),
         id: job.id.clone(),
         media: job.media,
         selection,
@@ -774,4 +795,131 @@ pub fn fingerprint(input: &Effective) -> Result<String> {
     content.output = None;
     content.depends_on.clear();
     Ok(hash(&serde_json::to_vec(&content)?))
+}
+
+fn resolve_cast(
+    job: &Job,
+    base: &Path,
+    cfg: &Config,
+    index: Option<&crate::provenance::Index>,
+) -> Result<Effective> {
+    if job.character.is_some() || !matches!(job.media, Media::Image | Media::Infographic) {
+        return Err(Error::input(
+            "cast applies only to images/infographics and conflicts with character",
+        ));
+    }
+    let mut aliases = BTreeSet::new();
+    let mut combined = job.clone();
+    combined.cast.clear();
+    let mut pinned = None;
+    let mut settings = None;
+    let mut identities = Vec::new();
+    let mut refs = Vec::new();
+    let mut hashes = Vec::new();
+    for member in &job.cast {
+        id(&member.alias)?;
+        if !aliases.insert(&member.alias) {
+            return Err(Error::input("Cast aliases must be unique"));
+        }
+        let profile = character(&relative(base, &member.character)?)?
+            .visual
+            .ok_or_else(|| Error::input("Cast character has no visual profile"))?;
+        if profile.references.is_empty() {
+            return Err(Error::input(
+                "Each cast member needs accepted visual references; bootstrap and accept first",
+            ));
+        }
+        let mut single = combined.clone();
+        single.character = Some(member.character.clone());
+        single.references.clear();
+        // Resolve visual identity without duplicating the scene or infographic content.
+        single.media = Media::Image;
+        single.spec = None;
+        single.brief = None;
+        single.depends_on.clear();
+        let mut input = resolve_inner(&single, base, cfg, index)?;
+        if input.references.is_empty() {
+            return Err(Error::input(
+                "Each cast member needs accepted visual references; bootstrap and accept first",
+            ));
+        }
+        if pinned.as_ref().is_some_and(|p| p != &input.selection) {
+            return Err(Error::input(
+                "Cast members require conflicting provider/models",
+            ));
+        }
+        if settings.as_ref().is_some_and(|s| s != &profile.settings) {
+            return Err(Error::input(
+                "Cast members require conflicting identity settings; use compatible explicit profiles",
+            ));
+        }
+        settings = Some(profile.settings);
+        pinned = Some(input.selection.clone());
+        let direction = member
+            .direction
+            .as_ref()
+            .map(|p| text(base, p))
+            .transpose()?
+            .unwrap_or_default();
+        for (i, r) in input.references.iter_mut().enumerate() {
+            r.name = format!("{}-identity-{}", member.alias, i + 1);
+        }
+        hashes.push((
+            member.alias.clone(),
+            input.character_hash,
+            direction.clone(),
+        ));
+        identities.push(format!(
+            "CAST {}:\n{}\nSCENE DIRECTION FOR {}:\n{}",
+            member.alias,
+            input
+                .prompt
+                .split("\nJOB DIRECTION:")
+                .next()
+                .unwrap_or(&input.prompt),
+            member.alias,
+            direction
+        ));
+        refs.extend(input.references);
+    }
+    // A skeleton resolves scene settings and additional content references with the same pin.
+    combined.selection = pinned;
+    if let Some(mut inherited) = settings {
+        inherited.overlay(&combined.settings);
+        combined.settings = inherited;
+    }
+    for reference in &refs {
+        // The final resolver needs the immutable bytes and provenance, not synthetic file paths.
+        crate::provenance::check(reference)?;
+    }
+    // Identity edit fidelity was already validated on every member. The scene-only
+    // skeleton may have no references until the resolved cast is attached below.
+    if combined.references.is_empty() {
+        combined.settings.input_fidelity = None;
+    }
+    let mut out = resolve_inner(&combined, base, cfg, index)?;
+    refs.extend(out.references);
+    if refs.len() > 8 {
+        return Err(Error::input(
+            "Combined cast exceeds the CLI limit of eight image references",
+        ));
+    }
+    refs.sort_by_key(|r| !matches!(r.role, ReferenceRole::Identity));
+    out.references = refs;
+    out.character_hash = Some(hash(&serde_json::to_vec(&hashes)?));
+    out.prompt = format!("{}\nSCENE:\n{}", identities.join("\n"), out.prompt);
+    out.prompt.push_str("\nPreserve each selected identity exactly: facial geometry, proportions, materials, colors and distinguishing details. Do not blend or redesign characters.\nATTACHMENT ORDER:\n");
+    for (i, r) in out.references.iter().enumerate() {
+        out.prompt += &format!("{}: {} ({:?})\n", i + 1, r.name, r.role);
+    }
+    if out.selection.provider == Provider::Openai
+        && matches!(
+            out.selection.model.as_str(),
+            "gpt-image-1" | "gpt-image-1.5"
+        )
+    {
+        out.settings.input_fidelity = Some("high".into());
+    }
+    providers::validate(&out)?;
+    Ok(out)
 }

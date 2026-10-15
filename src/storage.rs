@@ -13,12 +13,19 @@ pub fn hash(bytes: &[u8]) -> String {
 pub fn yaml<T: DeserializeOwned>(path: &Path) -> Result<T> {
     let content = fs::read_to_string(path)?;
     // Do not render parser snippets: manifests may contain private content.
-    serde_saphyr::from_str(&content).map_err(|_| {
+    let error = || {
         Error::input(format!(
             "Invalid YAML or unknown fields in {}",
             path.display()
         ))
-    })
+    };
+    if crate::blobs::directory(path).is_some() {
+        let mut value: serde_json::Value = serde_saphyr::from_str(&content).map_err(|_| error())?;
+        crate::blobs::hydrate(path, &mut value)?;
+        serde_json::from_value(value).map_err(|_| error())
+    } else {
+        serde_saphyr::from_str(&content).map_err(|_| error())
+    }
 }
 pub fn atomic(path: &Path, bytes: &[u8], overwrite: bool) -> Result<()> {
     let parent = path
@@ -38,9 +45,21 @@ pub fn atomic(path: &Path, bytes: &[u8], overwrite: bool) -> Result<()> {
     Ok(())
 }
 pub fn save<T: Serialize>(path: &Path, data: &T) -> Result<()> {
-    let content = serde_saphyr::to_string(data)
+    let mut value = serde_json::to_value(data)?;
+    crate::blobs::store(path, &mut value)?;
+    let content = serde_saphyr::to_string(&value)
         .map_err(|_| Error::new("serialization", "Cannot serialize local state", 1))?;
-    atomic(path, content.as_bytes(), true)
+    atomic(path, content.as_bytes(), true)?;
+    if crate::blobs::directory(path).is_some() {
+        let metadata = serde_json::json!({"index_version":2,"source_sha256":hash(content.as_bytes()),"metadata":crate::blobs::metadata(&value)});
+        // Derived cache failure must not invalidate a committed run.
+        let _ = atomic(
+            &path.with_file_name("metadata.json"),
+            &serde_json::to_vec(&metadata)?,
+            true,
+        );
+    }
+    Ok(())
 }
 pub fn create(path: &Path, bytes: &[u8]) -> Result<bool> {
     if path.exists() {
@@ -114,4 +133,15 @@ pub fn lock(path: &Path) -> Result<fs::File> {
         .create(true)
         .truncate(false)
         .open(path)?)
+}
+
+/// Config, job and run v2 readers retain v1 compatibility.
+pub fn version2(v: u32) -> Result<()> {
+    if matches!(v, 1 | 2) {
+        Ok(())
+    } else {
+        Err(Error::input(format!(
+            "Unsupported schema_version {v}; expected 1 or 2"
+        )))
+    }
 }

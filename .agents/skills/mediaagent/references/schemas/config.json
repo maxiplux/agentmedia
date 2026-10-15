@@ -265,7 +265,7 @@
     },
     "schema_version": {
       "format": "uint32",
-      "maximum": 1,
+      "maximum": 2,
       "minimum": 1,
       "type": "integer"
     }

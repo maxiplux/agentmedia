@@ -14,7 +14,7 @@ Implemented: Rust package/library/CLI, versioned contracts and schemas, offline 
 
 See [live evidence](LIVE_TESTS.md) for exact models, runs, decoded durations, one earlier rejected placeholder voice request, and untested paths. Live tests prove selected API/file handling, not human-perceived quality, exact script pronunciation, character consistency, or all model variants. No saved provider voice was created or cloned, and no candidates were accepted automatically. The descriptive preview test returned three candidates; provider-side creation/binding/verification refresh has offline coverage, with creation/binding untested live.
 
-Ordinary tests use mocked adapters/transports and small local fixtures. They verify contracts, concurrency, limits, identity resolution, authoring validation, audio assembly, cache, revisions, and recovery without paid calls even when credentials exist. All 100 offline tests, formatting, and lint checks passed locally on macOS. A local Apple Silicon release archive passed eight isolated offline checks, including initialization and embedded skill export without the checkout. See [packaging](PACKAGING.md). CI matrices are configured for Linux/macOS/Windows; Linux and Windows execution remain unverified here.
+Ordinary tests use mocked adapters/transports and small local fixtures. They verify contracts, concurrency, limits, identity resolution, authoring validation, audio assembly, cache, revisions, and recovery without paid calls even when credentials exist. The baseline had 100 passing offline tests on macOS; remediation adds independent contract/recovery/storage tests. See the remediation evidence below for the current count. A local Apple Silicon release archive passed eight isolated offline checks, including initialization and embedded skill export without the checkout. See [packaging](PACKAGING.md). CI matrices are configured for Linux/macOS/Windows; Linux and Windows execution remain unverified here.
 
 Verification still requiring external inputs: selected authorized speaker recordings for live cloning/reference synthesis, human listening and repeated character scenes, and native Linux/Windows execution. These do not become passed merely because implementation or mock tests succeeded.
 
@@ -60,3 +60,49 @@ structured diagnostics schema, and actionable failure classes. Default doctor st
 offline. A bounded live authentication check passed for all five provider endpoints
 with HTTP 200; media generation/model access and billing readiness were not tested
 by this check. See [connection checks](CONNECTIONS.md) and [live evidence](LIVE_TESTS.md).
+
+
+## Remediation implementation (0.2.0)
+
+Implemented: v2 job/config/run readers with v1 compatibility and explicit backed-up
+migration; ordered casts with canonical references and pinned-model conflict
+rejection; selected character/asset planner bundles with immutable reserved inputs;
+preview-hash-bound verification suites; read-only bounded model catalogs; user-attested
+recovered-response attachment; usage reports including separate voice/review operations;
+hash-addressed reference blobs, lightweight metadata indexes and conservative orphan
+cleanup; optional podcast pauses/gain/EBU R128 normalization; reference comparison
+reports, identity templates and complete generated skill command/schema documentation.
+
+The project now has a local baseline commit and explicit generation defaults.
+No remote or publication was added. The initial defaults are previously tested
+selections, not a new assertion of current account access.
+
+Prepared acceptance inputs are under `mediaagent/verification/`. The original-model
+reference-sheet preview resolves two requests; complete-media acceptance resolves
+13 requests; designed-voice preview is a separate one-request operation. The approved
+two-image reference-sheet batch has now run successfully, one attempt per image;
+both outputs were marked `needs_revision` after agent visual comparison for identity
+drift and cropping. Human acceptance remains pending. Other paid remediation batches
+remain unexecuted. Repeated scenes correctly remain blocked until references
+are selected; saved-voice reuse remains blocked until explicit creation/binding.
+Cloning/reference synthesis still needs authorized recordings and consent evidence.
+
+Fresh Codex/Claude automatic-discovery sessions and Windows execution remain pending.
+Generic process-caller and isolated package tests are separate from those gates.
+See [acceptance](ACCEPTANCE.md) and [remediation workflows](REMEDIATION.md).
+
+
+Remediation local evidence: 119 offline tests pass on macOS, with formatting and
+strict all-target/all-feature Clippy checks passing. The 0.2.0 Apple Silicon package
+passes 12 isolated offline checks. No paid requests were made during implementation.
+Subsequent approved character acceptance testing made two image requests, documented
+in [acceptance](ACCEPTANCE.md). No provider voice creation, cloned voices, or canonical
+reference acceptance were performed.
+
+
+Final Linux x86-64 verification also passes 119 offline tests, formatting, strict
+Clippy and 12 isolated package checks, executing under Docker Desktop emulation.
+The verified source manifest matches the current Rust, test, asset and packaging
+sources. Mac and Linux 0.2.0 archives/checksums are under `target/package-dist/`;
+`target/remediation-verification.json` records their exact hashes. Windows remains
+pending a Windows runner. Neither archive is publicly published or signed.

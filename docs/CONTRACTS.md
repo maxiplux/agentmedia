@@ -1,3 +1,7 @@
+> Remediation update: job/config/run support v1 and v2. New cast and podcast assembly
+> fields require v2. Other manifest versions remain v1. See [remediation](REMEDIATION.md)
+> and the CLI-generated schemas for current contracts; older v1 examples remain readable.
+
 # Contracts v1
 
 The executable and library share typed, unknown-field-rejecting Serde contracts. Schemars emits JSON Schema 2020-12. Every versioned document requires `schema_version: 1`; unsupported versions are rejected. Schemas: config, character, infographic, job, batch, effective, run, artifact, review, revision, budget, operation, voice_design, voice_consent, voice_clone, host_limits, diagnostics. Limits are a typed section of config and can also be supplied independently with `--limits-file`.

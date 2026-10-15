@@ -33,6 +33,7 @@ fn png() -> Vec<u8> {
 }
 fn input(name: &str) -> Effective {
     Effective {
+        assembly: None,
         id: name.into(),
         media: Media::Image,
         selection: Selection {
@@ -267,6 +268,7 @@ fn capability_rejection_includes_unknown_settings_and_voice_references() {
     assert!(providers::validate(&e).is_err());
     e = input("x");
     e.references.push(Reference {
+        blob: None,
         origin: None,
         transcript: None,
         consent_hash: None,
@@ -311,6 +313,7 @@ fn cache_fingerprint_changes_for_content_reference_voice_and_locale() {
     assert_ne!(baseline, validation::fingerprint(&altered).unwrap());
     altered = e.clone();
     altered.references.push(Reference {
+        blob: None,
         origin: None,
         transcript: None,
         consent_hash: None,
@@ -692,6 +695,8 @@ fn accepted_identity_is_reused_and_overrides_unrelated_project_defaults() {
         },
     );
     let job = Job {
+        cast: vec![],
+        assembly: None,
         voice_samples: vec![],
         schema_version: 1,
         id: "scene".into(),
@@ -932,6 +937,8 @@ async fn long_speech_is_split_exactly_and_assembled_with_no_parent_provider_call
     let source = t.path().join("article.md");
     fs::write(&source, &script).unwrap();
     let job = Job {
+        cast: vec![],
+        assembly: None,
         voice_samples: vec![],
         schema_version: 1,
         id: "article".into(),

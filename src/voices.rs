@@ -176,6 +176,7 @@ pub async fn design(
     }
     let input = json!({"kind":"voice_design","character_id":draft.character_id,"identity_hash":draft.identity_hash,"description":draft.description,"text":draft.text});
     let reservation = Effective {
+        assembly: None,
         id: "voice-design".into(),
         media: Media::Speech,
         selection: draft.selection.clone(),
@@ -351,6 +352,7 @@ pub async fn create(
     }
     let input = json!({"kind":"voice_create","candidate":candidate.id,"name":name,"description":draft.description,"identity_hash":draft.identity_hash});
     let reservation = Effective {
+        assembly: None,
         id: "voice-create".into(),
         media: Media::Text,
         selection: draft.selection.clone(),
@@ -546,6 +548,7 @@ pub async fn clone_voice(
         );
     }
     let reservation = Effective {
+        assembly: None,
         id: "voice-clone".into(),
         media: Media::Text,
         selection: selection.clone(),

@@ -55,6 +55,7 @@ impl Adapter for Fake {
         let previews = vec![Preview {
             id: "candidate-1".into(),
             audio: Reference {
+                blob: None,
                 origin: None,
                 transcript: None,
                 consent_hash: None,

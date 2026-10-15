@@ -1,0 +1,29 @@
+schema_version: 1
+title: Practice minutes
+audience: Adult learners
+key_message: Compare three fictional example values
+canvas: 1024x1536
+layout: Title followed by three clearly labelled rows and a source footer
+visual_brief: infographic-a.md
+sections:
+  - heading: Monday
+    copy: "15 minutes"
+    values:
+      - label: Monday
+        value: "15"
+        unit: minutes
+        source: Fictional acceptance-test data
+  - heading: Tuesday
+    copy: "25 minutes"
+    values:
+      - label: Tuesday
+        value: "25"
+        unit: minutes
+        source: Fictional acceptance-test data
+  - heading: Wednesday
+    copy: "20 minutes"
+    values:
+      - label: Wednesday
+        value: "20"
+        unit: minutes
+        source: Fictional acceptance-test data

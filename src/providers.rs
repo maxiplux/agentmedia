@@ -1546,6 +1546,7 @@ impl crate::voices::Adapter for HttpAdapter {
                         id: id.into(),
                         language: p["language"].as_str().map(str::to_owned),
                         audio: Reference {
+                            blob: None,
                             origin: None,
                             transcript: None,
                             consent_hash: None,
@@ -1637,6 +1638,7 @@ mod tests {
     }
     fn request(provider: Provider, model: &str, media: Media) -> Effective {
         Effective {
+            assembly: None,
             id: "fixture".into(),
             media,
             selection: Selection {
@@ -1961,6 +1963,7 @@ mod tests {
         e.settings.voice = None;
         let bytes = crate::audio::wav(&[0.1; 2400]).unwrap();
         e.references.push(Reference {
+            blob: None,
             origin: None,
             name: "sample.wav".into(),
             mime: "audio/wav".into(),
@@ -2112,6 +2115,7 @@ mod tests {
         let adapter = HttpAdapter::with_transport(root.path(), f.clone()).unwrap();
         let audio = crate::audio::wav(&[0.1; 2400]).unwrap();
         let recording = Reference {
+            blob: None,
             origin: None,
             name: "selected.wav".into(),
             mime: "audio/wav".into(),
@@ -2155,6 +2159,7 @@ mod tests {
         let adapter = HttpAdapter::with_transport(root.path(), f).unwrap();
         let bytes = crate::audio::wav(&[0.1; 2400]).unwrap();
         let recording = Reference {
+            blob: None,
             origin: None,
             name: "selected.wav".into(),
             mime: "audio/wav".into(),
@@ -2191,6 +2196,7 @@ mod tests {
             ("kito.png", b"second-identity".as_slice()),
         ] {
             e.references.push(Reference {
+                blob: None,
                 origin: None,
                 name: name.into(),
                 mime: "image/png".into(),

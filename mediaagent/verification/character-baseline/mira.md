@@ -1,0 +1,2 @@
+# Mira reference-sheet candidate
+Preserve the attached original character exactly. Show full body front, three-quarter and side views plus one face/detail close-up, evenly spaced on a neutral background. Keep all anatomy and accessories inside the frame. Preserve face geometry, eye shape, hair/material silhouette, head-to-body ratio, limb lengths, palette and the original rendering style. Do not redesign or age the character. No labels or decorative text. These are candidates for user review; do not reinterpret the original as inspiration.

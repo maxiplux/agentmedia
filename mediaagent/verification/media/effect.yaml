@@ -1,0 +1,6 @@
+schema_version: 2
+id: effect
+media: sfx
+selection: {provider: elevenlabs, model: eleven_text_to_sound_v2}
+brief: effect.md
+settings: {format: mp3, duration_seconds: 3}

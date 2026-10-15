@@ -1,0 +1,8 @@
+schema_version: 1
+id: acceptance-host
+persona: persona.md
+voice:
+  description: voice.md
+  selection: {provider: openai, model: gpt-4o-mini-tts}
+  binding: alloy
+  references: []

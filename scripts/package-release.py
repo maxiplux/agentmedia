@@ -34,7 +34,7 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
     isolated = pathlib.Path(temporary)
     copied = isolated / executable
     shutil.copy2(binary, copied)
-    project = isolated / 'project'
+    project = isolated / 'project with spaces'
     project.mkdir()
     preserved = 'LOCAL_FIXTURE=preserve-existing-file\n'
     (project / '.env').write_text(preserved)
@@ -86,6 +86,33 @@ with tempfile.TemporaryDirectory(prefix='mediaagent-package-') as temporary:
     assert (exported / 'references/connections.md').is_file()
     assert (exported / 'references/schemas/diagnostics.json').is_file()
     checks.append('offline_doctor_and_embedded_connection_contract')
+    # A generic process caller exercises new contracts in a path containing spaces.
+    jobs = project / 'acceptance jobs'
+    jobs.mkdir()
+    (jobs / 'brief.md').write_text('One clear leaf on a plain background.')
+    (jobs / 'job.yaml').write_text('schema_version: 2\nid: package-check\nmedia: image\nselection: {provider: openai, model: gpt-image-1}\nbrief: brief.md\n')
+    (jobs / 'suite.yaml').write_text('schema_version: 1\nid: package-check\ndescription: Isolated offline preview\njobs: [job.yaml]\nlimits: {requests: 1, images: 1, audio_seconds: 60, speech_chars: 1000, revisions: 1, attempts: 1, concurrency: 1, per_provider: 1}\ncriteria: [Human content acceptance]\n')
+    preview = cli(['--project', str(project), 'verify', '--suite', str(jobs / 'suite.yaml')])['data']
+    assert preview['estimated_reservation']['requests'] == 1
+    assert len(preview['preview_hash']) == 64 and preview['generation_performed'] is False
+    assert not list((project / 'mediaagent/runs').glob('*/run.yaml'))
+    checks.append('bounded_verification_preview_without_provider_calls')
+    before = (jobs / 'job.yaml').read_bytes()
+    cli(['--project', str(project), 'migrate', '--kind', 'job', '--file', str(jobs / 'job.yaml')])
+    assert (jobs / 'job.yaml').read_bytes() == before
+    assert not (jobs / 'job.v1.bak').exists()
+    checks.append('migration_preview_preserves_authored_files')
+    report = cli(['--project', str(project), 'usage'])['data']
+    assert report['currency_total'] is None
+    cleanup = isolated / 'cleanup.yaml'
+    cli(['--project', str(project), 'storage', 'plan', '--output', str(cleanup)])
+    assert cleanup.exists()
+    checks.append('usage_and_conservative_storage_preview')
+    for schema_name in ['job', 'run', 'verification']:
+        assert (exported / 'references/schemas' / (schema_name + '.json')).exists()
+    assert (exported / 'templates/cast-scene.yaml').exists()
+    assert (exported / 'references/remediation.md').exists()
+    checks.append('embedded_v2_cast_verification_and_recovery_guidance')
     reported = subprocess.run([str(copied), '--version'], cwd=isolated, env=smoke_environment, capture_output=True, text=True, check=True).stdout.strip()
     assert reported == f'mediaagent {version}'
 

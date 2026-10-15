@@ -1,0 +1,8 @@
+requests: 1
+images: 1
+audio_seconds: 60
+speech_chars: 1000
+revisions: 1
+attempts: 1
+concurrency: 1
+per_provider: 1

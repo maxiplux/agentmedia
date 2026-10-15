@@ -1,0 +1,26 @@
+schema_version: 1
+id: media-acceptance
+description: Bounded complete media workflows using explicit tested selections.
+jobs:
+  - article.yaml
+  - podcast.yaml
+  - instrumental.yaml
+  - vocal.yaml
+  - effect.yaml
+  - infographic-a.yaml
+  - infographic-b.yaml
+limits:
+  requests: 16
+  images: 2
+  audio_seconds: 600
+  speech_chars: 12000
+  revisions: 1
+  attempts: 1
+  concurrency: 2
+  per_provider: 2
+criteria:
+  - Narration preserves every word and joins chunks without omissions or repeats.
+  - Podcast preserves turn order and voices; listen to transitions and peak-limited normalization.
+  - Vocal music preserves the exact short lyric and instrumental music contains no singing.
+  - Both infographics preserve every label number unit and source with readable text.
+  - Durations and content match the job briefs; human acceptance remains separate.

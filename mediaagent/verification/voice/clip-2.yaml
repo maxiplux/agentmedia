@@ -1,0 +1,5 @@
+schema_version: 2
+id: voice-clip-2
+media: speech
+character: ../../characters/acceptance-narrator/character.yaml
+text_file: clip-2.md

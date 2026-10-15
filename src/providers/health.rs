@@ -397,3 +397,54 @@ fn expected(provider: Provider, v: &Value) -> bool {
         Provider::Elevenlabs => v["user_id"].as_str().is_some_and(|id| !id.is_empty()),
     }
 }
+
+impl Client {
+    /// One catalog GET per provider, no retries or pagination. A listed model is not a generation test.
+    pub async fn models(&self, root: &Path, selected: &[Provider]) -> Result<Value> {
+        let selected: BTreeSet<_> = if selected.is_empty() {
+            PROVIDERS.into_iter().collect()
+        } else {
+            selected.iter().copied().collect()
+        };
+        let mut rows = Vec::new();
+        for provider in selected {
+            let endpoint = match provider {
+                Provider::Openai => "https://api.openai.com/v1/models",
+                Provider::Google => {
+                    "https://generativelanguage.googleapis.com/v1beta/models?pageSize=100"
+                }
+                Provider::Openrouter => "https://openrouter.ai/api/v1/models",
+                Provider::Elevenlabs => "https://api.elevenlabs.io/v1/models",
+                Provider::Fish => {
+                    rows.push(serde_json::json!({"provider":provider,"status":"not_implemented","action":"Use the capability registry and explicit voice discovery; generation remains untested"}));
+                    continue;
+                }
+            };
+            let response:Result<Value>=async {
+                let key=credentials::resolve(provider,root)?;
+                let (header,key)=match provider {Provider::Google=>("x-goog-api-key",key),Provider::Elevenlabs=>("xi-api-key",key),_=>("authorization",format!("Bearer {key}"))};
+                let mut key=HeaderValue::from_str(&key).map_err(|_|Error::input("Invalid credential header"))?;key.set_sensitive(true);
+                let req=self.client.get(endpoint).header(header,key).build().map_err(|_|Error::input("Cannot build model catalog request"))?;
+                let response=tokio::time::timeout(self.timeout,self.transport.send(req)).await.map_err(|_|Error::new("timeout","Catalog lookup timed out",3))??;
+                if response.status!=200 {return Err(Error::new("catalog_unavailable",format!("Catalog HTTP {}; account generation access is inconclusive",response.status),3))}
+                if response.bytes.len()>MAX_BYTES{return Err(Error::new("response_limit","Catalog response exceeded 1 MiB",3))}
+                let value:Value=serde_json::from_slice(&response.bytes).map_err(|_|Error::input("Invalid catalog JSON"))?;
+                let (list,field)=match provider {Provider::Google=>(&value["models"],"name"),Provider::Elevenlabs=>(&value,"model_id"),_=>(&value["data"],"id")};
+                let list=list.as_array().ok_or_else(||Error::input("Invalid catalog shape"))?;
+                let mut models=Vec::new();
+                for item in list {
+                    let id=item[field].as_str().ok_or_else(||Error::input("Invalid model identifier"))?;
+                    let id=id.strip_prefix("models/").unwrap_or(id);
+                    if id.len()>200 || !id.bytes().all(|b|b.is_ascii_alphanumeric()||b"-_/.:".contains(&b)){return Err(Error::input("Invalid model identifier"))}
+                    let shutdown=item["shutdown_date"].as_str().filter(|v|v.len()==10&&v.bytes().all(|b|b.is_ascii_digit()||b==b'-'));
+                    models.push(serde_json::json!({"model":id,"registry_supported":super::registry().iter().any(|c|c.provider==provider&&c.model==id),"shutdown_date":shutdown}));
+                }
+                Ok(serde_json::json!({"provider":provider,"status":"catalog_visible","models":models,"has_more":value.get("nextPageToken").is_some(),"account_generation_access":"unverified","generation_tested":false}))
+            }.await;
+            rows.push(match response {Ok(v)=>v,Err(e)=>serde_json::json!({"provider":provider,"status":"inconclusive","reason":e.code,"action":"Check credentials/endpoint permissions; do not infer generation readiness"})});
+        }
+        Ok(
+            serde_json::json!({"catalogs":rows,"generation_performed":false,"scope":"One read-only catalog page per provider; absent models may be unlisted. No registry updates or model substitution."}),
+        )
+    }
+}

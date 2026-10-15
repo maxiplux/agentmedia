@@ -1,0 +1,6 @@
+schema_version: 2
+id: instrumental
+media: music
+selection: {provider: elevenlabs, model: music_v1}
+brief: instrumental.md
+settings: {format: mp3, duration_seconds: 10, instrumental: true}

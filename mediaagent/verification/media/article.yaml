@@ -1,0 +1,6 @@
+schema_version: 2
+id: article
+media: speech
+selection: {provider: openai, model: gpt-4o-mini-tts}
+text_file: article.md
+settings: {voice: alloy, format: wav}

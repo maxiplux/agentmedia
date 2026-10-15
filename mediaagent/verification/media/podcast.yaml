@@ -1,0 +1,31 @@
+schema_version: 2
+id: podcast
+media: podcast
+turns:
+  - id: host-intro
+    text_file: host-intro.md
+    character: host/character.yaml
+    settings: {format: wav}
+  - id: guest-intro
+    text_file: guest-intro.md
+    character: guest/character.yaml
+    settings: {format: wav}
+  - id: host-question
+    text_file: host-question.md
+    character: host/character.yaml
+    settings: {format: wav}
+  - id: guest-answer
+    text_file: guest-answer.md
+    character: guest/character.yaml
+    settings: {format: wav}
+  - id: host-summary
+    text_file: host-summary.md
+    character: host/character.yaml
+    settings: {format: wav}
+  - id: guest-close
+    text_file: guest-close.md
+    character: guest/character.yaml
+    settings: {format: wav}
+assembly:
+  pause_ms: 250
+  loudness_lufs: -19

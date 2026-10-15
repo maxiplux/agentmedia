@@ -1,0 +1,25 @@
+schema_version: 1
+id: character-scenes
+description: Three solo scenes per character and two paired interactions after canonical selection.
+jobs:
+  - mira-scene-1.yaml
+  - mira-scene-2.yaml
+  - mira-scene-3.yaml
+  - kito-scene-1.yaml
+  - kito-scene-2.yaml
+  - kito-scene-3.yaml
+  - paired-scene-1.yaml
+  - paired-scene-2.yaml
+limits:
+  requests: 8
+  images: 8
+  audio_seconds: 60
+  speech_chars: 1000
+  revisions: 1
+  attempts: 1
+  concurrency: 2
+  per_provider: 2
+criteria:
+  - Every scene preserves each accepted face silhouette proportions palette and distinguishing details.
+  - Both paired interactions keep identities separate without anatomy swaps.
+  - User recognizes both original characters consistently.

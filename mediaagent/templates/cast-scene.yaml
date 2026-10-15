@@ -1,0 +1,18 @@
+schema_version: 2
+id: paired-scene
+media: image
+brief: character-scene.md
+cast:
+  - alias: explorer
+    character: ../characters/mira/character.yaml
+    direction: explorer-direction.md
+  - alias: robot
+    character: ../characters/kito/character.yaml
+    direction: robot-direction.md
+settings:
+  format: png
+  size: 1536x1024
+  image_quality: medium
+  input_fidelity: high
+# Both profiles must have accepted references and compatible original models/settings.
+# selection may be omitted; the common pinned character model is resolved.

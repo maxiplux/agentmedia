@@ -1,0 +1,13 @@
+schema_version: 2
+id: kito-reference-sheet
+media: image
+selection: {provider: openai, model: gpt-image-1}
+brief: kito.md
+references:
+  - path: ../../runs/54372645-39f4-4bc9-b0d6-536fc0101eda/outputs/demo-kito.png
+    role: identity
+settings:
+  format: png
+  size: 1536x1024
+  image_quality: medium
+  input_fidelity: high

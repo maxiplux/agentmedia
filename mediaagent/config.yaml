@@ -1,11 +1,89 @@
-schema_version: 1
-defaults: {}
+consistency:
+  inherit_source_settings: true
+  require_known_identity_model: true
+default_locales:
+  podcast: en-US
+  speech: en-US
+default_settings:
+  image:
+    duration_seconds: null
+    format: png
+    image_quality: medium
+    input_fidelity: high
+    instrumental: null
+    seed: null
+    size: 1024x1024
+    voice: null
+  infographic:
+    duration_seconds: null
+    format: png
+    image_quality: medium
+    input_fidelity: high
+    instrumental: null
+    seed: null
+    size: 1024x1536
+    voice: null
+  music:
+    duration_seconds: 10
+    format: mp3
+    image_quality: null
+    instrumental: true
+    seed: null
+    size: null
+    voice: null
+  podcast:
+    duration_seconds: null
+    format: wav
+    image_quality: null
+    instrumental: null
+    seed: null
+    size: null
+    voice: alloy
+  sfx:
+    duration_seconds: 3
+    format: mp3
+    image_quality: null
+    instrumental: null
+    seed: null
+    size: null
+    voice: null
+  speech:
+    duration_seconds: null
+    format: wav
+    image_quality: null
+    instrumental: null
+    seed: null
+    size: null
+    voice: alloy
+defaults:
+  image:
+    model: gpt-image-1
+    provider: openai
+  infographic:
+    model: gpt-image-1
+    provider: openai
+  music:
+    model: music_v1
+    provider: elevenlabs
+  podcast:
+    model: gpt-4o-mini-tts
+    provider: openai
+  sfx:
+    model: eleven_text_to_sound_v2
+    provider: elevenlabs
+  speech:
+    model: gpt-4o-mini-tts
+    provider: openai
+  text:
+    model: gpt-4.1-mini
+    provider: openai
 limits:
-  requests: 20
-  images: 8
-  audio_seconds: 1800
-  speech_chars: 60000
-  revisions: 3
   attempts: 3
+  audio_seconds: 1800
   concurrency: 4
+  images: 8
   per_provider: 2
+  requests: 20
+  revisions: 3
+  speech_chars: 60000
+schema_version: 2

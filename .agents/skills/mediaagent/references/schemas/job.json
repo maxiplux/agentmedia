@@ -1,5 +1,33 @@
 {
   "$defs": {
+    "Assembly": {
+      "additionalProperties": false,
+      "properties": {
+        "loudness_lufs": {
+          "description": "Optional integrated loudness target; peak ceiling is -1 dBFS.",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "pause_ms": {
+          "default": 0,
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "turn_gain_db": {
+          "additionalProperties": {
+            "format": "float",
+            "type": "number"
+          },
+          "default": {},
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
     "AssetOrigin": {
       "additionalProperties": false,
       "properties": {
@@ -37,6 +65,28 @@
       "required": [
         "selection",
         "sha256"
+      ],
+      "type": "object"
+    },
+    "CastMember": {
+      "additionalProperties": false,
+      "properties": {
+        "alias": {
+          "type": "string"
+        },
+        "character": {
+          "type": "string"
+        },
+        "direction": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "alias",
+        "character"
       ],
       "type": "object"
     },
@@ -256,12 +306,49 @@
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "schema_version": {
+            "const": 1
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "assembly": {
+            "type": "null"
+          },
+          "cast": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ],
   "properties": {
+    "assembly": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Assembly"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "brief": {
       "type": [
         "string",
         "null"
       ]
+    },
+    "cast": {
+      "items": {
+        "$ref": "#/$defs/CastMember"
+      },
+      "type": "array"
     },
     "character": {
       "type": [
@@ -303,7 +390,7 @@
     },
     "schema_version": {
       "format": "uint32",
-      "maximum": 1,
+      "maximum": 2,
       "minimum": 1,
       "type": "integer"
     },

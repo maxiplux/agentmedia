@@ -1,4 +1,4 @@
-schema_version: 1
+schema_version: 2
 id: same-characters-new-scene
 media: image
 # Provider/model is inherited from the selected original artifacts.

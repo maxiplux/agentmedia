@@ -120,3 +120,63 @@ pub fn wav(samples: &[f32]) -> Result<Vec<u8>> {
     }
     Ok(cursor.into_inner())
 }
+
+pub fn validate_assembly(a: &crate::contracts::Assembly, turns: &[&str]) -> Result<()> {
+    if a.pause_ms > 10000
+        || a.turn_gain_db.iter().any(|(id, g)| {
+            !turns.contains(&id.as_str()) || !g.is_finite() || !(-24.0..=24.0).contains(g)
+        })
+        || a.loudness_lufs
+            .is_some_and(|v| !v.is_finite() || !(-36.0..=-10.0).contains(&v))
+    {
+        return Err(Error::input(
+            "Assembly requires pause_ms 0–10000, known turn IDs, gains -24–24 dB, and loudness_lufs -36–-10",
+        ));
+    }
+    Ok(())
+}
+/// Native mono assembly. Global gain is constrained by a -1 dBFS sample-peak ceiling.
+pub fn assemble(
+    clips: &[(String, Vec<f32>)],
+    options: Option<&crate::contracts::Assembly>,
+) -> Result<Vec<f32>> {
+    if let Some(a) = options {
+        validate_assembly(a, &clips.iter().map(|c| c.0.as_str()).collect::<Vec<_>>())?;
+    }
+    let mut out = Vec::new();
+    for (i, (id, clip)) in clips.iter().enumerate() {
+        if clip.iter().any(|s| !s.is_finite()) {
+            return Err(Error::input("Nonfinite audio samples"));
+        }
+        if i > 0
+            && let Some(a) = options
+        {
+            out.resize(out.len() + a.pause_ms as usize * 24, 0.0);
+        }
+        let gain = options
+            .and_then(|a| a.turn_gain_db.get(id))
+            .map(|db| 10_f32.powf(db / 20.0))
+            .unwrap_or(1.0);
+        out.extend(clip.iter().map(|v| v * gain));
+    }
+    if let Some(a) = options {
+        let peak = out.iter().map(|v| v.abs()).fold(0.0_f32, f32::max);
+        let mut gain = 1.0;
+        if let Some(target) = a.loudness_lufs {
+            let fail = |_| Error::new("loudness", "Cannot measure integrated audio loudness", 3);
+            let mut meter = ebur128::EbuR128::new(1, 24000, ebur128::Mode::I).map_err(fail)?;
+            meter.add_frames_f32(&out).map_err(fail)?;
+            let measured = meter.loudness_global().map_err(fail)?;
+            if measured.is_finite() {
+                gain = 10_f32.powf(((target - measured) / 20.0) as f32);
+            }
+        }
+        if peak > 0.0 {
+            gain = gain.min(10_f32.powf(-1.0 / 20.0) / peak);
+        }
+        for sample in &mut out {
+            *sample *= gain;
+        }
+    }
+    Ok(out)
+}

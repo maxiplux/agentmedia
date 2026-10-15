@@ -2,6 +2,11 @@
 
 A local Rust CLI for any agent with process access, and for terminal users. Generate images, raster infographics, exact narration, podcasts, music, and sound effects. Characters are optional: save visual identity and a provider voice binding when you need reuse.
 
+Open the [web guide](docs/site/index.html) for copyable examples for every media
+workflow, agent prompts, downloadable YAML/Markdown inputs, and a searchable command
+reference. It is a single HTML file with embedded JavaScript, compiled Tailwind CSS, command
+help and example downloads; see [preview instructions](docs/WEB_GUIDE.md).
+
 The first-version workflows are implemented; visual character consistency has not passed user acceptance. Offline contracts and mocked
 execution tests plus bounded live checks across all five providers. It includes
 voice design/cloning, authorized Fish recording synthesis, audio/image AI review,
@@ -165,3 +170,14 @@ A local native binary can be packaged with `python3 scripts/package-release.py -
 See [live test evidence](docs/LIVE_TESTS.md) for the exact models, runs, and verification limits.
 
 See [contracts](docs/CONTRACTS.md) for lifecycle and result guarantees and `mediaagent schema KIND` for actual JSON Schemas.
+
+
+## Remediation workflows
+
+Use `verify --suite suite.yaml --json` to preview bounded acceptance tests without
+provider calls. Execute only an approved preview hash. New v2 jobs support a cast
+of saved characters and optional podcast assembly. `plan --character ... --asset ...`
+copies selected dependencies into a contained bundle. `models --live` reads catalogs;
+`usage`, `storage plan`, `migrate`, `runs recover`, and `review report` support local
+operation and review. See [workflow details](docs/REMEDIATION.md) and
+[acceptance gates and prepared batches](docs/ACCEPTANCE.md).

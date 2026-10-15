@@ -1,10 +1,12 @@
 pub mod assets;
 pub mod audio;
+pub mod blobs;
 pub mod cli;
 pub mod contracts;
 pub mod credentials;
 pub mod engine;
 pub mod error;
+pub mod maintenance;
 pub mod operations;
 pub mod planning;
 pub mod progress;
@@ -14,4 +16,5 @@ pub mod providers;
 pub mod setup;
 pub mod storage;
 pub mod validation;
+pub mod verification;
 pub mod voices;
