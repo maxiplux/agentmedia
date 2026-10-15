@@ -31,6 +31,7 @@ if [ -z "$version" ]; then
   version=$(cat "$temporary/version.txt")
 fi
 version=${version#v}
+case "$version" in ''|*[!0-9.]*) echo 'Invalid stable release version' >&2; exit 1 ;; esac
 # Stable three-component versions only; never evaluate downloaded text as shell code.
 if ! printf '%s\n' "$version" | LC_ALL=C grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then echo 'Invalid stable release version' >&2; exit 1; fi
 asset=mediaagent-$target

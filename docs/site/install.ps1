@@ -1,7 +1,10 @@
 # Install the latest stable public release, or select -Version. No administrator access.
 param([string]$Version = '', [string]$BinDir = '', [switch]$NoModifyPath, [switch]$Force)
 $ErrorActionPreference = 'Stop'
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+# Preserve modern system TLS defaults; enable TLS 1.2 for older PowerShell defaults.
+if ([int][Net.ServicePointManager]::SecurityProtocol -ne 0) {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+}
 $architecture = [Environment]::GetEnvironmentVariable('PROCESSOR_ARCHITEW6432')
 if (-not $architecture) { $architecture = [Environment]::GetEnvironmentVariable('PROCESSOR_ARCHITECTURE') }
 if ($architecture -ne 'AMD64') { throw 'This release supports Windows x86-64. Build from source for another architecture.' }
@@ -14,7 +17,7 @@ try {
         $Version = (Get-Content -LiteralPath (Join-Path $temporary 'version.txt') -Raw).Trim()
     }
     $Version = $Version -replace '^v', ''
-    if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw 'Invalid stable release version' }
+    if ($Version -notmatch '\A[0-9]+\.[0-9]+\.[0-9]+\z') { throw 'Invalid stable release version' }
     $asset = 'mediaagent-x86_64-pc-windows-msvc.exe'
     $binary = Join-Path $temporary 'mediaagent.exe'
     $checksum = Join-Path $temporary 'checksum'
