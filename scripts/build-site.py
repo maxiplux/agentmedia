@@ -397,6 +397,8 @@ def render_block(node):
     if tag == 'details' and 'command-entry' in classes:
         summary = find_first(node, lambda n: n.tag == 'summary')
         pre = find_first(node, lambda n: n.tag == 'pre')
+        if summary is None or pre is None:  # generated entries always carry both; anything else is a bug
+            raise ValueError('a command-entry needs a <summary> and a <pre> with its help text')
         return [f'### {plain(summary)}', fenced(raw_text(pre))]
     if classes & {'hero-actions', 'media-tags'}:  # side-by-side links and tags with no text between them
         parts = [inline_node(child).strip() for child in elements(node)]
@@ -411,7 +413,8 @@ def render_block(node):
         return ['\n'.join(items)] if items else []
     if 'code-block' in classes:
         bar = find_first(node, lambda n: 'code-bar' in n.classes())
-        label = plain(find_first(bar, lambda n: n.tag == 'span')) if bar is not None else ''
+        span = find_first(bar, lambda n: n.tag == 'span') if bar is not None else None
+        label = plain(span) if span is not None else ''
         return ([f'{escape_md(label)}:'] if label else []) + [fenced(raw_text(pre)) for pre in find_all(node, lambda n: n.tag == 'pre')]
     return blocks(node)
 

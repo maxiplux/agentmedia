@@ -177,6 +177,15 @@ class Generator(unittest.TestCase):
         self.assertIn('1. ### Install\n\n   Run it.\n\n   ```\n   framechord init\n   ```\n\n2. ### Ask', markdown)
         self.assertIn('- one\n- two', markdown)
 
+    def test_markdown_handles_incomplete_blocks(self):
+        main = ('<section id="start"><div class="code-block"><div class="code-bar"><button>Copy</button></div>'
+                '<pre><code>framechord init</code></pre></div></section><section id="ask"><p>Ask.</p></section>')
+        markdown = self.site['render_markdown'](self.markdown_page(main), '0.7.0')
+        self.assertIn('<a id="start"></a>\n\n```\nframechord init\n```', markdown)
+        broken = '<section id="start"><details class="command-entry"><summary>framechord x</summary></details></section>'
+        with self.assertRaisesRegex(ValueError, 'command-entry'):
+            self.site['render_markdown'](self.markdown_page(broken + '<section id="ask"><p>Ask.</p></section>'), '0.7.0')
+
     def test_markdown_refuses_links_without_anchors(self):
         main = '<section id="start"><p><a href="#gone">gone</a></p></section><section id="ask"><p>Ask.</p></section>'
         with self.assertRaisesRegex(ValueError, '#gone'):
