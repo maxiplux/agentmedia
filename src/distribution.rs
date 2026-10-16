@@ -114,6 +114,56 @@ fn keep_backup(executable: &Path, version: &str) -> Result<()> {
     executable_write(&backup_path(dir), &bytes, true)?;
     record(&backup_receipt(dir), version, &bytes)
 }
+/// Waits between attempts to swap the executable. Windows briefly locks a file that just
+/// ran or that antivirus is scanning, so a short bounded wait usually clears the failure.
+const REPLACE_BACKOFF: [Duration; 4] = [
+    Duration::from_millis(100),
+    Duration::from_millis(250),
+    Duration::from_millis(500),
+    Duration::from_millis(1000),
+];
+
+/// Puts the verified `bytes` of `candidate` at `executable` through `swap`
+/// (`self_replace` in production), retrying transient failures. `swap` is retried only while
+/// the executable is still in place: on Windows it first moves the running executable aside,
+/// and a half-finished attempt cannot be repeated. That case is completed here by writing the
+/// verified bytes to the empty path, or `restore` (the executable being replaced) when that
+/// fails, so the path is never left empty. The error carries the operating-system reason.
+async fn replace_executable(
+    executable: &Path,
+    candidate: &Path,
+    bytes: &[u8],
+    restore: &[u8],
+    backoff: &[Duration],
+    mut swap: impl FnMut(&Path) -> std::io::Result<()>,
+) -> std::result::Result<(), String> {
+    let mut reason = String::new();
+    for wait in std::iter::once(Duration::ZERO).chain(backoff.iter().copied()) {
+        tokio::time::sleep(wait).await;
+        match swap(candidate) {
+            Ok(()) => return Ok(()),
+            Err(error) => reason = error.to_string(),
+        }
+        if executable.exists() {
+            continue;
+        }
+        for (contents, outcome) in [
+            (bytes, None),
+            (restore, Some("the preceding executable was restored")),
+        ] {
+            for wait in std::iter::once(Duration::ZERO).chain(backoff.iter().copied()) {
+                tokio::time::sleep(wait).await;
+                if executable_write(executable, contents, true).is_ok() {
+                    return outcome.map_or(Ok(()), |restored| Err(format!("{reason}; {restored}")));
+                }
+            }
+        }
+        return Err(format!(
+            "{reason}; the executable path is empty, restore it from the backup"
+        ));
+    }
+    Err(reason)
+}
 /// Append one literal PATH entry, preserving the user's existing profile bytes.
 pub fn configure_unix_path(bin: &Path, profile: &Path) -> Result<bool> {
     let path = bin
@@ -437,9 +487,18 @@ impl ReleaseClient {
         executable_write(&candidate, &bytes, false)?;
         verify_version(&candidate, &selected.to_string()).await?;
         keep_backup(&executable, VERSION)?;
-        self_replace::self_replace(&candidate).map_err(|_| {
+        replace_executable(
+            &executable,
+            &candidate,
+            &bytes,
+            &installed,
+            &REPLACE_BACKOFF,
+            |path| self_replace::self_replace(path),
+        )
+        .await
+        .map_err(|reason| {
             problem(format!(
-                "Replacement failed. Your previous executable is backed up at {}",
+                "Replacement failed ({reason}). Your previous executable is backed up at {}",
                 backup_path(dir).display()
             ))
         })?;
@@ -562,8 +621,20 @@ pub async fn rollback() -> Result<Value> {
     if prior.version != "unmanaged" {
         verify_version(&backup, &prior.version).await?;
     }
-    self_replace::self_replace(&backup).map_err(|_| {
-        problem("Cannot restore the backup; check directory permissions and stop running workers")
+    let current = fs::read(&executable)?;
+    replace_executable(
+        &executable,
+        &backup,
+        &bytes,
+        &current,
+        &REPLACE_BACKOFF,
+        |path| self_replace::self_replace(path),
+    )
+    .await
+    .map_err(|reason| {
+        problem(format!(
+            "Cannot restore the backup ({reason}); check directory permissions and stop running workers"
+        ))
     })?;
     if prior.version == "unmanaged" {
         if receipt(dir).exists() {
@@ -575,4 +646,90 @@ pub async fn rollback() -> Result<Value> {
     Ok(
         json!({"distribution_action":"Restored previous framechord","version":prior.version,"executable":executable,"project_files_changed":false,"network_requested":false,"message":"Rollback complete. Project configuration, keys, characters and skills were preserved."}),
     )
+}
+
+#[cfg(test)]
+mod replace_tests {
+    use super::*;
+    use std::{cell::Cell, io};
+
+    const NO_WAIT: [Duration; 3] = [Duration::ZERO; 3];
+
+    fn locked() -> io::Error {
+        io::Error::other("file is being used by another process (os error 32)")
+    }
+
+    fn fixture() -> (tempfile::TempDir, PathBuf, PathBuf) {
+        let dir = tempfile::tempdir().unwrap();
+        let executable = dir.path().join(executable_name());
+        let candidate = dir.path().join("candidate");
+        fs::write(&executable, b"old").unwrap();
+        fs::write(&candidate, b"new").unwrap();
+        (dir, executable, candidate)
+    }
+
+    #[tokio::test]
+    async fn a_transient_lock_is_retried_while_the_executable_is_untouched() {
+        let (_dir, executable, candidate) = fixture();
+        let calls = Cell::new(0);
+        let result =
+            replace_executable(&executable, &candidate, b"new", b"old", &NO_WAIT, |from| {
+                calls.set(calls.get() + 1);
+                if calls.get() < 3 {
+                    return Err(locked());
+                }
+                fs::copy(from, &executable).map(|_| ())
+            })
+            .await;
+        assert_eq!(result, Ok(()));
+        assert_eq!(calls.get(), 3);
+        assert_eq!(fs::read(&executable).unwrap(), b"new");
+    }
+
+    #[tokio::test]
+    async fn a_swap_that_moved_the_executable_away_is_completed_not_repeated() {
+        let (dir, executable, candidate) = fixture();
+        let calls = Cell::new(0);
+        let result = replace_executable(&executable, &candidate, b"new", b"old", &NO_WAIT, |_| {
+            calls.set(calls.get() + 1);
+            fs::rename(&executable, dir.path().join("relocated"))?;
+            Err(locked())
+        })
+        .await;
+        assert_eq!(result, Ok(()));
+        assert_eq!(calls.get(), 1, "a half-finished swap must not be retried");
+        assert_eq!(fs::read(&executable).unwrap(), b"new");
+    }
+
+    #[tokio::test]
+    async fn a_persistent_failure_reports_the_operating_system_error() {
+        let (_dir, executable, candidate) = fixture();
+        let calls = Cell::new(0);
+        let result = replace_executable(&executable, &candidate, b"new", b"old", &NO_WAIT, |_| {
+            calls.set(calls.get() + 1);
+            Err(locked())
+        })
+        .await;
+        assert_eq!(calls.get(), 1 + NO_WAIT.len());
+        assert!(result.unwrap_err().contains("os error 32"));
+        assert_eq!(fs::read(&executable).unwrap(), b"old");
+    }
+
+    #[tokio::test]
+    async fn an_empty_executable_path_is_reported_when_nothing_can_be_written() {
+        let dir = tempfile::tempdir().unwrap();
+        let executable = dir.path().join("gone").join(executable_name());
+        let result = replace_executable(
+            &executable,
+            &dir.path().join("candidate"),
+            b"new",
+            b"old",
+            &NO_WAIT,
+            |_| Err(locked()),
+        )
+        .await;
+        let message = result.unwrap_err();
+        assert!(message.contains("os error 32"), "{message}");
+        assert!(message.contains("restore it from the backup"), "{message}");
+    }
 }
