@@ -1,0 +1,7 @@
+# FrameChord guide. Search engines and AI agents are welcome.
+# Agents: https://framechord.com/llms.txt indexes the guide, and
+# https://framechord.com/index.md is the whole guide as Markdown.
+User-agent: *
+Allow: /
+
+Sitemap: https://framechord.com/sitemap.xml
