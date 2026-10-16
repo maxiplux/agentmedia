@@ -16,6 +16,15 @@ from its footer, its `#delegate` section and a `<link rel="alternate"
 type="text/markdown">` in the head. They are published at
 <https://framechord.com/index.md> and <https://framechord.com/llms.txt>.
 
+Three static files sit beside the page for search engines and agents, and are edited by
+hand. `robots.txt` allows all crawlers, points to the sitemap and names `llms.txt` and
+`index.md`. `sitemap.xml` lists the one canonical page. `favicon.svg` is the brand mark.
+The page head declares the canonical URL, robots directives, Open Graph and Twitter card
+tags using `media/hero.jpg`, `alternate` links to `index.md` and `llms.txt`, and
+schema.org JSON-LD: `WebSite`, `SoftwareApplication` and a `TechArticle` whose encoding
+is the Markdown copy. The JSON-LD has no version or date fields, so it needs no update
+per release.
+
 The FrameChord guide is published at <https://framechord.com/>. The GitHub Pages
 address redirects there; see [domain setup](DOMAIN.md).
 The `Publish documentation` GitHub Actions workflow publishes only `docs/site/`
