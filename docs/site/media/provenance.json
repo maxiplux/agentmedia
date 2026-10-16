@@ -917,10 +917,7 @@
       "file": "podcast.mp3",
       "job": "jobs/podcast.yaml",
       "media": "podcast",
-      "selection": {
-        "model": "gpt-4o-mini-tts",
-        "provider": "openai"
-      },
+      "selection": null,
       "turn_selections": [
         {
           "model": "gemini-3.8-flash-tts",
@@ -971,7 +968,9 @@
           "provider": "google"
         },
         "schema_version": 1
-      }
+      },
+      "selection_note": "Local assembly of the six turns; every provider request used the turn_selections (google gemini-3.8-flash-tts). The run record also copied the unused legacy project default (openai gpt-4o-mini-tts) onto the assembly job; it made no provider call.",
+      "cost_note": "usage reports the local assembly as not_estimated; each Gemini TTS turn is not_estimable because only total tokens were returned."
     },
     {
       "file": "music-bed.mp3",

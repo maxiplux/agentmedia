@@ -139,10 +139,12 @@ all generation endpoints, specific model/voice entitlements, or billing readines
 ## Site showcase batch (0.7.0)
 
 October 15, 2026, installed `framechord 0.7.0`, repository-root credentials. The 27
-jobs in `docs/site/media/jobs/showcase-batch.yaml` (13 OpenAI `gpt-image-2.5-flare`
-images and infographics, 12 Google `gemini-3.8-flash-tts` narrations in en-US and
-es-419, a 6-turn Gemini podcast with local assembly, and a 60-second Google `lyria-3.5`
-instrumental) passed `batch --dry-run` before execution. The first run
+manifest entries in `docs/site/media/jobs/showcase-batch.yaml` (13 OpenAI
+`gpt-image-2.5-flare` images and infographics, 12 Google `gemini-3.8-flash-tts`
+narrations in en-US and es-419, a 6-turn Gemini podcast and a 60-second Google
+`lyria-3.5` instrumental) passed `batch --dry-run` before execution. They expand to 33
+run jobs: the podcast becomes six turn requests plus a local assembly job, for 32
+provider requests in total. The first run
 `fdb96da4-1243-4ca1-8ec2-215a4433c550` completed 30 jobs; the last podcast turn, the
 assembly and the music were blocked before submission because the explicit limits
 file allowed 30 requests for 32 provider jobs. After the limit was raised to 36, run
