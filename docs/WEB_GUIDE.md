@@ -4,7 +4,8 @@ FrameChord is the project name from 0.6.1 onward. Earlier evidence below keeps i
 
 The complete deliverable is `docs/site/index.html`. Open it in a browser or serve
 that one file. No other assets, CDN, build step or internet access are required to
-render the guide.
+render the guide. The only external request it can make is opt-in Google Analytics,
+described under [Analytics consent](#analytics-consent).
 
 Two agent-readable files sit beside it and are derived from the finished page, never
 edited by hand: `docs/site/index.md`, the guide's `<main>` content as Markdown (English
@@ -67,6 +68,7 @@ The HTML contains:
   prompts and the case study of the guide's own media, eight practical scenarios, and
   seventeen workflow/reference sections ending with 65 expandable command help pages.
 - Four download links carrying the same embedded ZIP of 35 example files.
+- An opt-in Google Analytics consent banner; see [Analytics consent](#analytics-consent).
 
 Example downloads extract into `examples/` in your target project. They retain
 relative YAML dependencies. The cast example intentionally requires your own
@@ -85,8 +87,8 @@ The Tailwind CLI compiled the component rules using `@apply` and utility classes
 there is no runtime Tailwind script. Official build reference:
 https://tailwindcss.com/docs/installation/tailwind-cli
 
-Verified after bundling: no external scripts, styles, images or file links;
-unique element IDs and valid internal anchors; embedded ZIP integrity and all 35
+Verified after bundling, before the opt-in analytics below existed: no external
+scripts, styles, images or file links; unique element IDs and valid internal anchors; embedded ZIP integrity and all 35
 files; browser command search and copying; a mobile layout without page overflow.
 The 0.3.0 guide and extracted examples pass 22 offline initialization, dry-run and
 validation checks. No provider calls were made for this work. Earlier mobile
@@ -134,3 +136,27 @@ After propagation, the local resolver also returns all four expected apex
 addresses. Public release 0.6.2 installation, update and offline rollback pass on
 all three supported native platforms, including the Pages-to-custom-domain
 installer redirect. See [release evidence](STATUS.md#authenticated-release-metadata-062).
+
+## Analytics consent
+
+Since October 16, 2026 the guide can use Google Analytics (measurement ID
+`G-5QFTHWRP9W`), but only after a visitor clicks **Allow analytics** in the consent
+banner. Until then the page requests nothing from Google and writes no analytics
+cookie. The Consent Mode default (analytics, ad storage, ad user data and ad
+personalization all denied) is only queued in `window.dataLayer`.
+
+- **Allow** sends a consent update granting analytics storage only, then loads
+  `https://www.googletagmanager.com/gtag/js`. That script is the guide's one external
+  script, and it records a page view on load. Hash navigation between sections is not
+  tracked.
+- **No thanks**, or withdrawing later from **Analytics preferences** in the footer, sets
+  Google's disable flag, sends a denied update and deletes the `_ga` cookies. A
+  `storage` listener applies the change in every open tab of the site.
+- The choice is kept in `localStorage` under `framechord-analytics-consent`. Without
+  storage, the banner asks again on the next visit.
+
+Offline copies and consumers with a strict Content Security Policy keep working: if the
+script is blocked or there is no network, only analytics is lost. To remove analytics,
+delete the `#consent` banner, its footer button and the consent script at the end of
+`index.html`. The footer control is a button, which the Markdown converter skips, so
+`index.md` and `llms.txt` contain no analytics text.
