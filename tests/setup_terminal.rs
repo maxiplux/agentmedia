@@ -117,18 +117,13 @@ impl Terminal {
         writer.write_all(keys.as_bytes()).unwrap();
         writer.flush().unwrap();
     }
-    fn success(&mut self) {
-        // Returns as soon as the process exits; the generous bound only matters on a hang.
+    /// Waits for the process to exit. Returns as soon as it does; the generous bound only
+    /// matters on a hang, and then the assertion shows what the terminal last displayed.
+    fn exit_status(&mut self) -> portable_pty::ExitStatus {
         let deadline = Instant::now() + Duration::from_secs(45);
         loop {
             if let Some(status) = self.child.try_wait().unwrap() {
-                assert!(
-                    status.success(),
-                    "terminal exit {}: {}",
-                    status.exit_code(),
-                    self.output
-                );
-                return;
+                return status;
             }
             while let Ok(bytes) = self.receiver.try_recv() {
                 self.output.push_str(&String::from_utf8_lossy(&bytes));
@@ -140,6 +135,15 @@ impl Terminal {
             );
             std::thread::sleep(Duration::from_millis(25));
         }
+    }
+    fn success(&mut self) {
+        let status = self.exit_status();
+        assert!(
+            status.success(),
+            "terminal exit {}: {}",
+            status.exit_code(),
+            self.output
+        );
     }
 }
 #[test]
@@ -282,15 +286,7 @@ fn escape_returns_to_checklist_and_discard_writes_nothing() {
     p.send("Discard changes\r");
     p.wait("Discard all unsaved changes?");
     p.send("Discard and exit\r");
-    let deadline = Instant::now() + Duration::from_secs(15);
-    loop {
-        if let Some(status) = p.child.try_wait().unwrap() {
-            assert_eq!(status.exit_code(), 130);
-            break;
-        }
-        assert!(Instant::now() < deadline);
-        std::thread::sleep(Duration::from_millis(25));
-    }
+    assert_eq!(p.exit_status().exit_code(), 130);
     assert!(!root.exists());
 }
 #[test]
