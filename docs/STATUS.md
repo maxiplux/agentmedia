@@ -372,3 +372,23 @@ in `docs/site/media/provenance.json`. The new `#showcase` section brings the gui
 `build-site.py --check` and the generator tests pass, and the page was checked locally
 at desktop and phone widths with no console errors. Human review of media quality is
 still pending.
+
+## Agent delegation guide and agent-readable docs
+
+October 16, 2026. The guide gains a hand-written `#delegate` section, "Hand it to your
+agent", placed after the showcase. It covers installing the project skill, a free
+readiness prompt, the author/check/generate/report loop, twelve copyable prompts by use
+case, and a case study. The case study quotes, lightly edited, the request that
+produced the guide's media and lists the steps recorded in
+[live evidence](LIVE_TESTS.md#site-showcase-batch-070). The prompts are documentation:
+none was run as part of this change, and no paid call was made. The guide now has 20
+sections.
+
+`scripts/build-site.py` now also derives `docs/site/index.md` (the guide's `<main>`
+content as Markdown) and `docs/site/llms.txt` (an llms.txt index of install commands,
+agent rules and one link per section) from the finished page. `--check` covers both
+files, and the offline generator tests cover the converter. The README and the
+integration guide link the new section and both files. The page was checked locally at
+desktop and phone widths: copy buttons and search work, there is no horizontal scroll,
+and there are no console errors. Publication to framechord.com follows the normal
+`master` deployment.

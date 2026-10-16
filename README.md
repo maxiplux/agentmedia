@@ -10,8 +10,10 @@ A local Rust CLI that lets coding agents, and the people working with them, gene
 - **Honest limits.** No video, no upscaling, and character likeness still needs human review.
 
 Open the [web guide](https://framechord.com/) for copyable examples for every media
-workflow, agent prompts, downloadable YAML/Markdown inputs, and a searchable command
-reference. It is a single HTML file with embedded JavaScript, compiled Tailwind CSS, command
+workflow, [prompts to hand your agent](https://framechord.com/#delegate), downloadable
+YAML/Markdown inputs, and a searchable command reference. Agents can read the same guide
+as [Markdown](https://framechord.com/index.md), indexed by
+[llms.txt](https://framechord.com/llms.txt). It is a single HTML file with embedded JavaScript, compiled Tailwind CSS, command
 help and example downloads. You can also [open the HTML locally](docs/site/index.html);
 see [publishing and preview instructions](docs/WEB_GUIDE.md).
 
@@ -66,6 +68,40 @@ Credential names are `GEMINI_API_KEY`, `OPENAI_API_KEY`, `FISH_API_KEY`,
 `OPENROUTER_API_KEY` and `ELEVENLABS_API_KEY`. Only configure the providers you
 intend to use. Process environment values take precedence over the project's
 `.env`; unrelated ancestor projects are never searched for credentials.
+
+## Hand it to your agent
+
+Once the binary is installed, you do not need to learn the flags. `framechord init`
+installs the project skill that Claude Code, Codex, Cursor, Gemini CLI, OpenCode and
+GitHub Copilot discover. Open your agent in the same folder and describe the media in
+plain words. The agent writes the YAML job and Markdown brief, runs `validate` and a
+free `--dry-run` that shows the provider, model and outputs, and should generate only
+after you say go. A dry run does not price the request; compare it with the
+[dated rates](docs/COST.md), and `framechord usage` reports labelled list-price
+estimates after a run. Start with a check that generates nothing:
+
+> Use the framechord skill. Check this project's FrameChord setup: run framechord config
+> status and framechord doctor, tell me which providers and media types are ready, and
+> what I still need to configure. Do not generate anything.
+
+Then ask for real work, naming your files, destinations and anything that must stay exact:
+
+> Read posts/launch.md. Use FrameChord to create a 16:9 cover image and one inline
+> illustration that match the post. Write the briefs, validate them and show me the dry
+> run. Generate only after I say go, save the images to public/images/launch/ and add
+> them to the post.
+
+> Write a 90-second, two-host podcast script from the 2.3 section of CHANGELOG.md and
+> show it to me before any audio is made. After I approve the script, author a FrameChord
+> podcast job with two distinct voices, preview it, and generate it to
+> media/release-2.3.mp3 when I say go.
+
+Every image, voice and note in the [web guide](https://framechord.com/#showcase) came from
+one such request to a coding agent. The guide's
+[Hand it to your agent](https://framechord.com/#delegate) section has twelve copyable
+prompts by use case, from app sound effects to a consistent mascot, and the case study of
+how the guide's own media was made. Agents can read the whole guide as Markdown at
+<https://framechord.com/index.md>; <https://framechord.com/llms.txt> indexes it.
 
 ## Use it in your own project
 
@@ -324,7 +360,8 @@ framechord generate sfx --provider elevenlabs --model eleven_text_to_sound_v2 \
 After `init`, Codex, Claude Code, Cursor, Gemini CLI, OpenCode and GitHub Copilot
 discover the project-local FrameChord skill. Other agents can use
 `framechord skills export DIRECTORY` and run the same binary; see the
-[integration guide](docs/INTEGRATION.md). For example, ask your agent:
+[integration guide](docs/INTEGRATION.md) and the prompts in
+[Hand it to your agent](#hand-it-to-your-agent). For example, ask your agent:
 
 > Use FrameChord to prepare a two-speaker podcast from article.txt, an infographic
 > with the article's exact figures, and a 60-second instrumental intro. Use the
