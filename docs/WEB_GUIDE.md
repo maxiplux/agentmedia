@@ -6,6 +6,15 @@ The complete deliverable is `docs/site/index.html`. Open it in a browser or serv
 that one file. No other assets, CDN, build step or internet access are required to
 render the guide.
 
+Two agent-readable files sit beside it and are derived from the finished page, never
+edited by hand: `docs/site/index.md`, the guide's `<main>` content as Markdown (English
+narration only, media links relative to the site, the example pack linked on GitHub),
+and `docs/site/llms.txt`, an [llms.txt](https://llmstxt.org/) index with install
+commands, working rules for agents and one link per guide section. The page links both
+from its footer, its `#delegate` section and a `<link rel="alternate"
+type="text/markdown">` in the head. They are published at
+<https://framechord.com/index.md> and <https://framechord.com/llms.txt>.
+
 The FrameChord guide is published at <https://framechord.com/>. The GitHub Pages
 address redirects there; see [domain setup](DOMAIN.md).
 The `Publish documentation` GitHub Actions workflow publishes only `docs/site/`
@@ -27,6 +36,12 @@ document is the same standalone file used locally. Four regions are generated:
 - the four embedded `framechord-examples.zip` links, from `docs/site/examples/`;
 - the version, page-count and catalog-date stamps, from `Cargo.toml` and the catalog.
 
+After those regions, the generator rewrites `index.md` and `llms.txt` from the result.
+Their section list comes from the sidebar navigation, and each section's heading and
+summary come from its `section-heading`, so a new section needs only a nav link and
+that heading block. A Markdown link to an anchor the copy does not contain stops the
+generator.
+
 Regenerate them after any CLI, catalog or example change, and verify before pushing:
 
 ```sh
@@ -38,15 +53,19 @@ python3 scripts/test-build-site.py
 
 The generator needs Python 3.11 or newer and refuses to run when the built binary's
 version differs from `Cargo.toml`. `--check` compares the committed guide with a fresh
-regeneration (archives by content, everything else byte for byte) and is part of the
-Linux job in `check.yml`. Hand-written sections, including the cost and integration
-sections added on October 15, 2026, live outside the markers and are never touched.
+regeneration (archives by content, everything else byte for byte), compares `index.md`
+and `llms.txt` byte for byte, and is part of the Linux job in `check.yml`. Hand-written
+sections, including the cost and integration sections added on October 15, 2026 and
+the `#delegate` agent-prompt section added on October 16, 2026, live outside the markers
+and are never touched.
 
 The HTML contains:
 
 - Compiled Tailwind CSS 4.3.3 with the guide's component styles in a `<style>` tag.
 - Embedded JavaScript for search, navigation and copy buttons.
-- Sixteen workflow/reference sections, including eight practical scenarios, and 65 expandable command help pages.
+- Twenty sections: the narrated showcase, “Hand it to your agent” with twelve copyable
+  prompts and the case study of the guide's own media, eight practical scenarios, and
+  seventeen workflow/reference sections ending with 65 expandable command help pages.
 - Four download links carrying the same embedded ZIP of 35 example files.
 
 Example downloads extract into `examples/` in your target project. They retain

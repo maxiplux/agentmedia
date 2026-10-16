@@ -200,6 +200,18 @@ two skills with the same name; keep one. That case sets `duplicate_discovery: tr
 the agent's `skill_targets` entry, and the human output of `init` and `config status`
 prints one warning line naming the copies. `none` must be given alone.
 
+Once the skill is installed, start a new agent session in the project and describe the
+media you want in plain words. Ask for a dry run and say you will approve generation, for
+example: "Use FrameChord to narrate docs/getting-started.md exactly as written. Preview the
+request first, then generate when I approve and tell me the output path." The web guide's
+[Hand it to your agent](https://framechord.com/#delegate) section has a first readiness
+prompt, twelve prompts by use case, and the request that produced the guide's own media.
+
+An agent without the skill can learn FrameChord from the web:
+[llms.txt](https://framechord.com/llms.txt) lists the install commands, the working rules
+and every section of the guide, and [index.md](https://framechord.com/index.md) is the
+whole guide in Markdown, regenerated with the HTML.
+
 For any other process-based agent, export the skill and point the agent's instruction
 file at it:
 
