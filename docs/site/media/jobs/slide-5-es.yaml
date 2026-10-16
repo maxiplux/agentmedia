@@ -1,0 +1,8 @@
+schema_version: 2
+id: slide-5-es
+media: speech
+selection: {provider: google, model: gemini-3.8-flash-tts}
+brief: narration-es.md
+text_file: slide-5-es.txt
+settings: {format: wav, voice: Kore}
+locale: es-419

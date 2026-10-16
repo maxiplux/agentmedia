@@ -1,0 +1,1 @@
+Nothing up front. A dry run is free and makes no provider calls. When you generate, you pay the provider's list price for that asset, and FrameChord records what was used.

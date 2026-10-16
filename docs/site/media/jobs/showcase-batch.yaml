@@ -1,0 +1,29 @@
+schema_version: 1
+jobs:
+  - hero.yaml
+  - art-images.yaml
+  - art-speech.yaml
+  - art-podcasts.yaml
+  - art-music.yaml
+  - art-characters.yaml
+  - art-agents.yaml
+  - art-parallel.yaml
+  - art-review.yaml
+  - info-workflow.yaml
+  - info-cost.yaml
+  - info-characters.yaml
+  - info-recovery.yaml
+  - slide-1-en.yaml
+  - slide-2-en.yaml
+  - slide-3-en.yaml
+  - slide-4-en.yaml
+  - slide-5-en.yaml
+  - slide-6-en.yaml
+  - slide-1-es.yaml
+  - slide-2-es.yaml
+  - slide-3-es.yaml
+  - slide-4-es.yaml
+  - slide-5-es.yaml
+  - slide-6-es.yaml
+  - podcast.yaml
+  - music.yaml

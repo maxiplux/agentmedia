@@ -1,0 +1,1 @@
+FrameChord convierte un brief escrito en contenido multimedia terminado. Es una sola herramienta de línea de comandos para imágenes, infografías, narración, podcasts, música y efectos de sonido. Funciona en tu equipo, guarda cada entrada en archivos YAML y Markdown, y solo llama al proveedor de IA que elijas. Esta narración también se hizo con ella.

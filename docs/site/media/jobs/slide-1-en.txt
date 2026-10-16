@@ -1,0 +1,1 @@
+FrameChord turns a written brief into finished media. It is one command-line tool for images, infographics, narration, podcasts, music and sound effects. It runs on your machine, keeps every input in plain YAML and Markdown files, and calls only the AI provider you choose. This narration was made with it, too.

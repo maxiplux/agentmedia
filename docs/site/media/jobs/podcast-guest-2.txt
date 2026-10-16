@@ -1,0 +1,1 @@
+You write a short brief, and FrameChord turns it into an image, a voice-over, a podcast or a music bed. It's the same pattern for every medium, all from the command line.

@@ -1,0 +1,1 @@
+Los trabajos independientes se ejecutan juntos, dentro de los límites que tú defines. Cada trabajo guarda su propio registro, así que un fallo nunca borra otro resultado exitoso. Las solicitudes idénticas reutilizan resultados locales verificados. Y si una solicitud pagada termina en un estado incierto, FrameChord la verifica antes de pagarla dos veces.

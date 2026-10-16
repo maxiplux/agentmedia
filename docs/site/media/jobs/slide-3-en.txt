@@ -1,0 +1,1 @@
+Characters are optional, but when you need one, you define it once. A character keeps its look and its voice in separate profiles, and its accepted references are reused in every new scene. Candidates never become canonical until a person accepts them.

@@ -1,0 +1,6 @@
+schema_version: 2
+id: info-cost
+media: infographic
+selection: {provider: openai, model: gpt-image-2.5-flare}
+spec: info-cost-spec.yaml
+settings: {format: png, size: 1024x1536, image_quality: high}

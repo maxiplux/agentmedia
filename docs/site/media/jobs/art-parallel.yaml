@@ -1,0 +1,6 @@
+schema_version: 2
+id: art-parallel
+media: image
+selection: {provider: openai, model: gpt-image-2.5-flare}
+brief: art-parallel.md
+settings: {format: png, size: 1536x1024, image_quality: medium}

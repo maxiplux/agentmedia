@@ -134,3 +134,29 @@ provider voices, or run records were generated. Credential file integrity was ch
 before/after. Raw responses, account IDs, key previews, and balances were discarded.
 This verifies the listed authentication endpoints at the time of execution, not
 all generation endpoints, specific model/voice entitlements, or billing readiness.
+
+
+## Site showcase batch (0.7.0)
+
+October 15, 2026, installed `framechord 0.7.0`, repository-root credentials. The 27
+jobs in `docs/site/media/jobs/showcase-batch.yaml` (13 OpenAI `gpt-image-2.5-flare`
+images and infographics, 12 Google `gemini-3.8-flash-tts` narrations in en-US and
+es-419, a 6-turn Gemini podcast with local assembly, and a 60-second Google `lyria-3.5`
+instrumental) passed `batch --dry-run` before execution. The first run
+`fdb96da4-1243-4ca1-8ec2-215a4433c550` completed 30 jobs; the last podcast turn, the
+assembly and the music were blocked before submission because the explicit limits
+file allowed 30 requests for 32 provider jobs. After the limit was raised to 36, run
+`411fb953-5cfd-45fa-a48b-2938e159a0b7` reused 31 verified cached results and submitted
+only the remaining turn and the music; every job succeeded. A first request for a
+30-second Lyria song was rejected offline with the full-song minimum message.
+
+All 13 Google `gemini-3.8-flash` audio reviews (`review check --ai`) of the narrations
+and assembled podcast passed with no findings. Twelve concurrent `review check`
+invocations on artifacts of the same run were rejected before submission with "Wait
+for generation to finish before AI review" while one review held the run; run
+sequentially, all passed. Agent inspection found every infographic label and number
+exact and no stray lettering in the illustrations. `usage` reports a partial list-price
+estimate of about $0.37 (image output tokens and the song); Gemini TTS returned only
+total tokens and is not estimable. Human listening and acceptance of final quality
+remain pending. Per-asset hashes, usage and reviews are in
+`docs/site/media/provenance.json`.

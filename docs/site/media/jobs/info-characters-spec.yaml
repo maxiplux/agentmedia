@@ -1,0 +1,19 @@
+schema_version: 1
+title: "Define a character once"
+audience: "Storytellers and product teams"
+key_message: "Accepted references are reused, never overwritten."
+canvas: "1024x1536"
+layout: "Title and key message at top; three numbered stages stacked vertically with arrows; two small rule cards side by side at the bottom."
+sections:
+  - heading: "1 Define"
+    copy: "One ID with separate visual and voice profiles."
+  - heading: "2 Accept"
+    copy: "A person chooses the candidate images and voice."
+  - heading: "3 Reuse"
+    copy: "New scenes pin the same provider, model and references."
+  - heading: "Per job"
+    copy: "Pose, outfit and mood are direction, not identity."
+  - heading: "New model?"
+    copy: "Create a new character version."
+visual_brief: info-characters.md
+references: []

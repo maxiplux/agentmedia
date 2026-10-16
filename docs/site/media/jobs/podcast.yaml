@@ -1,0 +1,33 @@
+schema_version: 2
+id: podcast-in-a-minute
+media: podcast
+brief: podcast.md
+locale: en-US
+turns:
+  - id: host-1
+    text_file: podcast-host-1.txt
+    selection: {provider: google, model: gemini-3.8-flash-tts}
+    settings: {voice: Puck, format: wav}
+  - id: guest-2
+    text_file: podcast-guest-2.txt
+    selection: {provider: google, model: gemini-3.8-flash-tts}
+    settings: {voice: Aoede, format: wav}
+  - id: host-3
+    text_file: podcast-host-3.txt
+    selection: {provider: google, model: gemini-3.8-flash-tts}
+    settings: {voice: Puck, format: wav}
+  - id: guest-4
+    text_file: podcast-guest-4.txt
+    selection: {provider: google, model: gemini-3.8-flash-tts}
+    settings: {voice: Aoede, format: wav}
+  - id: host-5
+    text_file: podcast-host-5.txt
+    selection: {provider: google, model: gemini-3.8-flash-tts}
+    settings: {voice: Puck, format: wav}
+  - id: guest-6
+    text_file: podcast-guest-6.txt
+    selection: {provider: google, model: gemini-3.8-flash-tts}
+    settings: {voice: Aoede, format: wav}
+assembly:
+  pause_ms: 300
+  loudness_lufs: -19

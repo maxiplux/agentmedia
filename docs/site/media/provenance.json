@@ -1,0 +1,1013 @@
+{
+  "schema": "framechord-site-media/1",
+  "generated_on": "2026-10-15",
+  "framechord": "0.7.0",
+  "summary": "Generated on October 15, 2026 with FrameChord 0.7.0 in one batch of 33 jobs: OpenAI gpt-image-2.5-flare drew 9 illustrations and 4 infographics; Google gemini-3.8-flash-tts spoke 12 narrations and a 6-turn podcast; Google lyria-3.5 wrote the music. A rerun after raising a request limit reused 31 verified results from the local cache.",
+  "publishing": "Images re-encoded as JPEG and audio as MP3 for the web; no other edits.",
+  "estimate": {
+    "list_price_estimate_usd": 0.3681,
+    "covers": "image output tokens (input text tokens unpriced, so partial) and the Lyria song, from the bundled price table verified 2026-10-15",
+    "unknown": "Gemini TTS returned only total tokens, so speech cost is not estimable from reported units; it is not zero."
+  },
+  "review": "Every image was inspected for exact text and unwanted lettering; narration and podcast passed Google gemini-3.8-flash audio review with no findings. Human listening of final quality is still recommended.",
+  "assets": [
+    {
+      "file": "hero.jpg",
+      "job": "jobs/hero.yaml",
+      "media": "image",
+      "selection": {
+        "model": "gpt-image-2.5-flare",
+        "provider": "openai"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "png",
+        "image_quality": "high",
+        "size": "1536x1024"
+      },
+      "locale": null,
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "977c6f44127204836f25171f4ce79ab8e9349a60eed5b2b41d3a73f24c06959e",
+      "published_sha256": "a2cff4cffb217db47a78d77293c4e7f9f63e8f12d5221a7a5567b7b763ab1407",
+      "provider_reported_usage": {
+        "input_tokens": 184,
+        "output_tokens": 1372,
+        "total_tokens": 1556
+      },
+      "cost_status": "estimated",
+      "list_price_estimate": {
+        "basis": "1372 output image tokens × $30/1000000",
+        "partial": true,
+        "qualifier": null,
+        "quantity": 1372,
+        "rate_per": 1000000,
+        "rate_usd": 30.0,
+        "source": "https://developers.openai.com/api/docs/pricing",
+        "table_verified_at": "2026-10-15",
+        "unit": "image_token_out",
+        "usd": 0.04116
+      },
+      "ai_review": null
+    },
+    {
+      "file": "art-images.jpg",
+      "job": "jobs/art-images.yaml",
+      "media": "image",
+      "selection": {
+        "model": "gpt-image-2.5-flare",
+        "provider": "openai"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "png",
+        "image_quality": "medium",
+        "size": "1536x1024"
+      },
+      "locale": null,
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "85be3f871d55a16b7afaa063731d0e507ef0a15c93986be3f77455bee7a0eb7c",
+      "published_sha256": "285dc2f610d0688df70c6531507fd201a0b1afd3d630cf171740debe735c0fd5",
+      "provider_reported_usage": {
+        "input_tokens": 158,
+        "output_tokens": 343,
+        "total_tokens": 501
+      },
+      "cost_status": "estimated",
+      "list_price_estimate": {
+        "basis": "343 output image tokens × $30/1000000",
+        "partial": true,
+        "qualifier": null,
+        "quantity": 343,
+        "rate_per": 1000000,
+        "rate_usd": 30.0,
+        "source": "https://developers.openai.com/api/docs/pricing",
+        "table_verified_at": "2026-10-15",
+        "unit": "image_token_out",
+        "usd": 0.01029
+      },
+      "ai_review": null
+    },
+    {
+      "file": "art-speech.jpg",
+      "job": "jobs/art-speech.yaml",
+      "media": "image",
+      "selection": {
+        "model": "gpt-image-2.5-flare",
+        "provider": "openai"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "png",
+        "image_quality": "medium",
+        "size": "1536x1024"
+      },
+      "locale": null,
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "f23ad33b401a02156a027fb0a0784c5ad1ed4fdb0b4900b44785fdb10b91f93c",
+      "published_sha256": "a27e81a39f9a376fbc5cd7dbb5817dc3cc420106b6d9dd4647c5dff6a75d01c6",
+      "provider_reported_usage": {
+        "input_tokens": 146,
+        "output_tokens": 343,
+        "total_tokens": 489
+      },
+      "cost_status": "estimated",
+      "list_price_estimate": {
+        "basis": "343 output image tokens × $30/1000000",
+        "partial": true,
+        "qualifier": null,
+        "quantity": 343,
+        "rate_per": 1000000,
+        "rate_usd": 30.0,
+        "source": "https://developers.openai.com/api/docs/pricing",
+        "table_verified_at": "2026-10-15",
+        "unit": "image_token_out",
+        "usd": 0.01029
+      },
+      "ai_review": null
+    },
+    {
+      "file": "art-podcasts.jpg",
+      "job": "jobs/art-podcasts.yaml",
+      "media": "image",
+      "selection": {
+        "model": "gpt-image-2.5-flare",
+        "provider": "openai"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "png",
+        "image_quality": "medium",
+        "size": "1536x1024"
+      },
+      "locale": null,
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "6aaea426e31546c2783b1bdb7c2116e738bd1f126a05d24cc1bbe47e8cfe2209",
+      "published_sha256": "9d38c7406b1e33320cc5d85f8281fd0e6a24b04ed552159db5ae2d99806c216c",
+      "provider_reported_usage": {
+        "input_tokens": 155,
+        "output_tokens": 343,
+        "total_tokens": 498
+      },
+      "cost_status": "estimated",
+      "list_price_estimate": {
+        "basis": "343 output image tokens × $30/1000000",
+        "partial": true,
+        "qualifier": null,
+        "quantity": 343,
+        "rate_per": 1000000,
+        "rate_usd": 30.0,
+        "source": "https://developers.openai.com/api/docs/pricing",
+        "table_verified_at": "2026-10-15",
+        "unit": "image_token_out",
+        "usd": 0.01029
+      },
+      "ai_review": null
+    },
+    {
+      "file": "art-music.jpg",
+      "job": "jobs/art-music.yaml",
+      "media": "image",
+      "selection": {
+        "model": "gpt-image-2.5-flare",
+        "provider": "openai"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "png",
+        "image_quality": "medium",
+        "size": "1536x1024"
+      },
+      "locale": null,
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "8b293d2ace9e9d705b0adf6530a7b8f9c639a28970a1728b4d6f0cfae14917cb",
+      "published_sha256": "2591ed4c1447be2795b30954b4655991668320bfa519b63ffe9a44ae6672c7dd",
+      "provider_reported_usage": {
+        "input_tokens": 153,
+        "output_tokens": 343,
+        "total_tokens": 496
+      },
+      "cost_status": "estimated",
+      "list_price_estimate": {
+        "basis": "343 output image tokens × $30/1000000",
+        "partial": true,
+        "qualifier": null,
+        "quantity": 343,
+        "rate_per": 1000000,
+        "rate_usd": 30.0,
+        "source": "https://developers.openai.com/api/docs/pricing",
+        "table_verified_at": "2026-10-15",
+        "unit": "image_token_out",
+        "usd": 0.01029
+      },
+      "ai_review": null
+    },
+    {
+      "file": "art-characters.jpg",
+      "job": "jobs/art-characters.yaml",
+      "media": "image",
+      "selection": {
+        "model": "gpt-image-2.5-flare",
+        "provider": "openai"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "png",
+        "image_quality": "medium",
+        "size": "1536x1024"
+      },
+      "locale": null,
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "005cfe7447bf1197079e4c3fc5289e28ebcd1d18bc3defbe3e9406bfe549e630",
+      "published_sha256": "e8973234f022344382a4ffee4e4596c2a16f91b20187410a1fee424a404a50c6",
+      "provider_reported_usage": {
+        "input_tokens": 174,
+        "output_tokens": 343,
+        "total_tokens": 517
+      },
+      "cost_status": "estimated",
+      "list_price_estimate": {
+        "basis": "343 output image tokens × $30/1000000",
+        "partial": true,
+        "qualifier": null,
+        "quantity": 343,
+        "rate_per": 1000000,
+        "rate_usd": 30.0,
+        "source": "https://developers.openai.com/api/docs/pricing",
+        "table_verified_at": "2026-10-15",
+        "unit": "image_token_out",
+        "usd": 0.01029
+      },
+      "ai_review": null
+    },
+    {
+      "file": "art-agents.jpg",
+      "job": "jobs/art-agents.yaml",
+      "media": "image",
+      "selection": {
+        "model": "gpt-image-2.5-flare",
+        "provider": "openai"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "png",
+        "image_quality": "medium",
+        "size": "1536x1024"
+      },
+      "locale": null,
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "0105965f00f6909907e8282cdff6c7dc45de6e7caafff73b15d97ed7af42f118",
+      "published_sha256": "5eea04b97cad17ee216b42054161f1753689ef4cf77d69a656b6963d6459760b",
+      "provider_reported_usage": {
+        "input_tokens": 164,
+        "output_tokens": 343,
+        "total_tokens": 507
+      },
+      "cost_status": "estimated",
+      "list_price_estimate": {
+        "basis": "343 output image tokens × $30/1000000",
+        "partial": true,
+        "qualifier": null,
+        "quantity": 343,
+        "rate_per": 1000000,
+        "rate_usd": 30.0,
+        "source": "https://developers.openai.com/api/docs/pricing",
+        "table_verified_at": "2026-10-15",
+        "unit": "image_token_out",
+        "usd": 0.01029
+      },
+      "ai_review": null
+    },
+    {
+      "file": "art-parallel.jpg",
+      "job": "jobs/art-parallel.yaml",
+      "media": "image",
+      "selection": {
+        "model": "gpt-image-2.5-flare",
+        "provider": "openai"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "png",
+        "image_quality": "medium",
+        "size": "1536x1024"
+      },
+      "locale": null,
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "1df4387cce96d630f9035062c1b892b2096f01fcbf456a7e09b66f51e05ad4a0",
+      "published_sha256": "3936dff909f38d0c53d3b4f3eba4ff434d867f2a4310b8cc48997c59a17232d1",
+      "provider_reported_usage": {
+        "input_tokens": 164,
+        "output_tokens": 343,
+        "total_tokens": 507
+      },
+      "cost_status": "estimated",
+      "list_price_estimate": {
+        "basis": "343 output image tokens × $30/1000000",
+        "partial": true,
+        "qualifier": null,
+        "quantity": 343,
+        "rate_per": 1000000,
+        "rate_usd": 30.0,
+        "source": "https://developers.openai.com/api/docs/pricing",
+        "table_verified_at": "2026-10-15",
+        "unit": "image_token_out",
+        "usd": 0.01029
+      },
+      "ai_review": null
+    },
+    {
+      "file": "art-review.jpg",
+      "job": "jobs/art-review.yaml",
+      "media": "image",
+      "selection": {
+        "model": "gpt-image-2.5-flare",
+        "provider": "openai"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "png",
+        "image_quality": "medium",
+        "size": "1536x1024"
+      },
+      "locale": null,
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "707c64b11e6de6b4d7f49097bcefc9ed10c0bab3afb4170deb7420d729ed3cf8",
+      "published_sha256": "8e9d2cf863af8c05a5df53a894b2873e747a191970c274a28adeee37f8417767",
+      "provider_reported_usage": {
+        "input_tokens": 157,
+        "output_tokens": 343,
+        "total_tokens": 500
+      },
+      "cost_status": "estimated",
+      "list_price_estimate": {
+        "basis": "343 output image tokens × $30/1000000",
+        "partial": true,
+        "qualifier": null,
+        "quantity": 343,
+        "rate_per": 1000000,
+        "rate_usd": 30.0,
+        "source": "https://developers.openai.com/api/docs/pricing",
+        "table_verified_at": "2026-10-15",
+        "unit": "image_token_out",
+        "usd": 0.01029
+      },
+      "ai_review": null
+    },
+    {
+      "file": "info-workflow.jpg",
+      "job": "jobs/info-workflow.yaml",
+      "media": "infographic",
+      "selection": {
+        "model": "gpt-image-2.5-flare",
+        "provider": "openai"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "png",
+        "image_quality": "high",
+        "size": "1024x1536"
+      },
+      "locale": null,
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "8759b9351e9e80bbf3d7a43912ff58c7611162a7d5ba3b39c82cc45000d276b5",
+      "published_sha256": "653ab26aa32272fa5100a2da5cb5c5356080d2445e2eb3ca0318d37731090a78",
+      "provider_reported_usage": {
+        "input_tokens": 464,
+        "output_tokens": 1372,
+        "total_tokens": 1836
+      },
+      "cost_status": "estimated",
+      "list_price_estimate": {
+        "basis": "1372 output image tokens × $30/1000000",
+        "partial": true,
+        "qualifier": null,
+        "quantity": 1372,
+        "rate_per": 1000000,
+        "rate_usd": 30.0,
+        "source": "https://developers.openai.com/api/docs/pricing",
+        "table_verified_at": "2026-10-15",
+        "unit": "image_token_out",
+        "usd": 0.04116
+      },
+      "ai_review": null
+    },
+    {
+      "file": "info-cost.jpg",
+      "job": "jobs/info-cost.yaml",
+      "media": "infographic",
+      "selection": {
+        "model": "gpt-image-2.5-flare",
+        "provider": "openai"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "png",
+        "image_quality": "high",
+        "size": "1024x1536"
+      },
+      "locale": null,
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "a7a33d06d1bf996999f3be0312ae50f10e2dc6aff97a0fbc5fb7e92779f031f8",
+      "published_sha256": "d6244bc73b3740daa8d5418486d750b4d5b3c8d6416ff2becbfeeb25574e7b8d",
+      "provider_reported_usage": {
+        "input_tokens": 563,
+        "output_tokens": 1372,
+        "total_tokens": 1935
+      },
+      "cost_status": "estimated",
+      "list_price_estimate": {
+        "basis": "1372 output image tokens × $30/1000000",
+        "partial": true,
+        "qualifier": null,
+        "quantity": 1372,
+        "rate_per": 1000000,
+        "rate_usd": 30.0,
+        "source": "https://developers.openai.com/api/docs/pricing",
+        "table_verified_at": "2026-10-15",
+        "unit": "image_token_out",
+        "usd": 0.04116
+      },
+      "ai_review": null
+    },
+    {
+      "file": "info-characters.jpg",
+      "job": "jobs/info-characters.yaml",
+      "media": "infographic",
+      "selection": {
+        "model": "gpt-image-2.5-flare",
+        "provider": "openai"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "png",
+        "image_quality": "high",
+        "size": "1024x1536"
+      },
+      "locale": null,
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "c3c465606ecde3e72bffe8b5b411474f50807d2e1059f87c67c06678be6726df",
+      "published_sha256": "4edf3e8a306c3edfc119b7e787d0cbce7cc5d08ffaafe175fdfa434c1c607025",
+      "provider_reported_usage": {
+        "input_tokens": 431,
+        "output_tokens": 1372,
+        "total_tokens": 1803
+      },
+      "cost_status": "estimated",
+      "list_price_estimate": {
+        "basis": "1372 output image tokens × $30/1000000",
+        "partial": true,
+        "qualifier": null,
+        "quantity": 1372,
+        "rate_per": 1000000,
+        "rate_usd": 30.0,
+        "source": "https://developers.openai.com/api/docs/pricing",
+        "table_verified_at": "2026-10-15",
+        "unit": "image_token_out",
+        "usd": 0.04116
+      },
+      "ai_review": null
+    },
+    {
+      "file": "info-recovery.jpg",
+      "job": "jobs/info-recovery.yaml",
+      "media": "infographic",
+      "selection": {
+        "model": "gpt-image-2.5-flare",
+        "provider": "openai"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "png",
+        "image_quality": "high",
+        "size": "1024x1536"
+      },
+      "locale": null,
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "c6dbc7e217bfe8f4499143ef2c21ad3c84f1921e80f82512554b0280d23c1691",
+      "published_sha256": "21fdf52a66bb4e5fa7a8d38e2bbffbc6d994f25a3e545502f7ff5b10be106e75",
+      "provider_reported_usage": {
+        "input_tokens": 395,
+        "output_tokens": 1372,
+        "total_tokens": 1767
+      },
+      "cost_status": "estimated",
+      "list_price_estimate": {
+        "basis": "1372 output image tokens × $30/1000000",
+        "partial": true,
+        "qualifier": null,
+        "quantity": 1372,
+        "rate_per": 1000000,
+        "rate_usd": 30.0,
+        "source": "https://developers.openai.com/api/docs/pricing",
+        "table_verified_at": "2026-10-15",
+        "unit": "image_token_out",
+        "usd": 0.04116
+      },
+      "ai_review": null
+    },
+    {
+      "file": "slide-1-en.mp3",
+      "job": "jobs/slide-1-en.yaml",
+      "media": "speech",
+      "selection": {
+        "model": "gemini-3.8-flash-tts",
+        "provider": "google"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "wav",
+        "voice": "Kore"
+      },
+      "locale": "en-US",
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "04b1678699d264ba37b4bd528db694188e780b91713a0c9aa9e0d1ffce759a16",
+      "published_sha256": "8679ffbe6743fe4e41ab818f0b1af87c1efc9ea9809bbad8e1fcc999d2954aff",
+      "provider_reported_usage": {
+        "total_tokens": 613
+      },
+      "cost_status": "not_estimable",
+      "list_price_estimate": null,
+      "ai_review": {
+        "artifact": "71443c96-08de-45be-9491-bc8f6948689a",
+        "findings": [],
+        "provenance": "ai",
+        "quality": "passed",
+        "reviewer": {
+          "model": "gemini-3.8-flash",
+          "provider": "google"
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "file": "slide-2-en.mp3",
+      "job": "jobs/slide-2-en.yaml",
+      "media": "speech",
+      "selection": {
+        "model": "gemini-3.8-flash-tts",
+        "provider": "google"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "wav",
+        "voice": "Kore"
+      },
+      "locale": "en-US",
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "03bcea067b9240ce8056f82054b8e7e3081cd50d596c7ba4455b6999e8b9f021",
+      "published_sha256": "51fea6b199002fb8ca6998a0bef736d88b488a2e4a239bed14e44bb5d018e46a",
+      "provider_reported_usage": {
+        "total_tokens": 483
+      },
+      "cost_status": "not_estimable",
+      "list_price_estimate": null,
+      "ai_review": {
+        "artifact": "7b769aab-07f9-4cde-8a19-573bc07a0b96",
+        "findings": [],
+        "provenance": "ai",
+        "quality": "passed",
+        "reviewer": {
+          "model": "gemini-3.8-flash",
+          "provider": "google"
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "file": "slide-3-en.mp3",
+      "job": "jobs/slide-3-en.yaml",
+      "media": "speech",
+      "selection": {
+        "model": "gemini-3.8-flash-tts",
+        "provider": "google"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "wav",
+        "voice": "Kore"
+      },
+      "locale": "en-US",
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "cbe748b276b2ec6e8c92818402d62626eadbd442b0a9f39c7cf837e0d7c57c7e",
+      "published_sha256": "6680efb1a79928c605f39821c827ad3c34bfa97a48b6d5137f6b2decd4d6dca8",
+      "provider_reported_usage": {
+        "total_tokens": 480
+      },
+      "cost_status": "not_estimable",
+      "list_price_estimate": null,
+      "ai_review": {
+        "artifact": "c4731839-c4a1-46ad-a752-bec28225f8f4",
+        "findings": [],
+        "provenance": "ai",
+        "quality": "passed",
+        "reviewer": {
+          "model": "gemini-3.8-flash",
+          "provider": "google"
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "file": "slide-4-en.mp3",
+      "job": "jobs/slide-4-en.yaml",
+      "media": "speech",
+      "selection": {
+        "model": "gemini-3.8-flash-tts",
+        "provider": "google"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "wav",
+        "voice": "Kore"
+      },
+      "locale": "en-US",
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "6a0b14655e7cd4fec9b6d89f26b2e4a66df72c722e0eed9f1e92597577b5dc27",
+      "published_sha256": "5ac40f2804e5e94ed39b26d503bc7233549d142d1e8318702c3cb1812e28d538",
+      "provider_reported_usage": {
+        "total_tokens": 556
+      },
+      "cost_status": "not_estimable",
+      "list_price_estimate": null,
+      "ai_review": {
+        "artifact": "d6f005bb-d1ce-4a08-90fe-f0f576add7c0",
+        "findings": [],
+        "provenance": "ai",
+        "quality": "passed",
+        "reviewer": {
+          "model": "gemini-3.8-flash",
+          "provider": "google"
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "file": "slide-5-en.mp3",
+      "job": "jobs/slide-5-en.yaml",
+      "media": "speech",
+      "selection": {
+        "model": "gemini-3.8-flash-tts",
+        "provider": "google"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "wav",
+        "voice": "Kore"
+      },
+      "locale": "en-US",
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "220273fe4360197aed0edf602da38189e9ca45ab6d494c3730dd4e59af22bb38",
+      "published_sha256": "45ba68c92eadda3be12bed98f1a7236b5fec7e2189a48ade988c40d47815ed8d",
+      "provider_reported_usage": {
+        "total_tokens": 612
+      },
+      "cost_status": "not_estimable",
+      "list_price_estimate": null,
+      "ai_review": {
+        "artifact": "72e22f85-87a5-408d-bd42-e1e255322375",
+        "findings": [],
+        "provenance": "ai",
+        "quality": "passed",
+        "reviewer": {
+          "model": "gemini-3.8-flash",
+          "provider": "google"
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "file": "slide-6-en.mp3",
+      "job": "jobs/slide-6-en.yaml",
+      "media": "speech",
+      "selection": {
+        "model": "gemini-3.8-flash-tts",
+        "provider": "google"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "wav",
+        "voice": "Kore"
+      },
+      "locale": "en-US",
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "20c7edce391e251fe16276fdd22ae6320606034c3883633b1e1c83d36b394b29",
+      "published_sha256": "d57ab69810f16dfdfa1259a1d3e4fa43b9015432212e07907985a4cc3095de4b",
+      "provider_reported_usage": {
+        "total_tokens": 536
+      },
+      "cost_status": "not_estimable",
+      "list_price_estimate": null,
+      "ai_review": {
+        "artifact": "8dc1b213-5167-44c3-a28d-86dea24acd66",
+        "findings": [],
+        "provenance": "ai",
+        "quality": "passed",
+        "reviewer": {
+          "model": "gemini-3.8-flash",
+          "provider": "google"
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "file": "slide-1-es.mp3",
+      "job": "jobs/slide-1-es.yaml",
+      "media": "speech",
+      "selection": {
+        "model": "gemini-3.8-flash-tts",
+        "provider": "google"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "wav",
+        "voice": "Kore"
+      },
+      "locale": "es-419",
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "6c82b0b0a522b733a1c1f732bab9a47cc7343f89456181173ea5b20b1650d4ca",
+      "published_sha256": "e53d71fe0980203c30746c075276ecf9f9f1f338739748024e522a0b6027ce9f",
+      "provider_reported_usage": {
+        "total_tokens": 647
+      },
+      "cost_status": "not_estimable",
+      "list_price_estimate": null,
+      "ai_review": {
+        "artifact": "b3eb5ded-57a2-491f-bb70-1874a4cb749c",
+        "findings": [],
+        "provenance": "ai",
+        "quality": "passed",
+        "reviewer": {
+          "model": "gemini-3.8-flash",
+          "provider": "google"
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "file": "slide-2-es.mp3",
+      "job": "jobs/slide-2-es.yaml",
+      "media": "speech",
+      "selection": {
+        "model": "gemini-3.8-flash-tts",
+        "provider": "google"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "wav",
+        "voice": "Kore"
+      },
+      "locale": "es-419",
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "24023a8e0dccf9df14c7b561898715495b63240ce92ae04ecbb14113a26a41cd",
+      "published_sha256": "b1c2f83a7ef68e032b702f25080a6e8bef7f51db4755d669215e8a5b65d91477",
+      "provider_reported_usage": {
+        "total_tokens": 521
+      },
+      "cost_status": "not_estimable",
+      "list_price_estimate": null,
+      "ai_review": {
+        "artifact": "20c79eca-e988-4139-8b64-e01f5a4ab6de",
+        "findings": [],
+        "provenance": "ai",
+        "quality": "passed",
+        "reviewer": {
+          "model": "gemini-3.8-flash",
+          "provider": "google"
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "file": "slide-3-es.mp3",
+      "job": "jobs/slide-3-es.yaml",
+      "media": "speech",
+      "selection": {
+        "model": "gemini-3.8-flash-tts",
+        "provider": "google"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "wav",
+        "voice": "Kore"
+      },
+      "locale": "es-419",
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "6beb4e9c293104394a1168edf6afa421a93ea05b77cd4a266d8a14dedebd5715",
+      "published_sha256": "5fb66d4f008747f1d81bc691f2d043c19ca7dd97156f5d893ccdc6a17393ef6b",
+      "provider_reported_usage": {
+        "total_tokens": 559
+      },
+      "cost_status": "not_estimable",
+      "list_price_estimate": null,
+      "ai_review": {
+        "artifact": "29212654-4655-41c0-aea8-db10c405fcbf",
+        "findings": [],
+        "provenance": "ai",
+        "quality": "passed",
+        "reviewer": {
+          "model": "gemini-3.8-flash",
+          "provider": "google"
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "file": "slide-4-es.mp3",
+      "job": "jobs/slide-4-es.yaml",
+      "media": "speech",
+      "selection": {
+        "model": "gemini-3.8-flash-tts",
+        "provider": "google"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "wav",
+        "voice": "Kore"
+      },
+      "locale": "es-419",
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "93d867f096554973b8733996b44cb93c32729c235811a8ee35ac08823dca6345",
+      "published_sha256": "7060836fbeaa0cc02aa53a8b3405b2e3d19dba03b030ff2dfb3736b9a2af0f99",
+      "provider_reported_usage": {
+        "total_tokens": 671
+      },
+      "cost_status": "not_estimable",
+      "list_price_estimate": null,
+      "ai_review": {
+        "artifact": "825f59c9-95a2-4f89-9532-344b4e9514e0",
+        "findings": [],
+        "provenance": "ai",
+        "quality": "passed",
+        "reviewer": {
+          "model": "gemini-3.8-flash",
+          "provider": "google"
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "file": "slide-5-es.mp3",
+      "job": "jobs/slide-5-es.yaml",
+      "media": "speech",
+      "selection": {
+        "model": "gemini-3.8-flash-tts",
+        "provider": "google"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "wav",
+        "voice": "Kore"
+      },
+      "locale": "es-419",
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "719d4b65ca87a2e0e7ae2b06e08790331d54285a6d8afa31d55bc7a704efe31d",
+      "published_sha256": "e728949f7d1607892947f7e534d5c03b0b7cfac6785c481c4987eaa9541df00e",
+      "provider_reported_usage": {
+        "total_tokens": 593
+      },
+      "cost_status": "not_estimable",
+      "list_price_estimate": null,
+      "ai_review": {
+        "artifact": "19fef32f-0fd3-4baf-8dd8-663b016de222",
+        "findings": [],
+        "provenance": "ai",
+        "quality": "passed",
+        "reviewer": {
+          "model": "gemini-3.8-flash",
+          "provider": "google"
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "file": "slide-6-es.mp3",
+      "job": "jobs/slide-6-es.yaml",
+      "media": "speech",
+      "selection": {
+        "model": "gemini-3.8-flash-tts",
+        "provider": "google"
+      },
+      "turn_selections": null,
+      "settings": {
+        "format": "wav",
+        "voice": "Kore"
+      },
+      "locale": "es-419",
+      "run": "fdb96da4-1243-4ca1-8ec2-215a4433c550",
+      "generated_sha256": "c0be1b8173e66b03f9cf3bea7bfe122c94c6d0321135fc49f7eea3ec36954371",
+      "published_sha256": "dcdfdf99e23e655172e61ec666a3f53bdf030a9dbb2cd6b2c044b79cf54264dd",
+      "provider_reported_usage": {
+        "total_tokens": 567
+      },
+      "cost_status": "not_estimable",
+      "list_price_estimate": null,
+      "ai_review": {
+        "artifact": "22d03d41-2c7a-4264-93eb-10bab90f9f43",
+        "findings": [],
+        "provenance": "ai",
+        "quality": "passed",
+        "reviewer": {
+          "model": "gemini-3.8-flash",
+          "provider": "google"
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "file": "podcast.mp3",
+      "job": "jobs/podcast.yaml",
+      "media": "podcast",
+      "selection": {
+        "model": "gpt-4o-mini-tts",
+        "provider": "openai"
+      },
+      "turn_selections": [
+        {
+          "model": "gemini-3.8-flash-tts",
+          "provider": "google",
+          "voice": "Puck"
+        },
+        {
+          "model": "gemini-3.8-flash-tts",
+          "provider": "google",
+          "voice": "Aoede"
+        },
+        {
+          "model": "gemini-3.8-flash-tts",
+          "provider": "google",
+          "voice": "Puck"
+        },
+        {
+          "model": "gemini-3.8-flash-tts",
+          "provider": "google",
+          "voice": "Aoede"
+        },
+        {
+          "model": "gemini-3.8-flash-tts",
+          "provider": "google",
+          "voice": "Puck"
+        },
+        {
+          "model": "gemini-3.8-flash-tts",
+          "provider": "google",
+          "voice": "Aoede"
+        }
+      ],
+      "settings": {},
+      "locale": "en-US",
+      "run": "411fb953-5cfd-45fa-a48b-2938e159a0b7",
+      "generated_sha256": "5ea47755f96ebd2018bee4aa57f43e474c6848689ad688c9138f3d5d6118d036",
+      "published_sha256": "5fcd968869ba09b409b0b57610d03eced4492f9a93ebb76037339b4fae4ab460",
+      "provider_reported_usage": null,
+      "cost_status": "not_estimated",
+      "list_price_estimate": null,
+      "ai_review": {
+        "artifact": "4a64fa0b-bfa4-4991-9595-039d7351c0e4",
+        "findings": [],
+        "provenance": "ai",
+        "quality": "passed",
+        "reviewer": {
+          "model": "gemini-3.8-flash",
+          "provider": "google"
+        },
+        "schema_version": 1
+      }
+    },
+    {
+      "file": "music-bed.mp3",
+      "job": "jobs/music.yaml",
+      "media": "music",
+      "selection": {
+        "model": "lyria-3.5",
+        "provider": "google"
+      },
+      "turn_selections": null,
+      "settings": {
+        "duration_seconds": 60,
+        "format": "mp3",
+        "instrumental": true
+      },
+      "locale": null,
+      "run": "411fb953-5cfd-45fa-a48b-2938e159a0b7",
+      "generated_sha256": "9709ee72b18393211bfc60fa238f334330974e5867c973ae923289e5627284c4",
+      "published_sha256": "229b338f3681e0088313040582c7bf6d5331cf7d95ab5adc561f5daca1ef06c0",
+      "provider_reported_usage": {
+        "total_tokens": 911
+      },
+      "cost_status": "estimated",
+      "list_price_estimate": {
+        "basis": "1 song(s) × $0.08",
+        "partial": false,
+        "qualifier": null,
+        "quantity": 1,
+        "rate_per": 1,
+        "rate_usd": 0.08,
+        "source": "https://ai.google.dev/gemini-api/docs/pricing",
+        "table_verified_at": "2026-10-15",
+        "unit": "song",
+        "usd": 0.08
+      },
+      "ai_review": null
+    }
+  ]
+}
