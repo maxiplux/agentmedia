@@ -501,9 +501,12 @@ def render_llms(page, version, command_count):
         '- Credentials come from the environment or the project `.env`: `GEMINI_API_KEY`, `OPENAI_API_KEY`, '
         '`FISH_API_KEY`, `OPENROUTER_API_KEY`, `ELEVENLABS_API_KEY`. Never print, paste or commit key values.',
         '- Loop: author a YAML job and Markdown brief, run `framechord validate`, preview with `--dry-run --json` '
-        '(no provider calls), generate only when the user asks, then report the artifact paths from the JSON result.',
+        '(no provider calls), show the user that preview and wait for their explicit approval before generating, '
+        'then report the artifact paths from the JSON result. A request to make media is not approval of the '
+        'preview.',
         '- Pass `--json --non-interactive`. Keep scripts, lyrics and figures exact. Do not switch provider, model '
-        'or voice unless asked. Never retry an uncertain paid request without explicit approval.',
+        'or voice unless asked. Get fresh approval before resuming a stopped run or batch, and never retry an '
+        'uncertain paid request without explicit approval.',
         '',
         '## Guide',
         '',
