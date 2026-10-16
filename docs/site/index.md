@@ -198,7 +198,7 @@ You do not need to learn every flag. Claude Code, Codex, Cursor, Gemini CLI, Ope
    Name your source files, where the results should go and anything that must stay exact. The agent follows the same loop every time:
 
    - **Author.** It writes a YAML job and a Markdown brief under `framechord/jobs/`, files you can read, edit and commit.
-   - **Check.** It runs `framechord validate` and a `--dry-run`, which make no provider calls, and shows you the model, outputs and estimated list price.
+   - **Check.** It runs `framechord validate` and a `--dry-run`, which make no provider calls, and shows you the provider, model, settings and output paths it would use. A dry run does not price the request; ask the agent to compare it with the rates in [Pay per asset](#cost), and run `framechord usage` afterwards for labelled list-price estimates.
    - **Generate.** Only after you say go. This is the step your provider bills.
    - **Report.** It reviews the result and gives you the file paths and any job that failed or needs a decision.
 
@@ -219,7 +219,7 @@ A cover image and one inline illustration that match the post, saved where your 
 Prompt:
 
 ```
-Read posts/launch.md. Use FrameChord to create a 16:9 cover image and one inline illustration that match the post. Write the briefs, validate them and show me a dry run with the estimated cost. Generate only after I say go, save the images to public/images/launch/ and add them to the post.
+Read posts/launch.md. Use FrameChord to create a 16:9 cover image and one inline illustration that match the post. Write the briefs, validate them and show me the dry run. Generate only after I say go, save the images to public/images/launch/ and add them to the post.
 ```
 
 <a id="case-prompt-narration"></a>
@@ -261,7 +261,7 @@ An infographic whose labels and figures come only from your file.
 Prompt:
 
 ```
-Make a FrameChord infographic from data/q3-metrics.csv. Use only the numbers in that file and invent no statistics. Show me the spec with every label and figure before generating, then check the finished image for exact text.
+Make a FrameChord infographic from data/q3-metrics.csv. Use only the numbers in that file and invent no statistics. Show me the spec with every label and figure and a dry run, generate only when I approve, then check the finished image for exact text.
 ```
 
 <a id="case-prompt-sfx"></a>
@@ -289,7 +289,7 @@ An instrumental bed that leaves room for a voice-over.
 Prompt:
 
 ```
-Create a 60-second instrumental background track for our product demo with FrameChord: calm, modern, no vocals, with room for a voice-over. Show me the brief and the dry run first.
+Create a 60-second instrumental background track for our product demo with FrameChord: calm, modern, no vocals, with room for a voice-over. Show me the brief and the dry run, and generate only when I say go.
 ```
 
 <a id="case-prompt-mascot"></a>
@@ -303,7 +303,7 @@ A reusable character with references you choose, then scenes that reuse them.
 Prompt:
 
 ```
-Create a FrameChord character for our mascot Pip, using assets/pip.png as the starting reference. Propose candidate references and let me pick; do not accept any without my choice. Then draw Pip in three onboarding scenes from the accepted reference, with the same provider and model.
+Create a FrameChord character for our mascot Pip, using assets/pip.png as the starting reference. Show me the candidate request as a dry run and generate candidates only when I say go. Let me pick one; do not accept a reference without my choice. Then author three onboarding scene jobs from the accepted reference with the same provider and model, preview them as one batch, and generate only when I approve.
 ```
 
 <a id="case-prompt-bilingual"></a>
@@ -317,7 +317,7 @@ Separate narrations from scripts a fluent person approved.
 Prompt:
 
 ```
-Narrate welcome.md in English and in Latin American Spanish with FrameChord. Draft the Spanish script and wait for my approval before any audio; never translate during synthesis. Preview both requests and report each file path.
+Narrate welcome.md in English and in Latin American Spanish with FrameChord. Draft the Spanish script and wait for my approval before any audio; never translate during synthesis. Preview both requests, generate only when I approve, and report each file path.
 ```
 
 <a id="case-prompt-docs"></a>
@@ -331,7 +331,7 @@ Illustrations, infographics and a narrated tour, planned as one batch. This is h
 Prompt:
 
 ```
-Use FrameChord to improve our documentation site at docs/index.html with illustrations, infographics and short narrated slides that explain the product and its benefits. List every asset with its brief, show me the batch dry run and estimated cost, generate after I approve, review each result, then compress the files and insert them into the page.
+Use FrameChord to improve our documentation site at docs/index.html with illustrations, infographics and short narrated slides that explain the product and its benefits. List every asset with its brief, show me the batch dry run and the request limits, generate after I approve, review each result, then compress the files and insert them into the page.
 ```
 
 <a id="case-prompt-usage"></a>
@@ -359,7 +359,7 @@ Remaining jobs completed without paying twice for the ones that succeeded.
 Prompt:
 
 ```
-Yesterday's FrameChord batch did not finish. Find the run, resume it without repeating successful requests, and list any jobs whose outcome is uncertain so I can decide whether to retry them.
+Yesterday's FrameChord batch did not finish. Find the run, tell me which jobs succeeded, which would be submitted on resume and which have an uncertain outcome. Resume only when I say go, without repeating successful requests, and never retry an uncertain job without my approval.
 ```
 
 <a id="case-prompt-install"></a>

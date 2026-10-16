@@ -75,8 +75,10 @@ Once the binary is installed, you do not need to learn the flags. `framechord in
 installs the project skill that Claude Code, Codex, Cursor, Gemini CLI, OpenCode and
 GitHub Copilot discover. Open your agent in the same folder and describe the media in
 plain words. The agent writes the YAML job and Markdown brief, runs `validate` and a
-free `--dry-run`, and should generate only after you say go. Start with a check that
-generates nothing:
+free `--dry-run` that shows the provider, model and outputs, and should generate only
+after you say go. A dry run does not price the request; compare it with the
+[dated rates](docs/COST.md), and `framechord usage` reports labelled list-price
+estimates after a run. Start with a check that generates nothing:
 
 > Use the framechord skill. Check this project's FrameChord setup: run framechord config
 > status and framechord doctor, tell me which providers and media types are ready, and
@@ -85,9 +87,9 @@ generates nothing:
 Then ask for real work, naming your files, destinations and anything that must stay exact:
 
 > Read posts/launch.md. Use FrameChord to create a 16:9 cover image and one inline
-> illustration that match the post. Write the briefs, validate them and show me a dry run
-> with the estimated cost. Generate only after I say go, save the images to
-> public/images/launch/ and add them to the post.
+> illustration that match the post. Write the briefs, validate them and show me the dry
+> run. Generate only after I say go, save the images to public/images/launch/ and add
+> them to the post.
 
 > Write a 90-second, two-host podcast script from the 2.3 section of CHANGELOG.md and
 > show it to me before any audio is made. After I approve the script, author a FrameChord
