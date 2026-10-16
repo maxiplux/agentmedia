@@ -3207,12 +3207,16 @@ if (deck) {
   const remember = choice => { try { localStorage.setItem(KEY, choice); } catch (_) { /* choice lasts this visit */ } };
   window.dataLayer = window.dataLayer || [];
   function gtag() { window.dataLayer.push(arguments); }
+  // Consent Mode baseline: everything denied until the visitor allows analytics.
+  // gtag.js itself is not requested before that, so these entries only queue.
+  gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
   let loaded = false;
+  // Order matters: lift the disable flag and grant storage before the first config.
   function enable() {
     window['ga-disable-' + ID] = false;
-    if (loaded) { gtag('consent', 'update', { analytics_storage: 'granted' }); return; }
+    gtag('consent', 'update', { analytics_storage: 'granted' });
+    if (loaded) return;
     loaded = true;
-    gtag('consent', 'default', { analytics_storage: 'granted', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
     gtag('js', new Date());
     gtag('config', ID);
     const tag = document.createElement('script');
@@ -3222,7 +3226,7 @@ if (deck) {
   }
   function disable() {
     window['ga-disable-' + ID] = true;
-    if (loaded) gtag('consent', 'update', { analytics_storage: 'denied' });
+    gtag('consent', 'update', { analytics_storage: 'denied' });
     // Remove analytics cookies an earlier "allow" may have written.
     const host = location.hostname;
     document.cookie.split(';').map(c => c.split('=')[0].trim()).filter(n => n === '_ga' || n.startsWith('_ga_')).forEach(name => {
@@ -3244,6 +3248,13 @@ if (deck) {
       banner.hidden = false;
       banner.querySelector('.consent-allow').focus();
     });
+  });
+  // A choice made in another tab of this site applies here too, so withdrawing
+  // consent anywhere stops analytics in every open tab.
+  window.addEventListener('storage', event => {
+    if (event.key !== KEY || (event.newValue !== 'granted' && event.newValue !== 'denied')) return;
+    banner.hidden = true;
+    if (event.newValue === 'granted') enable(); else disable();
   });
   const choice = stored();
   if (choice === 'granted') enable();
