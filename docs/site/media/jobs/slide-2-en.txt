@@ -1,0 +1,1 @@
+Every medium follows the same pattern. Write a brief. Validate it offline. Preview the exact request with a dry run, so nothing is billed yet. Generate only when the inputs are right. Then review the saved file before you use it.

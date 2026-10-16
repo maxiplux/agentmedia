@@ -1,0 +1,1 @@
+Los personajes son opcionales, pero cuando necesitas uno, lo defines una sola vez. Un personaje guarda su apariencia y su voz en perfiles separados, y sus referencias aceptadas se reutilizan en cada escena nueva. Las candidatas nunca se vuelven canónicas hasta que una persona las acepta.

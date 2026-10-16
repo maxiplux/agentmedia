@@ -1,0 +1,6 @@
+schema_version: 2
+id: music-bed
+media: music
+selection: {provider: google, model: lyria-3.5}
+brief: music.md
+settings: {format: mp3, duration_seconds: 60, instrumental: true}

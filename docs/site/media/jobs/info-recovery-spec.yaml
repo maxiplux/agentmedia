@@ -1,0 +1,17 @@
+schema_version: 1
+title: "Run together. Recover safely."
+audience: "Developers automating media batches"
+key_message: "A failure never erases a finished job."
+canvas: "1024x1536"
+layout: "Title and key message at top; four stacked cards with simple icons; the uncertain-request card highlighted in orange."
+sections:
+  - heading: "Parallel"
+    copy: "Independent jobs run at once within your limits."
+  - heading: "Isolated"
+    copy: "Each job keeps its own record and files."
+  - heading: "Cached"
+    copy: "Identical requests reuse verified local results."
+  - heading: "Uncertain?"
+    copy: "A timed-out paid request is checked, not resent."
+visual_brief: info-recovery.md
+references: []

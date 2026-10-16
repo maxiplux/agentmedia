@@ -1,0 +1,1 @@
+Lee como el narrador cálido y tranquilo de un breve video explicativo, en español latinoamericano. Articulación clara, ritmo constante y pausas naturales. Di solo el guion exacto, sin traducirlo ni agregar comentarios.

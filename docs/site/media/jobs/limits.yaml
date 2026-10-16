@@ -1,0 +1,8 @@
+requests: 36
+images: 13
+audio_seconds: 900
+speech_chars: 8000
+revisions: 1
+attempts: 1
+concurrency: 4
+per_provider: 3

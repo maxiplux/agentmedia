@@ -1,0 +1,1 @@
+Todos los medios siguen el mismo patrón. Escribe un brief. Valídalo sin conexión. Revisa la solicitud exacta con una ejecución de prueba, así todavía no se cobra nada. Genera solo cuando las entradas sean correctas. Después, revisa el archivo guardado antes de usarlo.

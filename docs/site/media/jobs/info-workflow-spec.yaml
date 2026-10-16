@@ -1,0 +1,22 @@
+schema_version: 1
+title: "One pattern for every medium"
+audience: "Developers and creators new to FrameChord"
+key_message: "Nothing is billed until you choose Generate."
+canvas: "1024x1536"
+layout: "Title and key message at top; five numbered steps stacked vertically and joined by a teal line; step 4 highlighted in orange."
+sections:
+  - heading: "1 Brief"
+    copy: "Write what to make in YAML and Markdown."
+  - heading: "2 Validate"
+    copy: "Check files, references and model support offline."
+  - heading: "3 Preview"
+    copy: "A dry run shows the exact request."
+    values:
+      - label: "Provider calls"
+        value: "0"
+  - heading: "4 Generate"
+    copy: "Send the request. Files and receipts are saved locally."
+  - heading: "5 Review"
+    copy: "Look and listen before you publish."
+visual_brief: info-workflow.md
+references: []

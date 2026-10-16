@@ -1,0 +1,1 @@
+FrameChord works with any agent that can run a process, including Claude Code and Codex. One command installs a project skill, so your agent can write the files, validate them and call the binary. The agent plans the work. FrameChord makes the media and keeps the receipts.

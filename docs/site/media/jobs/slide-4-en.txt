@@ -1,0 +1,1 @@
+Independent jobs run together, within the limits you set. Each job keeps its own record, so one failure never erases another success. Identical requests reuse verified local results. And if a paid request ends in an uncertain state, FrameChord checks before paying for it twice.

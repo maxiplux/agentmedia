@@ -1,0 +1,1 @@
+FrameChord funciona con cualquier agente que pueda ejecutar un proceso, incluidos Claude Code y Codex. Un comando instala una skill en el proyecto, para que tu agente escriba los archivos, los valide y llame al binario. El agente planifica el trabajo. FrameChord crea el contenido y guarda los recibos.
